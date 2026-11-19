@@ -1,5 +1,5 @@
 /* GymVerse – service worker: aplikacja działa offline po pierwszym wejściu. */
-const CACHE = 'gymverse-v2';
+const CACHE = 'gymverse-v4';
 const SHELL = ['./', 'index.html', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png', 'apple-touch-icon.png'];
 
 self.addEventListener('install', e => {
