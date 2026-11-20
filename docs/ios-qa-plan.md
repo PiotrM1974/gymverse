@@ -1,7 +1,7 @@
 # GymVerse — plan kontrolowanego testu iOS/Safari
 
 **Status:** plan do akceptacji właściciela; nie uruchomiono hostingu ani testu na urządzeniu.  
-**Wersja aplikacji objęta planem:** PR #4, commit `f21215c91ee5561e309bb3d11c326c1784519585`.  
+**Wersja aplikacji objęta planem:** kod aplikacji z PR #4, commit `f21215c91ee5561e309bb3d11c326c1784519585`; późniejsze commity tego PR mogą zawierać wyłącznie dokumentację QA.
 **Dane:** wyłącznie syntetyczne. Test nie jest zgodą na merge, publikację, wdrożenie ani migrację rzeczywistych danych.
 
 ## Cel i kryteria zaliczenia
@@ -20,14 +20,25 @@ Każdy punkt otrzymuje `PASS`, `FAIL` albo `NOT RUN`, wraz z modelem iPhone’a,
 
 ### Zalecana forma
 
-Po osobnej zgodzie utworzyć statyczny podgląd PR #4 na tymczasowym hostingu pod dedykowanym hostname, np. osobnym projektem preview na Cloudflare Pages (`<unikalny-projekt-qa>.pages.dev`). Wdrożyć wyłącznie zawartość gałęzi `feature/gv-data`, bez łączenia do `main`, i ustawić wyróżniającą nazwę aplikacji testowej `GymVerse QA`, aby ikona nie mogła być pomylona z produkcyjną.
+Po osobnej zgodzie utworzyć statyczne, odizolowane środowisko QA pod osobnym originem HTTPS, np. w osobnym projekcie Cloudflare Pages z unikalnym hostname `<unikalny-projekt-qa>.pages.dev`. Przygotować statyczne pliki z dokładnie commita `f21215c91ee5561e309bb3d11c326c1784519585` (kod oceniony w PR #4), nałożyć poniższe oznaczenia QA w kopii tymczasowej i przesłać ją metodą Direct Upload. Nie podłączać projektu do repozytorium ani automatycznej publikacji. W ten sposób aktualizacje `main` nie mogą zmienić QA ani produkcyjnego GitHub Pages.
+
+### Nakładka identyfikacyjna GymVerse QA
+
+Aby ograniczyć ryzyko pomylenia instalacji, podczas przygotowania kopii do QA nałożone zostaną wyłącznie testowe oznaczenia środowiska. Nakładka będzie zastosowana do tymczasowego katalogu publikacji, poza śledzonym źródłem i bez commita zmieniającego logikę aplikacji:
+
+- w kopii `manifest.webmanifest`: `name` i `short_name` ustawione na `GymVerse QA`; pozostawić `start_url` i `scope` ograniczone do katalogu głównego osobnego hosta QA;
+- w kopii HTML: `apple-mobile-web-app-title` oraz `<title>` ustawione na `GymVerse QA`;
+- dodać do kopii widoczny i dostępny dla czytników ekranu pasek `ŚRODOWISKO QA — wyłącznie dane syntetyczne`;
+- zachować istniejące ikony aplikacji bez zmian; nie edytować ani nie podmieniać grafik ćwiczeń.
+
+Żaden z tych identyfikatorów nie trafi do produkcyjnej aplikacji, `main` ani GitHub Pages. Raport testu zapisze SHA źródłowego commita, SHA nakładki/katalogu publikacji oraz hostname QA.
 
 Hosting, DNS, konto, projekt preview i wdrożenie nie zostały utworzone ani skonfigurowane. Ich utworzenie wymaga osobnej zgody. Po przydzieleniu adresu przed testem sprawdzić:
 
 1. `new URL(adres_testu).origin` różni się od originu produkcji `https://piotrm1974.github.io`.
 2. Strona, manifest, `sw.js` i wszystkie krytyczne skrypty są serwowane z hosta testowego po HTTPS.
 3. Service Worker ma zakres tylko hosta testowego, a `start_url` i `scope` manifestu wskazują testową aplikację.
-4. W Safari widać nazwę `GymVerse QA`; nie otwierać ani nie instalować adresu produkcyjnego.
+4. W manifeście, metadanych strony, tytule i widocznym pasku UI widać `GymVerse QA`; nie otwierać ani nie instalować adresu produkcyjnego.
 
 **Nie wystarczy osobna ścieżka GitHub Pages** (np. `/gymverse-qa/`). Inny path może ograniczyć zakres Service Workera, ale origin pozostaje ten sam. `localStorage`, IndexedDB i Cache Storage są powiązane z originem, więc ścieżka pod `piotrm1974.github.io` nie zapewni wymaganej izolacji danych od produkcji.
 
@@ -54,21 +65,43 @@ Podgląd musi zawierać komplet aplikacji: `index.html`, manifest, `sw.js`, `src
 
 Zapisuj wynik każdej pozycji w raporcie; nierozpoznany ekran, brak zasobu, utrata wpisu lub niejasny komunikat to `FAIL` albo `NOT RUN`, nigdy domyślny PASS.
 
+**IOS-06–IOS-12 wykonuj kolejno w tej samej instalacji aplikacji GymVerse QA uruchamianej z ikony ekranu początkowego, z tym samym syntetycznym stanem danych.** Nie usuwaj instalacji, nie resetuj jej storage i nie przechodź w tym zakresie do Safari. IOS-01/02 są osobną kontrolą strony w Safari, a IOS-03 służy instalacji. Dane w Safari i Home Screen web app mogą być rozdzielone; test nie zakłada ich współdzielenia. Jeśli aplikacja QA zostanie odinstalowana, dane zresetowane albo kontekst utracony, przerwij tę sekwencję i odnotuj ją jako `NOT RUN` do czasu odtworzenia świeżego, syntetycznego przypadku testowego.
+
 | ID | Scenariusz | Kroki | Oczekiwany wynik | Wynik / obserwacja |
 |---|---|---|---|---|
 | IOS-01 | Izolacja originu | Otwórz adres QA i porównaj origin z `https://piotrm1974.github.io`; w Web Inspector sprawdź origin strony i scope SW. | Hostname inny niż produkcyjny; manifest, SW i dane należą do QA. | `____` |
 | IOS-02 | Uruchomienie w Safari | Załaduj stronę online; obejrzyj wszystkie cztery plany; sprawdź konsolę i błędy sieci krytycznych zasobów. | GymVerse QA uruchamia się bez błędów JS; widoczne są cztery plany; brak 404 dla `src/gv-base-b.js`, `src/gv-data.js`, ZIP codec, manifestu i ikon. | `____` |
 | IOS-03 | Instalacja PWA | Dodaj adres QA z Safari na ekran początkowy, włącz „Otwórz jako aplikację internetową”, użyj etykiety `GymVerse QA`; uruchom ikonę. | Otwiera się aplikacja standalone QA; nazwa/ikona nie mylą z produkcją. Karta Safari i aplikacja QA mogą mieć odrębny storage. | `____` |
 | IOS-04 | Service Worker | Po połączeniu online odczekaj aktywację, zamknij i ponownie otwórz QA; sprawdź kontroler, scope, cache aplikacji oraz odpowiedź krytycznych zasobów. | Rejestracja aktywna i ograniczona do QA; pliki krytyczne są dostępne z cache. Nie wymagaj, by worker cały czas działał w pamięci. | `____` |
-| IOS-05 | Offline | Po udanym IOS-04 włącz tryb samolotowy, zamknij QA z przełącznika aplikacji i uruchom ponownie; przejdź do planów i historii. | Powłoka, cztery plany i wcześniej zapisane dane syntetyczne ładują się bez sieci; brak fałszywego komunikatu o nowym zapisie. Po teście wróć online przed eksportem/odtworzeniem. | `____` |
-| IOS-06 | Serie, trening i draft | Zaimportuj fixture v4. Następnie rozpocznij testowy trening, wpisz serię i osobno pozostaw wagę/powtórzenia jako niezapisany draft. Zamknij i otwórz QA. | Historia fixture’a pozostaje; zapisany trening i draft są odróżnialne i wracają po restarcie. Niekompletny trening nadal wymaga potwierdzenia. | `____` |
-| IOS-07 | Pomiar i plany | Zapisz syntetyczny pomiar i wprowadź testową zmianę planu; odśwież aplikację. | Zmiany widoczne po ponownym odczycie; UI nie pokazuje sukcesu przed trwałym zapisem. | `____` |
-| IOS-08 | Eksport v5 do Plików | Uruchom eksport v5, poczekaj na gotowość pliku, tapnij osobny przycisk dostarczenia, z arkusza wybierz „Zapisz w Plikach”, folder QA. Otwórz Pliki i sprawdź zapis. | ZIP istnieje pod oczekiwaną nazwą, nie ma zerowego rozmiaru; app potwierdza backup dopiero po powrocie i świadomym potwierdzeniu. Anulowanie arkusza nie oznacza sukcesu. | `____` |
-| IOS-09 | Ponowny odczyt ZIP v5 | W QA wprowadź dodatkową syntetyczną zmianę, po czym zaimportuj zapisany ZIP jako pełne odtworzenie z jawnym potwierdzeniem. | Walidacja i podgląd poprzedzają zgodę; po odtworzeniu wracają liczby sesji, serii, planów, ciężarów, ustawień i draftów z kopii. Timer nie uruchamia się automatycznie; aktywny trening/draft przywracane są zgodnie z osobnymi wyborami. | `____` |
-| IOS-10 | Import JSON v4 | Na odizolowanym stanie QA zaimportuj `backup-v4.json`; osobno sprawdź merge i pełne odtworzenie (przed pełnym odtworzeniem zapisz ZIP bazowy). | Podgląd/potwierdzenie zgodnie z wybraną ścieżką; syntetyczna sesja i ciężar zostają zachowane; brak błędów walidacji lub pomijania serii. | `____` |
-| IOS-11 | Migracja syntetyczna | Wróć do testowego stanu `localStorage` (na QA wyłącznie), pozostaw syntetyczny trening/draft. Potwierdź osobno sprawdzony eksport źródłowy v4, ponownie sprawdzony ZIP v5, zamknij inne karty QA i wykonaj ręczne przygotowanie. Sprawdź podgląd liczb i dopiero wtedy świadomie zatwierdź przełączenie. | Bez aktywacji przed końcową zgodą. Po przełączeniu źródłowy snapshot pozostaje; wskaźnik wskazuje IndexedDB; żaden wpis nie znika ani nie dubluje się. | `____` |
-| IOS-12 | Odczyt po migracji | Odśwież i zamknij/otwórz Home Screen QA; sprawdź historię, ciężary, plany, ustawienia, aktywny trening i draft. | Wszystkie liczniki i identyfikatory odpowiadają stanowi przed migracją; zapisany timer/powiadomienia nie startują automatycznie. Eksport v5 po migracji zawiera stan aktywnego magazynu. | `____` |
+| IOS-05 | Offline | Online, przed odłączeniem sieci, otwórz co najmniej jedną znaną ilustrację ćwiczenia i zanotuj jej URL po potwierdzeniu pobrania/cache’owania. Następnie włącz tryb samolotowy, zamknij QA z przełącznika aplikacji i uruchom ponownie; przejdź do planów, historii i tej ilustracji. | Powłoka HTML, krytyczne skrypty, manifest oraz ikony z listy precache powinny działać po poprawnej instalacji SW. Ilustracje ćwiczeń nie są wstępnie precache’owane: zgodnie z aktualną strategią SW obraz tego samego originu trafia do cache dynamicznie dopiero po pobraniu online. Wcześniej pobrana ilustracja powinna być widoczna offline; ilustracja nigdy wcześniej niepobrana może być niedostępna. Powłoka, cztery plany i zapisane dane syntetyczne ładują się bez sieci; brak fałszywego komunikatu o nowym zapisie. Po teście wróć online. | `____` |
+| IOS-06 | Serie, trening i draft | W tej samej zainstalowanej aplikacji GymVerse QA uruchomionej z ekranu początkowego — bez przechodzenia do Safari — zaimportuj fixture v4. Następnie rozpocznij testowy trening, wpisz serię i osobno pozostaw wagę/powtórzenia jako niezapisany draft. Zamknij i otwórz QA. | Historia fixture’a pozostaje; zapisany trening i draft są odróżnialne i wracają po restarcie. Niekompletny trening nadal wymaga potwierdzenia. | `____` |
+| IOS-07 | Pomiar i plany | W tej samej zainstalowanej aplikacji QA z ekranu początkowego zapisz syntetyczny pomiar i wprowadź testową zmianę planu; odśwież aplikację. | Zmiany widoczne po ponownym odczycie; UI nie pokazuje sukcesu przed trwałym zapisem. | `____` |
+| IOS-08 | Eksport v5 do Plików | W tej samej zainstalowanej aplikacji QA z ekranu początkowego uruchom eksport v5, poczekaj na gotowość pliku, tapnij osobny przycisk dostarczenia, z arkusza wybierz „Zapisz w Plikach”, folder QA. Otwórz Pliki i sprawdź zapis. | ZIP istnieje pod oczekiwaną nazwą, nie ma zerowego rozmiaru; app potwierdza backup dopiero po powrocie i świadomym potwierdzeniu. Anulowanie arkusza nie oznacza sukcesu. | `____` |
+| IOS-09 | Ponowny odczyt ZIP v5 | W tej samej zainstalowanej aplikacji QA z ekranu początkowego wprowadź dodatkową syntetyczną zmianę, po czym zaimportuj zapisany ZIP jako pełne odtworzenie z jawnym potwierdzeniem. | Walidacja i podgląd poprzedzają zgodę; po odtworzeniu wracają liczby sesji, serii, planów, ciężarów, ustawień i draftów z kopii. Timer nie uruchamia się automatycznie; aktywny trening/draft przywracane są zgodnie z osobnymi wyborami. | `____` |
+| IOS-10 | Import JSON v4 | W tej samej zainstalowanej aplikacji QA z ekranu początkowego zaimportuj `backup-v4.json`; osobno sprawdź merge i pełne odtworzenie (przed pełnym odtworzeniem zapisz ZIP bazowy). | Podgląd/potwierdzenie zgodnie z wybraną ścieżką; syntetyczna sesja i ciężar zostają zachowane; brak błędów walidacji lub pomijania serii. | `____` |
+| IOS-11 | Migracja syntetyczna | W tej samej zainstalowanej aplikacji QA z ekranu początkowego wróć do testowego stanu `localStorage` (na QA wyłącznie), pozostaw syntetyczny trening/draft. Potwierdź osobno sprawdzony eksport źródłowy v4 i ZIP v5, zamknij inne karty QA, zapisz dowody integralności z tabeli poniżej, sprawdź podgląd liczb i dopiero wtedy świadomie zatwierdź przełączenie. | Bez aktywacji przed końcową zgodą. Po przełączeniu źródłowy snapshot pozostaje; wskaźnik wskazuje IndexedDB; żaden wpis nie znika ani nie dubluje się. | `____` |
+| IOS-12 | Odczyt po migracji | W tej samej zainstalowanej aplikacji QA z ekranu początkowego odśwież, a następnie zamknij/otwórz Home Screen QA; sprawdź historię, ciężary, plany, ustawienia, aktywny trening i draft. Zapisz ponownie dowody integralności. | Wszystkie liczniki i identyfikatory odpowiadają stanowi przed migracją; zapisany timer/powiadomienia nie startują automatycznie. Eksport v5 po migracji zawiera stan aktywnego magazynu. | `____` |
 | IOS-13 | Nieudana operacja | Nie wymuszaj braku miejsca ani nie kasuj bazy na osobistym telefonie. Wykonaj wyłącznie bezpieczny, normalny zapis; awarie IDB i błędy transakcji pozostają pokryte automatycznymi syntetycznymi testami. | Brak eksperymentalnej destrukcji storage. Jeśli naturalny błąd wystąpi, zanotuj komunikat i nie próbuj migracji/fallbacku. | `____` |
+
+### Dowody integralności danych
+
+Wypełnij tę tabelę danymi wyłącznie z syntetycznej instalacji QA. Zliczaj serie jako rekordy serii, nie jako liczbę ćwiczeń. W polach identyfikatorów wpisuj pełne syntetyczne ID albo jednoznaczne, bezstratne zbiory ID; nie zastępuj ich samymi sumami kontrolnymi. Drafty bez UUID identyfikuj kluczem złożonym używanym przez aplikację (np. `planId/sessionId/step/setNumber`). Dla pomiarów podaj ich trwały klucz (np. ID, jeśli występuje, albo data/typ pomiaru zgodnie z modelem).
+
+| Dowód | Przed migracją (localStorage) | Po przełączeniu (IndexedDB) | Po odświeżeniu i ponownym uruchomieniu QA |
+|---|---|---|---|
+| Liczba sesji | `____` | `____` | `____` |
+| Liczba serii | `____` | `____` | `____` |
+| Liczba planów | `____` | `____` | `____` |
+| Liczba pomiarów | `____` | `____` | `____` |
+| Liczba draftów | `____` | `____` | `____` |
+| Identyfikatory sesji | `____` | `____` | `____` |
+| Identyfikatory serii | `____` | `____` | `____` |
+| Identyfikatory/klucze planów | `____` | `____` | `____` |
+| Identyfikatory/klucze pomiarów | `____` | `____` | `____` |
+| Klucze złożone draftów | `____` | `____` | `____` |
+| Wynik kontroli sum kontrolnych / zgodności snapshotu | `____` | `____` | `____` |
+
+Wynik jest zaliczony tylko wtedy, gdy liczniki i tożsamości syntetycznych rekordów są zgodne przed migracją, po przełączeniu i po ponownym uruchomieniu. Każdą różnicę wyjaśnij i oznacz `FAIL`; nie naprawiaj jej ręcznie w IndexedDB.
 
 ### Testy potrzebujące zdalnego Web Inspector
 
