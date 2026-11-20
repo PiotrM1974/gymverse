@@ -7,6 +7,8 @@ test.beforeEach(async ({ page }) => {
 });
 
 test('starts the first plan, records a set, finishes, survives reload and imports synthetic backup v4', async ({ page }) => {
+  const pageErrors = [];
+  page.on('pageerror', error => pageErrors.push(error.message));
   page.on('dialog', dialog => dialog.accept());
   await page.locator('[data-act="startPlan"][data-plan="push_a1"]').click();
   await page.locator('#weight_0').fill('40');
@@ -14,7 +16,10 @@ test('starts the first plan, records a set, finishes, survives reload and import
   await page.locator('#btnDone_0').click();
   await page.getByRole('button', { name: /zakończ i zapisz trening/i }).click();
   await expect(page.getByText('Trening zaliczony!')).toBeVisible();
+  expect(await page.evaluate(() => localStorage.getItem('gymverse_active'))).toBeNull();
+  expect(await page.evaluate(() => JSON.parse(localStorage.getItem('gymverse_history') || '[]'))).toHaveLength(1);
   await page.reload();
+  expect(pageErrors).toEqual([]);
   await page.getByRole('button', { name: 'Historia' }).click();
   await expect(page.locator('#historyList').getByText('Push A1')).toBeVisible();
   await page.locator('#importFile').setInputFiles('tests/fixtures/backup-v4.json');
