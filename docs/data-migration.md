@@ -2,7 +2,7 @@
 
 ## Zakres i stan wdrożenia
 
-Warstwa `createRuntimeStore()` rozpoczyna pracę w trybie `localStorage`. To nadal jedyne źródło bieżących danych, dopóki użytkownik nie uruchomi ręcznej procedury w aplikacji. Kod nie wykonuje migracji automatycznie przy starcie. Na prawdziwym iPhonie migracji nie uruchamiano.
+Warstwa `createRuntimeStore()` rozpoczyna pracę w trybie `localStorage`. To nadal jedyne źródło bieżących danych, dopóki użytkownik nie uruchomi ręcznej procedury w aplikacji. Kod nie wykonuje migracji automatycznie przy starcie. Raport z testu QA na fizycznym iPhonie z 20.11.2026 zgłasza pomyślną, ręczną migrację wyłącznie danych syntetycznych do IndexedDB; zakres dowodów i ograniczenia opisuje [raport iOS QA](ios-qa-results.md). Nie przeprowadzano migracji rzeczywistych danych użytkownika.
 
 Ręczna procedura wymaga kolejno:
 
@@ -60,7 +60,7 @@ Zapisy do IndexedDB używają rewizji w tej samej transakcji co odczyt wskaźnik
 
 ## Ograniczenia weryfikacji
 
-Testy używają wyłącznie syntetycznych wartości. Test przełączenia na urządzeniu iOS/Safari oraz test z rzeczywistym eksportem właściciela pozostają obowiązkowym krokiem przed przyszłym, osobno zatwierdzonym wdrożeniem. Obecne E2E Edge nie zastępują tego testu.
+Testy w repozytorium i zgłoszony test iOS QA używały wyłącznie syntetycznych wartości. Funkcjonalną migrację wykonano na fizycznym iPhonie w środowisku QA, ale nie wykazano pełnej zgodności liczników/ID/sum kontrolnych ani oddzielnej trwałości niezapisanych draftów. Nie testowano migracji rzeczywistych danych właściciela. Przed ewentualnym, osobno zatwierdzonym wdrożeniem nadal wymagane są decyzja właściciela, sprawdzona kopia konkretnego urządzenia i weryfikacja po migracji; E2E Edge nie zastępuje tych kontroli.
 
 ## Analiza granicy `dataSchemaVersion: 3`
 
