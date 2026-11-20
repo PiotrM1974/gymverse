@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { createBackupV5, inspectLegacySnapshot, previewBackupV5, requestStoragePersistence, restoreBackupV5, restoreLegacyV4 } from '../../src/gv-data.js';
+import { addStableIdentifiers, createBackupV5, ensureStableHistoryIds, inspectLegacySnapshot, previewBackupV5, requestStoragePersistence, restoreBackupV5, restoreLegacyV4 } from '../../src/gv-data.js';
 import { BlobReader, BlobWriter, TextReader, TextWriter, ZipReader, ZipWriter } from '@zip.js/zip.js';
 
 const validSynthetic = () => ({
@@ -75,6 +75,72 @@ describe('GV-DATA source snapshot inspection', () => {
     expect(result.counts).toMatchObject({ sessions: 1, sets: 1 });
     expect(result.schemaKeys).toContain('gymverse_history');
   });
+
+  it('rejects unsafe weight-mode and unknown exercises before a confirmed v4 restore mutates storage', async () => {
+    const backup = {
+      app: 'gymverse', version: 4, exportedAt: '2026-01-02T00:00:00.000Z',
+      history: [{ date: '2026-01-01T12:00:00.000Z', details: [{ exerciseId: 'bench_flat', weight: 0, reps: 10 }] }],
+      lastWeights: {}, body: [], plans: [], custom: {}
+    };
+    const storage = memoryStorage({ gymverse_history: 'previous-synthetic-state' });
+    const validation = { strictExerciseCatalog: true, catalog: { bench_flat: 'Bench' }, bodyweightExerciseIds: [] };
+    await expect(restoreLegacyV4(storage, backup, { confirmed: true, restoreActive: false, restoreDrafts: false, validationOptions: validation }))
+      .rejects.toMatchObject({ anomalies: expect.arrayContaining(['SERIES_WEIGHT_MODE_INVALID']) });
+    expect(storage.getItem('gymverse_history')).toBe('previous-synthetic-state');
+    const unknown = structuredClone(backup);
+    unknown.history[0].details[0] = { exerciseId: 'exercise_missing_from_catalog', weight: 40, reps: 8 };
+    await expect(restoreLegacyV4(storage, unknown, { confirmed: true, restoreActive: false, restoreDrafts: false, validationOptions: validation }))
+      .rejects.toMatchObject({ anomalies: expect.arrayContaining(['EXERCISE_UNKNOWN']) });
+    expect(storage.getItem('gymverse_history')).toBe('previous-synthetic-state');
+  });
+
+  it('preserves zero-weight sets for imported custom bodyweight exercises and validates ZIP v5 against the target catalog', async () => {
+    const backup = {
+      app: 'gymverse', version: 4, exportedAt: '2026-01-02T00:00:00.000Z',
+      history: [{ date: '2026-01-01T12:00:00.000Z', details: [{ exerciseId: 'c_synthetic_bw', weight: 0, reps: 10 }] }],
+      lastWeights: {}, body: [], plans: [], custom: { c_synthetic_bw: { name: 'Synthetic BW', bw: true } }
+    };
+    const validation = { strictExerciseCatalog: true, catalog: { bench_flat: 'Bench' }, bodyweightExerciseIds: [] };
+    const preview = await inspectLegacySnapshot(backup, validation);
+    expect(preview.ok).toBe(true);
+    const legacyStore = memoryStorage({ gymverse_history: 'previous-synthetic-state' });
+    await restoreLegacyV4(legacyStore, backup, { confirmed: true, restoreActive: false, restoreDrafts: false, validationOptions: validation });
+    expect(JSON.parse(legacyStore.getItem('gymverse_history'))[0].details[0].weight).toBe(0);
+    expect(JSON.parse(legacyStore.getItem('gymverse_history'))[0].details[0].reps).toBe(10);
+    const zipSnapshot = { gymverse_schema: 4, gymverse_history: backup.history, gymverse_custom: backup.custom, gymverse_plans: [], gymverse_body: [], gymverse_last_weights: {} };
+    const goodZip = await createBackupV5(zipSnapshot, { createdAt: '2026-01-02T00:00:00.000Z', validationOptions: validation });
+    const goodPreview = await previewBackupV5(goodZip, validation);
+    const zipStore = memoryStorage({ gymverse_history: 'prior-zip-state' });
+    await restoreBackupV5(zipStore, goodPreview, { confirmed: true, restoreActive: false, restoreDrafts: false, validationOptions: validation });
+    expect(JSON.parse(zipStore.getItem('gymverse_history'))[0].details[0].weight).toBe(0);
+    const v5 = await createBackupV5({ gymverse_schema: 4, gymverse_history: [{ date: backup.history[0].date, details: [{ exerciseId: 'bench_flat', weight: 0, reps: 10 }] }], gymverse_custom: {} }, { createdAt: '2026-01-02T00:00:00.000Z' });
+    await expect(previewBackupV5(v5, validation)).rejects.toMatchObject({ anomalies: expect.arrayContaining(['SERIES_WEIGHT_MODE_INVALID']) });
+  });
+});
+
+describe('GV-DATA persistent history identifiers', () => {
+  it('assigns repeatable legacy identifiers while preserving same-time sessions and multiplicity', () => {
+    const legacy = [
+      { date: '2026-01-01T12:00:00.000Z', planId: 'push_a1', details: [{ exerciseId: 'bench_flat', setNumber: 1, weight: 40, reps: 8 }] },
+      { date: '2026-01-01T12:00:00.000Z', planId: 'pull_a1', details: [{ exerciseId: 'lat_pulldown_wide', setNumber: 1, weight: 50, reps: 9 }] },
+      { date: '2026-01-02T12:00:00.000Z', planId: 'push_a1', details: [{ exerciseId: 'bench_flat', setNumber: 1, weight: 40, reps: 8 }] },
+      { date: '2026-01-02T12:00:00.000Z', planId: 'push_a1', details: [{ exerciseId: 'bench_flat', setNumber: 1, weight: 40, reps: 8 }] }
+    ];
+    const once = ensureStableHistoryIds(legacy);
+    const twice = ensureStableHistoryIds(legacy);
+    expect(once.map(session => session.id)).toEqual(twice.map(session => session.id));
+    expect(new Set(once.map(session => session.id)).size).toBe(4);
+    expect(once[0].details[0].id).toBe(twice[0].details[0].id);
+    expect(once[0].details[0].id).toBeTruthy();
+  });
+
+  it('preserves existing UUIDs and includes durable identifiers in backup snapshots', () => {
+    const snapshot = { gymverse_history: [{ id: 'session-uuid', date: '2026-01-01T12:00:00.000Z', details: [{ id: 'set-uuid', exerciseId: 'bench_flat', weight: 40, reps: 8 }] }] };
+    const identified = addStableIdentifiers(snapshot);
+    expect(identified.gymverse_history[0].id).toBe('session-uuid');
+    expect(identified.gymverse_history[0].details[0].id).toBe('set-uuid');
+    expect(snapshot.gymverse_history[0].id).toBe('session-uuid');
+  });
 });
 
 describe('GV-DATA v5 backup', () => {
@@ -95,7 +161,10 @@ describe('GV-DATA v5 backup', () => {
     const preview = await previewBackupV5(archive);
     expect(archive.type).toBe('application/zip');
     expect(preview).toMatchObject({ ok: true, version: 5, counts: { sessions: 1, sets: 1, plans: 1 } });
+    expect(preview.schema).toBe('legacy-storage-snapshot');
     expect(preview.snapshot.gymverse_rest).toBe(90);
+    expect(preview.snapshot.gymverse_history[0].id).toBeTruthy();
+    expect(preview.snapshot.gymverse_history[0].details[0].id).toBeTruthy();
     expect(preview.snapshot.gymverse_draft_v1).toEqual(snapshot.gymverse_draft_v1);
     expect(preview.interpretations).toHaveLength(1);
     expect(preview.counts.legacyInterpretations).toBe(1);
@@ -175,7 +244,10 @@ describe('GV-DATA v5 backup', () => {
     await expect(restoreLegacyV4(storage, legacy, { confirmed: false, restoreActive: false, restoreDrafts: false })).rejects.toThrow('RESTORE_CONFIRMATION_REQUIRED');
     expect(storage.getItem('gymverse_history')).toBe('old-history');
     await expect(restoreLegacyV4(storage, legacy, { confirmed: true, restoreActive: false, restoreDrafts: false })).resolves.toMatchObject({ status: 'restored' });
-    expect(JSON.parse(storage.getItem('gymverse_history'))[0].details[0].weight).toBe(30);
+    const restoredSession = JSON.parse(storage.getItem('gymverse_history'))[0];
+    expect(restoredSession.details[0].weight).toBe(30);
+    expect(restoredSession.id).toMatch(/^legacy-session-/);
+    expect(restoredSession.details[0].id).toMatch(/^legacy-set-/);
     expect(storage.getItem('gymverse_active')).toBeNull();
     expect(storage.getItem('gymverse_draft_v1')).toBeNull();
     expect(storage.getItem('gymverse_rest')).toBe('90');

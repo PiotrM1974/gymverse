@@ -14,6 +14,62 @@ function canonical(value) {
   return JSON.stringify(value);
 }
 
+function stableHash(value) {
+  const text = typeof value === 'string' ? value : canonical(value);
+  let hash = 14695981039346656037n;
+  const mask = (1n << 64n) - 1n;
+  for (const character of text) {
+    hash ^= BigInt(character.codePointAt(0));
+    hash = (hash * 1099511628211n) & mask;
+  }
+  return hash.toString(16).padStart(16, '0');
+}
+
+function legacySessionContent(session) {
+  const { id, ...content } = session || {};
+  if (Array.isArray(content.details)) content.details = content.details.map(set => {
+    if (!isPlainObject(set)) return set;
+    const { id: setId, ...setContent } = set;
+    return setContent;
+  });
+  return content;
+}
+
+export function legacySessionFingerprint(session) {
+  return stableHash(legacySessionContent(session));
+}
+
+export function ensureStableHistoryIds(history) {
+  if (!Array.isArray(history)) return [];
+  const multiplicity = new Map();
+  return history.map(session => {
+    if (!isPlainObject(session)) return session;
+    const fingerprint = legacySessionFingerprint(session);
+    const occurrence = (multiplicity.get(fingerprint) || 0) + 1;
+    multiplicity.set(fingerprint, occurrence);
+    const id = typeof session.id === 'string' && session.id ? session.id : `legacy-session-${fingerprint}-${occurrence}`;
+    const details = Array.isArray(session.details) ? session.details.map((set, index) => {
+      if (!isPlainObject(set)) return set;
+      return { ...set, id: typeof set.id === 'string' && set.id ? set.id : `legacy-set-${stableHash(`${id}|${stableHash(set)}`)}-${index + 1}` };
+    }) : session.details;
+    return { ...session, id, ...(Array.isArray(details) ? { details } : {}) };
+  });
+}
+
+export function addStableIdentifiers(snapshot) {
+  const result = structuredClone(snapshot);
+  if (Array.isArray(result.gymverse_history)) result.gymverse_history = ensureStableHistoryIds(result.gymverse_history);
+  const active = result.gymverse_active;
+  if (isPlainObject(active)) {
+    if (typeof active.id !== 'string' || !active.id) active.id = `legacy-session-${stableHash(legacySessionContent(active))}-1`;
+    if (Array.isArray(active.sets)) active.sets = active.sets.map((set, index) => isPlainObject(set) ? {
+      ...set,
+      id: typeof set.id === 'string' && set.id ? set.id : `legacy-set-${stableHash(`${active.id}|${stableHash(set)}`)}-${index + 1}`
+    } : set);
+  }
+  return result;
+}
+
 function isPlainObject(value) {
   return value !== null && typeof value === 'object' && !Array.isArray(value);
 }
@@ -22,7 +78,7 @@ function add(anomalies, code) {
   if (!anomalies.includes(code)) anomalies.push(code);
 }
 
-export async function inspectLegacySnapshot(snapshot) {
+export async function inspectLegacySnapshot(snapshot, validationOptions = {}) {
   const anomalies = [];
   const counts = { sessions: 0, sets: 0, plans: 0, customExercises: 0, drafts: 0, bodyMeasurements: 0, legacyInterpretations: 0 };
   if (!isPlainObject(snapshot)) {
@@ -49,6 +105,12 @@ export async function inspectLegacySnapshot(snapshot) {
   const schemaKeys = Object.keys(source).filter(key => LEGACY_KEYS.has(key)).sort();
   Object.keys(isV4 ? snapshot : source).forEach(key => { if (!knownKeys.has(key)) add(anomalies, 'UNKNOWN_KEY'); });
   snapshot = source;
+  const exerciseCatalog = { ...(validationOptions.catalog || {}) };
+  const bodyweightExercises = new Set(validationOptions.bodyweightExerciseIds || []);
+  Object.entries(snapshot.gymverse_custom || {}).forEach(([id, exercise]) => {
+    if (exercise && typeof exercise.name === 'string') exerciseCatalog[id] = exercise.name;
+    if (exercise && exercise.bw === true) bodyweightExercises.add(id);
+  });
   if (snapshot.gymverse_history != null && !Array.isArray(snapshot.gymverse_history)) add(anomalies, 'HISTORY_NOT_ARRAY');
   if (Array.isArray(snapshot.gymverse_history)) {
     counts.sessions = snapshot.gymverse_history.length;
@@ -57,6 +119,11 @@ export async function inspectLegacySnapshot(snapshot) {
       session.details.forEach(set => {
         counts.sets += 1;
         if (!isPlainObject(set) || typeof set.exerciseId !== 'string' || !Number.isFinite(Number(set.weight)) || Number(set.weight) < 0 || !Number.isInteger(Number(set.reps)) || Number(set.reps) <= 0) add(anomalies, 'INVALID_SERIES');
+        else if (validationOptions.strictExerciseCatalog) {
+          const exerciseId = (validationOptions.exerciseIdMap || {})[set.exerciseId] || set.exerciseId;
+          if (!Object.hasOwn(exerciseCatalog, exerciseId)) add(anomalies, 'EXERCISE_UNKNOWN');
+          else if (Number(set.weight) === 0 && !bodyweightExercises.has(exerciseId)) add(anomalies, 'SERIES_WEIGHT_MODE_INVALID');
+        }
       });
     });
   }
@@ -296,12 +363,14 @@ export async function createRuntimeStore(options = {}) {
         return value && value.__gymverseRaw !== undefined ? value.__gymverseRaw : JSON.stringify(value);
       },
       setItem(key, raw) {
+        if (writePaused && key !== RUNTIME_LATCH) throw new Error('MIGRATION_IN_PROGRESS');
         const value = parseRuntimeValue(String(raw));
         cache.set(key, value);
         if (mode === 'indexeddb') queueIndexedWrite().catch(() => {});
         else storage.setItem(key, String(raw));
       },
       removeItem(key) {
+        if (writePaused && key !== RUNTIME_LATCH) throw new Error('MIGRATION_IN_PROGRESS');
         cache.delete(key);
         if (mode === 'indexeddb') queueIndexedWrite().catch(() => {});
         else storage.removeItem(key);
@@ -660,13 +729,14 @@ function sanitizeRestoredActive(active) {
 export async function restoreLegacyV4(storage, parsed, options = {}) {
   if (options.confirmed !== true) throw new Error('RESTORE_CONFIRMATION_REQUIRED');
   if (typeof options.restoreActive !== 'boolean' || typeof options.restoreDrafts !== 'boolean') throw new Error('RESTORE_SESSION_CHOICES_REQUIRED');
-  const snapshot = normalizeV4Export(parsed);
-  const inspection = await inspectLegacySnapshot(snapshot);
+  let snapshot = normalizeV4Export(parsed);
+  const inspection = await inspectLegacySnapshot(snapshot, options.validationOptions || {});
   if (!inspection.ok) {
     const error = new Error('LEGACY_V4_INVALID');
     error.anomalies = inspection.anomalies;
     throw error;
   }
+  snapshot = addStableIdentifiers(snapshot);
   if (!options.restoreActive) delete snapshot.gymverse_active;
   else if (snapshot.gymverse_active) snapshot.gymverse_active = sanitizeRestoredActive(snapshot.gymverse_active);
   if (!options.restoreDrafts) delete snapshot.gymverse_draft_v1;
@@ -852,13 +922,14 @@ function decodeJson(bytes, anomaly) {
 
 /** Create a v5 archive from a storage-key snapshot. The caller should offer it only after a user action. */
 export async function createBackupV5(snapshot, options = {}) {
-  const inspection = await inspectLegacySnapshot(snapshot);
+  const identifiedSnapshot = addStableIdentifiers(snapshot);
+  const inspection = await inspectLegacySnapshot(identifiedSnapshot, options.validationOptions || {});
   if (!inspection.ok) {
     const error = new Error('SNAPSHOT_INVALID');
     error.anomalies = inspection.anomalies;
     throw error;
   }
-  const { data, settings } = splitSnapshot(snapshot);
+  const { data, settings } = splitSnapshot(identifiedSnapshot);
   const interpretations = (options.legacyInterpretations || []).map(normalizeInterpretation);
   const dataBytes = utf8(canonical({ storage: data, legacyInterpretations: interpretations }));
   const settingsBytes = utf8(canonical(settings));
@@ -900,7 +971,7 @@ export async function createBackupV5(snapshot, options = {}) {
 }
 
 /** Parse and verify a ZIP v5 without touching browser storage; returned values stay in memory. */
-export async function previewBackupV5(blob) {
+export async function previewBackupV5(blob, validationOptions = {}) {
   if (!(blob instanceof Blob) || blob.size <= 0 || blob.size > MAX_ARCHIVE_BYTES) throw new Error('ARCHIVE_SIZE_INVALID');
   const reader = new ZipReader(new BlobReader(blob), { checkOverlappingEntry: true, filenameValidation: 'strict' });
   try {
@@ -928,7 +999,7 @@ export async function previewBackupV5(blob) {
     const dataPayload = decodeJson(payloads.get('data.json'), 'DATA_JSON_INVALID');
     const settings = decodeJson(payloads.get('settings.json'), 'SETTINGS_JSON_INVALID');
     const checksums = decodeJson(payloads.get('checksums.json'), 'CHECKSUMS_JSON_INVALID');
-    if (!isPlainObject(manifest) || manifest.app !== 'gymverse' || Number(manifest.version) !== 5 || !Array.isArray(manifest.files) || !manifest.files.includes('data.json') || !manifest.files.includes('settings.json')) throw new Error('MANIFEST_INVALID');
+    if (!isPlainObject(manifest) || manifest.app !== 'gymverse' || Number(manifest.version) !== 5 || manifest.schema !== 'legacy-storage-snapshot' || !Array.isArray(manifest.files) || !manifest.files.includes('data.json') || !manifest.files.includes('settings.json')) throw new Error('MANIFEST_INVALID');
     if (!isPlainObject(checksums) || checksums.algorithm !== 'SHA-256' || !isPlainObject(checksums.files)) throw new Error('CHECKSUMS_INVALID');
     const payloadNames = Array.from(payloads.keys()).filter(name => name !== 'manifest.json' && name !== 'checksums.json').sort();
     if (manifest.files.slice().sort().join(',') !== payloadNames.join(',') || Object.keys(checksums.files).sort().join(',') !== payloadNames.join(',')) throw new Error('CHECKSUMS_FILES_INVALID');
@@ -940,8 +1011,8 @@ export async function previewBackupV5(blob) {
     if (Object.keys(data).some(key => !LEGACY_KEYS.has(key) || SETTINGS_KEYS.has(key))) throw new Error('DATA_SCHEMA_INVALID');
     if (!isPlainObject(settings) || Object.keys(settings).some(key => !SETTINGS_KEYS.has(key))) throw new Error('SETTINGS_SCHEMA_INVALID');
     const interpretations = dataPayload.legacyInterpretations.map(normalizeInterpretation);
-    const snapshot = { ...data, ...settings };
-    const inspection = await inspectLegacySnapshot(snapshot);
+    const snapshot = addStableIdentifiers({ ...data, ...settings });
+    const inspection = await inspectLegacySnapshot(snapshot, validationOptions);
     if (!inspection.ok) {
       const error = new Error('BACKUP_DATA_INVALID');
       error.anomalies = inspection.anomalies;
@@ -951,7 +1022,7 @@ export async function previewBackupV5(blob) {
     if (manifest.counts && canonical(manifest.counts) !== canonical(counts)) throw new Error('MANIFEST_COUNTS_MISMATCH');
     const media = Array.from(payloads.entries()).filter(([name]) => name.startsWith('custom-media/')).map(([name, bytes]) => ({ name, bytes }));
     const mediaDigests = await Promise.all(media.map(async item => ({ name: item.name, sha256: await sha256Hex(item.bytes) })));
-    return Object.freeze({ ok: true, version: 5, sha256: await sha256Hex(utf8(canonical({ snapshot, interpretations, media: mediaDigests }))), counts, schemaKeys: inspection.schemaKeys, snapshot, interpretations, media });
+    return Object.freeze({ ok: true, version: 5, schema: manifest.schema, sha256: await sha256Hex(utf8(canonical({ snapshot, interpretations, media: mediaDigests }))), counts, schemaKeys: inspection.schemaKeys, snapshot, interpretations, media });
   } finally {
     await reader.close();
   }
@@ -968,7 +1039,7 @@ export async function restoreBackupV5(storage, preview, options = {}) {
   if (!options.restoreActive) delete inspected.gymverse_active;
   else if (inspected.gymverse_active) inspected.gymverse_active = sanitizeRestoredActive(inspected.gymverse_active);
   if (!options.restoreDrafts) delete inspected.gymverse_draft_v1;
-  const validation = await inspectLegacySnapshot(inspected);
+  const validation = await inspectLegacySnapshot(inspected, options.validationOptions || {});
   if (!validation.ok) {
     const error = new Error('RESTORE_DATA_INVALID');
     error.anomalies = validation.anomalies;

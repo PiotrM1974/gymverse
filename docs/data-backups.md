@@ -6,7 +6,9 @@ Archiwum zawiera `manifest.json`, `data.json`, `settings.json` oraz `checksums.j
 
 `data.json` rozdziela snapshot kluczy legacy od potwierdzonych lokalnie interpretacji historii. `settings.json` zawiera dozwolone ustawienia aplikacji. Kopia może obejmować aktywny trening, drafty i własne grafiki; przy odtworzeniu użytkownik wybiera osobno, czy przywrócić aktywny trening i drafty. Grafiki trafiają do osobnego magazynu IndexedDB. Pełne odtworzenie zastępuje klucze GymVerse, ale zachowuje niepowiązane wpisy `localStorage`.
 
-Eksport jest przygotowywany po działaniu użytkownika. Aplikacja prosi o potwierdzenie, że plik został zapisany; anulowanie arkusza udostępniania lub brak potwierdzenia nie oznacza trwałego backupu. Import najpierw weryfikuje i pokazuje liczbę rekordów, potem żąda jawnego potwierdzenia. JSON v4 pozostaje obsługiwany w trybie łączeniowym i pełnym odtworzeniu.
+Eksport ZIP jest przygotowywany po działaniu użytkownika, a dostarczenie pliku wymaga osobnego, bezpośredniego kliknięcia. Na iPhonie wybierz „Zapisz w Plikach”, wskaż folder i sprawdź plik w aplikacji Pliki. Anulowanie arkusza udostępniania lub brak potwierdzenia nie oznacza trwałego backupu. Import najpierw weryfikuje i pokazuje liczbę rekordów, potem żąda jawnego potwierdzenia. JSON v4 pozostaje obsługiwany w trybie łączeniowym i pełnym odtworzeniu.
+
+Manifest v5 oznacza bieżący model jako `legacy-storage-snapshot`. Format kopii v5 ani wewnętrzny schemat IndexedDB 4 nie oznaczają wdrożenia docelowego `dataSchemaVersion: 3`.
 
 ## Walidator lokalny
 

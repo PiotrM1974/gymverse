@@ -199,6 +199,98 @@ test('refuses migration while a second GymVerse tab is open', async ({ page }) =
   expect(result).toBe('OTHER_TABS_OPEN');
 });
 
+test('blocks direct source-storage writes throughout the critical migration window', async ({ page }) => {
+  const result = await page.evaluate(async () => {
+    const runtime = window.__gymverseTestHarness.getStore();
+    localStorage.setItem('gymverse_active', JSON.stringify({ planId: 'synthetic-original', sets: [] }));
+    const before = localStorage.getItem('gymverse_active');
+    localStorage.setItem('gymverse_history', JSON.stringify([{ date: 'synthetic-source', details: [] }]));
+    const historyBefore = localStorage.getItem('gymverse_history');
+    const preview = await runtime.previewMigration();
+    const nativeSetItem = Storage.prototype.setItem;
+    const rejected = [];
+    Storage.prototype.setItem = function (key, value) {
+      nativeSetItem.call(this, key, value);
+      if (key === 'gymverse_storage_mode' && value === 'indexeddb-pending') {
+        try { runtime.storage.setItem('gymverse_active', JSON.stringify({ planId: 'synthetic-raced', sets: [] })); }
+        catch (error) { rejected.push(error.message); }
+        try { runtime.storage.removeItem('gymverse_history'); }
+        catch (error) { rejected.push(error.message); }
+      }
+    };
+    try {
+      const migration = await runtime.activateMigration(preview, { sourceExportVerified: true, v5ExportVerified: true });
+      return { rejected, before, after: localStorage.getItem('gymverse_active'), historyBefore, historyAfter: localStorage.getItem('gymverse_history'), migration };
+    } finally {
+      Storage.prototype.setItem = nativeSetItem;
+      runtime.close();
+    }
+  });
+  expect(result.rejected).toEqual(['MIGRATION_IN_PROGRESS', 'MIGRATION_IN_PROGRESS']);
+  expect(result.after).toBe(result.before);
+  expect(result.historyAfter).toBe(result.historyBefore);
+  expect(result.migration.status).toBe('activated');
+});
+
+test('does not mark a set complete before IndexedDB confirms the write', async ({ page }) => {
+  page.on('dialog', dialog => dialog.dismiss());
+  await page.locator('[data-act="startPlan"][data-plan="push_a1"]').click();
+  await page.locator('#weight_0').fill('40');
+  await page.locator('#reps_0').fill('8');
+  await page.evaluate(async () => {
+    const runtime = window.__gymverseTestHarness.getStore();
+    const preview = await runtime.previewMigration();
+    await runtime.activateMigration(preview, { sourceExportVerified: true, v5ExportVerified: true });
+    IDBFactory.prototype.open = () => { throw new DOMException('synthetic write failure', 'UnknownError'); };
+  });
+  await page.locator('#btnDone_0').click();
+  await expect(page.locator('#btnDone_0')).toHaveClass(/ready/);
+  await expect(page.locator('#btnDone_0')).not.toHaveClass(/completed/);
+  await expect(page.locator('#weight_0')).toHaveValue('40');
+  await expect(page.locator('#reps_0')).toHaveValue('8');
+  await expect(page.locator('#toast')).toContainText('zapis');
+  const runtimeActive = await page.evaluate(() => window.__gymverseTestHarness.getStore().get('gymverse_active'));
+  expect(runtimeActive.sets).toHaveLength(1);
+});
+
+test('does not report a body measurement saved when IndexedDB rejects it', async ({ page }) => {
+  page.on('dialog', dialog => dialog.dismiss());
+  await page.evaluate(async () => {
+    const runtime = window.__gymverseTestHarness.getStore();
+    const preview = await runtime.previewMigration();
+    await runtime.activateMigration(preview, { sourceExportVerified: true, v5ExportVerified: true });
+    IDBFactory.prototype.open = () => { throw new DOMException('synthetic measurement write failure', 'UnknownError'); };
+  });
+  await page.locator('[data-act="view"][data-view="view-stats"]').first().click();
+  await page.locator('#bodyInput').fill('80');
+  const sourceBefore = await page.evaluate(() => localStorage.getItem('gymverse_body'));
+  await page.locator('[data-act="bodySave"]').click();
+  await expect(page.locator('#bodyInput')).toHaveValue('80');
+  await expect(page.locator('#toast')).toContainText('Nie udało się potwierdzić zapisu');
+  expect(await page.evaluate(() => localStorage.getItem('gymverse_body'))).toBe(sourceBefore);
+  const available = await page.evaluate(() => window.__gymverseTestHarness.getStore().get('gymverse_body'));
+  expect(available).toHaveLength(1);
+  expect(available[0].kg).toBe(80);
+});
+
+test('keeps the iOS share action inside a second user gesture and explains saving to Files', async ({ page }) => {
+  await page.evaluate(() => {
+    Object.defineProperty(navigator, 'userAgent', { configurable: true, value: 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 Mobile' });
+    Object.defineProperty(navigator, 'canShare', { configurable: true, value: () => true });
+    window.__shareGestureActive = false;
+    Object.defineProperty(navigator, 'share', { configurable: true, value: () => { window.__shareGestureActive = !!navigator.userActivation?.isActive; return Promise.resolve(); } });
+  });
+  await page.locator('[data-act="export"]').first().click();
+  await expect(page.locator('#fileDeliveryPrompt')).toBeVisible();
+  await expect(page.locator('#fileDeliveryInstructions')).toContainText('Zapisz w Plikach');
+  expect(await page.evaluate(() => window.__shareGestureActive)).toBe(false);
+  page.on('dialog', dialog => dialog.accept());
+  await page.locator('[data-act="deliverPreparedFile"]').click();
+  expect(await page.evaluate(() => window.__shareGestureActive)).toBe(true);
+  await expect(page.locator('#fileDeliveryPrompt')).toBeHidden();
+  await expect(page.locator('#toast')).toContainText('Zapis kopii ZIP v5 potwierdzony');
+});
+
 test('keeps legacy storage active when the selector write fails for lack of space', async ({ page }) => {
   const result = await page.evaluate(async () => {
     const values = new Map([['gymverse_schema', '1'], ['gymverse_history', '[]']]);
@@ -399,7 +491,7 @@ test('restores a synthetic ZIP v5 through the application confirmation flow', as
     const { createBackupV5 } = await import('./src/gv-data.js');
     const archive = await createBackupV5({
       gymverse_schema: 4,
-      gymverse_history: [{ date: '2026-02-03T12:00:00.000Z', details: [{ exerciseId: 'synthetic', weight: 20, reps: 5 }] }],
+      gymverse_history: [{ date: '2026-02-03T12:00:00.000Z', details: [{ exerciseId: 'bench_flat', weight: 20, reps: 5 }] }],
       gymverse_plans: [], gymverse_custom: {}, gymverse_body: [], gymverse_last_weights: {},
       gymverse_active: { planId: 'synthetic', startedAt: 2, sets: [] },
       gymverse_draft_v1: { version: 1, items: [{ planId: 'synthetic', sessionId: '2', step: 0, setNumber: 1, weight: '20', reps: '5', updatedAt: 1 }] }

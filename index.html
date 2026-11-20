@@ -423,6 +423,10 @@ select.select-custom, input.select-custom { width: 100%; background: var(--card-
 </div>
 
 <div id="toast" role="status" aria-live="polite"></div>
+<div class="banner soft" id="fileDeliveryPrompt" hidden style="position:fixed;left:12px;right:12px;bottom:calc(env(safe-area-inset-bottom, 0px) + 14px);z-index:500;box-shadow:0 8px 32px #0009">
+  <p id="fileDeliveryInstructions"></p>
+  <button class="btn-secondary" style="margin-top:0;padding:10px" data-act="deliverPreparedFile">Udostępnij / zapisz plik</button>
+</div>
 
 <script src="src/gv-base-b.js"></script>
 <script>
@@ -442,6 +446,18 @@ const pad2 = n => String(n).padStart(2, '0');
 const dkey = d => `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
 const DAY = 864e5;
 let STORE = null;
+let DATA_IDS = null;
+let pendingFileDelivery = null;
+
+function createUuid() {
+  if (globalThis.crypto && typeof globalThis.crypto.randomUUID === 'function') return globalThis.crypto.randomUUID();
+  if (!globalThis.crypto || typeof globalThis.crypto.getRandomValues !== 'function') throw new Error('SECURE_UUID_UNAVAILABLE');
+  const bytes = globalThis.crypto.getRandomValues(new Uint8Array(16));
+  bytes[6] = (bytes[6] & 0x0f) | 0x40;
+  bytes[8] = (bytes[8] & 0x3f) | 0x80;
+  const hex = Array.from(bytes, byte => byte.toString(16).padStart(2, '0')).join('');
+  return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
+}
 
 let toastTimer = null;
 let draftSaveTimer = null;
@@ -464,7 +480,7 @@ const LS = {
     }
   },
   set(key, value) {
-    return STORE.set(key, value).then(() => true).catch(e => { toast(storageFailureMessage(e)); return false; });
+    return STORE.set(key, value);
   },
   del(key) {
     return STORE.delete(key).then(() => true).catch(e => { toast(storageFailureMessage(e)); return false; });
@@ -677,6 +693,7 @@ function normalizeSession(s, catalog = CATALOG, bwSet, strict = false) {
       return;
     }
     details.push({
+      ...(typeof x.id === 'string' && x.id ? { id: x.id } : {}),
       exerciseId: id,
       exerciseName: String(x.exerciseName || catalog[id] || id).slice(0, 120),
       setNumber: Number(x.setNumber) || 1,
@@ -686,7 +703,7 @@ function normalizeSession(s, catalog = CATALOG, bwSet, strict = false) {
   });
   const planTitle = String(s.planTitle || 'Trening').slice(0, 60);
   const plan = getPlan(s.planId) || PLANS.find(p => p.title === planTitle);
-  const out = { date: d.toISOString(), planId: plan ? plan.id : (typeof s.planId === 'string' ? s.planId.slice(0, 40) : null), planTitle, totalVolume: 0, totalReps: 0, details };
+  const out = { ...(typeof s.id === 'string' && s.id ? { id: s.id } : {}), date: d.toISOString(), planId: plan ? plan.id : (typeof s.planId === 'string' ? s.planId.slice(0, 40) : null), planTitle, totalVolume: 0, totalReps: 0, details };
   if (details.length) recalcSession(out, bwSet);
   else { out.totalVolume = Number(s.totalVolume) || 0; out.totalReps = Number(s.totalReps) || 0; }
   if (Number(s.durationMin) > 0) out.durationMin = Math.round(Number(s.durationMin));
@@ -725,22 +742,28 @@ function rebuildLastSets(preserveSaved = false) {
     if (s.rir) Object.keys(s.rir).forEach(k => { lastRir[k] = s.rir[k]; });
   });
 }
-function saveAll() {
-  try {
-    BASE_B.persistJsonTransaction(STORE.storage, { gymverse_history: history, gymverse_last_weights: lastSets });
-    return true;
-  } catch (e) { toast(storageFailureMessage(e)); return false; }
+async function saveAll(nextHistory = history, nextLastSets = lastSets) {
+  await STORE.transact({ gymverse_history: nextHistory, gymverse_last_weights: nextLastSets });
+  return true;
 }
-function rebuildAll() { lastSets = {}; rebuildLastSets(); saveAll(); }
-function saveActive() { return active ? LS.set('gymverse_active', active) : true; }
-function commitActiveState(nextActive, extraUpdates = {}) {
+async function rebuildAll() { lastSets = {}; rebuildLastSets(); await saveAll(); }
+async function saveActive() {
+  if (!active) return true;
+  try { await LS.set('gymverse_active', active); return true; }
+  catch (error) {
+    toast(storageFailureMessage(error));
+    await offerEmergencyExport(history, lastSets, active, true);
+    return false;
+  }
+}
+async function commitActiveState(nextActive, extraUpdates = {}) {
   try {
-    BASE_B.persistJsonTransaction(STORE.storage, Object.assign({ gymverse_active: nextActive }, extraUpdates));
+    await STORE.transact(Object.assign({ gymverse_active: nextActive }, extraUpdates));
     active = nextActive;
     return true;
   } catch (error) {
     toast(storageFailureMessage(error));
-    offerEmergencyExport(history, lastSets, nextActive);
+    await offerEmergencyExport(history, lastSets, nextActive);
     return false;
   }
 }
@@ -749,7 +772,7 @@ function lastWeightsFor(sessions) {
   return BASE_B.deriveLastWeights(sessions, lastSets);
 }
 
-function loadState() {
+async function loadState() {
   CUSTOM = cleanCustom(LS.get('gymverse_custom', {}));
   applyCustom();
   loadPlans();
@@ -759,7 +782,7 @@ function loadState() {
   if (!Array.isArray(raw)) raw = [];
   const schema = LS.get('gymverse_schema', 1);
   if (schema < 2) {
-    LS.set('gymverse_history_backup_v1', raw);
+    await LS.set('gymverse_history_backup_v1', raw);
     lastSets = {};
     const legacy = LS.get('gymverse_last_weights', {});
     Object.keys(legacy || {}).forEach(id => {
@@ -770,9 +793,9 @@ function loadState() {
     lastSets = LS.get('gymverse_last_weights', {});
     if (!lastSets || typeof lastSets !== 'object') lastSets = {};
   }
-  history = raw.map(session => normalizeSession(session)).filter(Boolean);
+  history = DATA_IDS.ensureStableHistoryIds(raw.map(session => normalizeSession(session)).filter(Boolean));
   rebuildLastSets(true);
-  if (schema < 2) { saveAll(); LS.set('gymverse_schema', 2); }
+  if (schema < 2) { await saveAll(); await LS.set('gymverse_schema', 2); }
 
   const r = Number(LS.get('gymverse_rest', 0));
   restSetting = [0, 90, 120, 180, 240].includes(r) ? r : 0;
@@ -782,6 +805,9 @@ function loadState() {
   const a = LS.get('gymverse_active', null);
   const plan = a && getPlan(a.planId);
   if (a && plan && plan.exercises.length && Array.isArray(a.sets)) {
+    const identifiedActive = DATA_IDS.addStableIdentifiers({ gymverse_active: a }).gymverse_active;
+    a.id = identifiedActive.id;
+    a.sets = identifiedActive.sets;
     a.step = Math.min(Math.max(Number(a.step) || 0, 0), plan.exercises.length - 1);
     a.swaps = a.swaps && typeof a.swaps === 'object' ? a.swaps : {};
     a.setCount = a.setCount && typeof a.setCount === 'object' ? a.setCount : {};
@@ -961,7 +987,7 @@ async function startWorkout(planId) {
   if (active && active.planId !== planId && !confirm('Masz niedokończony trening. Porzucić go i zacząć nowy?')) return;
   if (active && active.planId === planId) { openWorkout(); return; }
   if (active && !await discardActive()) return;
-  active = { planId, step: 0, sets: [], startedAt: Date.now(), timerEndAt: 0, swaps: {}, setCount: {}, rir: {} };
+  active = { id: createUuid(), planId, step: 0, sets: [], startedAt: Date.now(), timerEndAt: 0, swaps: {}, setCount: {}, rir: {} };
   if (!await saveActive()) { active = null; return; }
   openWorkout();
 }
@@ -1237,7 +1263,7 @@ function togglePlates() {
   updatePlates();
 }
 
-function onDone(i) {
+async function onDone(i) {
   const btn = $('btnDone_' + i);
   if (!btn) return false;
   if (btn.classList.contains('completed')) {
@@ -1258,12 +1284,12 @@ function onDone(i) {
   if (existing) {
     existing.weight = w; existing.reps = r;
   } else {
-    nextActive.sets.push({ step: nextActive.step, key: e.key, name: e.name, setNumber: i + 1, weight: w, reps: r, date: new Date().toISOString() });
+    nextActive.sets.push({ id: createUuid(), step: nextActive.step, key: e.key, name: e.name, setNumber: i + 1, weight: w, reps: r, date: new Date().toISOString() });
   }
   const query = draftQuery(active.step, i + 1);
   const nextDrafts = BASE_B.draftPayloadWithout(STORE.storage, item => item.planId === query.planId && item.sessionId === query.sessionId && item.step === query.step && item.setNumber === query.setNumber);
   try {
-    BASE_B.persistJsonTransaction(STORE.storage, { gymverse_active: nextActive, [BASE_B.DRAFT_KEY]: nextDrafts });
+    await STORE.transact({ gymverse_active: nextActive, [BASE_B.DRAFT_KEY]: nextDrafts });
   } catch (error) {
     toast(storageFailureMessage(error));
     offerEmergencyExport(history, lastSets, nextActive);
@@ -1283,15 +1309,15 @@ function focusNextRow() {
   }
 }
 
-function addSet() {
+async function addSet() {
   const n = setsFor(active.step);
   if (n >= 12) return;
   const nextActive = JSON.parse(JSON.stringify(active));
   nextActive.setCount[active.step] = n + 1;
-  if (!commitActiveState(nextActive)) return;
+  if (!await commitActiveState(nextActive)) return;
   renderStep();
 }
-function removeSet() {
+async function removeSet() {
   const n = setsFor(active.step);
   if (n <= 1) return;
   const loggedLast = active.sets.find(s => s.step === active.step && s.setNumber === n);
@@ -1301,7 +1327,7 @@ function removeSet() {
   nextActive.setCount[nextActive.step] = n - 1;
   const query = { planId: active.planId, sessionId: String(active.startedAt || active.planId), step: active.step, setNumber: n };
   const nextDrafts = BASE_B.draftPayloadWithout(STORE.storage, item => item.planId === query.planId && item.sessionId === query.sessionId && item.step === query.step && item.setNumber === query.setNumber);
-  if (!commitActiveState(nextActive, { [BASE_B.DRAFT_KEY]: nextDrafts })) return;
+  if (!await commitActiveState(nextActive, { [BASE_B.DRAFT_KEY]: nextDrafts })) return;
   renderStep();
 }
 
@@ -1321,7 +1347,7 @@ function swapOpen() {
   $('swapSelect').innerHTML = html;
   box.hidden = false;
 }
-function applySwap(val) {
+async function applySwap(val) {
   if (!val) return;
   const hasSets = active.sets.some(s => s.step === active.step);
   if (hasSets && !confirm('Zamiana usunie zapisane serie tego ćwiczenia. Kontynuować?')) { $('swapSelect').value = ''; return; }
@@ -1331,15 +1357,15 @@ function applySwap(val) {
   if (val === '__base__') delete nextActive.swaps[nextActive.step]; else nextActive.swaps[nextActive.step] = val;
   const query = { planId: active.planId, sessionId: String(active.startedAt || active.planId), step: active.step };
   const nextDrafts = BASE_B.draftPayloadWithout(STORE.storage, item => item.planId === query.planId && item.sessionId === query.sessionId && item.step === query.step);
-  if (!commitActiveState(nextActive, { [BASE_B.DRAFT_KEY]: nextDrafts })) return;
+  if (!await commitActiveState(nextActive, { [BASE_B.DRAFT_KEY]: nextDrafts })) return;
   $('swapBox').hidden = true;
   renderStep();
 }
 
-function setRir(v) {
+async function setRir(v) {
   const nextActive = JSON.parse(JSON.stringify(active));
   if (nextActive.rir[nextActive.step] === v) delete nextActive.rir[nextActive.step]; else nextActive.rir[nextActive.step] = v;
-  if (!commitActiveState(nextActive)) return;
+  if (!await commitActiveState(nextActive)) return;
   renderStep();
 }
 
@@ -1350,19 +1376,19 @@ async function nextStep() {
     if (!flushDraftsForStep(active.step)) return;
     const nextActive = JSON.parse(JSON.stringify(active));
     nextActive.step++;
-    if (!commitActiveState(nextActive)) return;
+    if (!await commitActiveState(nextActive)) return;
     renderStep();
     window.scrollTo(0, 0);
   } else {
     await finishWorkout(true);
   }
 }
-function prevStep() {
+async function prevStep() {
   if (active.step > 0) {
     if (!flushDraftsForStep(active.step)) return;
     const nextActive = JSON.parse(JSON.stringify(active));
     nextActive.step--;
-    if (!commitActiveState(nextActive)) return;
+    if (!await commitActiveState(nextActive)) return;
     $('swapBox').hidden = true; renderStep(); window.scrollTo(0, 0);
   }
 }
@@ -1401,6 +1427,7 @@ async function finishWorkout(fromNext) {
   const records = findRecords(active.sets);
   const nowIso = new Date().toISOString();
   const details = active.sets.map(s => ({
+    id: s.id || createUuid(),
     exerciseId: s.key, exerciseName: s.name, setNumber: s.setNumber, weight: s.weight, reps: s.reps, date: s.date
   }));
   const totalVolume = details.reduce((a, d) => a + setLoad(d.exerciseId, d.weight, d.reps, nowIso), 0);
@@ -1414,9 +1441,9 @@ async function finishWorkout(fromNext) {
   });
 
   const prevSame = history.filter(h => h.planId === plan.id).sort(byDate).pop();
-  const entry = { date: nowIso, planId: plan.id, planTitle: plan.title, totalVolume, totalReps, durationMin, details };
+  const entry = { id: active.id || createUuid(), date: nowIso, planId: plan.id, planTitle: plan.title, totalVolume, totalReps, durationMin, details };
   if (Object.keys(rir).length) entry.rir = rir;
-  const nextHistory = history.concat(entry);
+  const nextHistory = DATA_IDS.ensureStableHistoryIds(history.concat(entry));
   const nextLastSets = lastWeightsFor(nextHistory);
   const sessionId = String(active.startedAt || active.planId);
   const nextDrafts = BASE_B.draftPayloadWithout(STORE.storage, item => item.planId === active.planId && item.sessionId === sessionId);
@@ -1493,7 +1520,7 @@ async function offerEmergencyExport(pendingHistory, pendingLastWeights, activeSn
     drafts: current.gymverse_draft_v1 || BASE_B.readDraftPayload(STORE.storage)
   };
   try {
-    const ok = await deliverFile(`gymverse_awaryjna_${dkey(new Date())}.json`, 'application/json', JSON.stringify(payload, null, 2));
+    const ok = await stageFileDelivery(`gymverse_awaryjna_${dkey(new Date())}.json`, 'application/json', JSON.stringify(payload, null, 2));
     toast(integrityUncertain
       ? (ok ? 'Awaryjny JSON przygotowany z dostępnego stanu. Integralność zapisu pozostaje niepewna.' : 'Eksport anulowany. Integralność zapisu pozostaje niepewna.')
       : (ok ? 'Awaryjny JSON przygotowany. Trening nadal pozostaje aktywny.' : 'Eksport awaryjny anulowany. Trening nadal pozostaje aktywny.'));
@@ -1614,9 +1641,9 @@ function timerAdd() {
   if (active && timerPausedLeft == null) { active.timerEndAt = timerEndAt; saveActive(); }
   renderTimer();
 }
-function setRest(sec) {
+async function setRest(sec) {
+  await LS.set('gymverse_rest', sec);
   restSetting = sec;
-  LS.set('gymverse_rest', sec);
   document.querySelectorAll('[data-act="rest"]').forEach(b => b.classList.toggle('active', Number(b.dataset.sec) === sec));
 }
 
@@ -1780,13 +1807,13 @@ function getGoal() {
   if (g && Number.isInteger(g.min) && Number.isInteger(g.max) && g.min >= 1 && g.max >= g.min && g.max <= 60) return g;
   return { min: 10, max: 20 };
 }
-function editGoal() {
+async function editGoal() {
   const g = getGoal();
   const txt = prompt('Cel: ile serii tygodniowo na partię mięśniową (format min-max, np. 10-20)', `${g.min}-${g.max}`);
   if (txt === null) return;
   const m = txt.match(/^\s*(\d{1,2})\s*[-–]\s*(\d{1,2})\s*$/);
   if (!m || Number(m[1]) < 1 || Number(m[2]) < Number(m[1]) || Number(m[2]) > 60) { toast('Podaj zakres, np. 10-20'); return; }
-  LS.set('gymverse_goal', { min: Number(m[1]), max: Number(m[2]) });
+  await LS.set('gymverse_goal', { min: Number(m[1]), max: Number(m[2]) });
   renderStats();
 }
 
@@ -1882,21 +1909,23 @@ function calDay(el) {
   }
 }
 
-function saveBody() {
+async function saveBody() {
   const kg = num($('bodyInput').value);
   if (!isFinite(kg) || kg < 20 || kg > 400) { toast('Podaj wagę w kg (20–400)'); return; }
   const date = dkey(new Date());
-  body = body.filter(b => b.date !== date).concat([{ date, kg }]).sort((a, b) => a.date.localeCompare(b.date));
-  LS.set('gymverse_body', body);
+  const nextBody = body.filter(b => b.date !== date).concat([{ date, kg }]).sort((a, b) => a.date.localeCompare(b.date));
+  await LS.set('gymverse_body', nextBody);
+  body = nextBody;
   $('bodyInput').value = '';
   toast(`Zapisano: ${fmt(kg)} kg`);
   renderStats();
 }
-function delLastBody() {
+async function delLastBody() {
   if (!body.length) return;
   if (!confirm('Usunąć ostatni pomiar wagi?')) return;
-  body.pop();
-  LS.set('gymverse_body', body);
+  const nextBody = body.slice(0, -1);
+  await LS.set('gymverse_body', nextBody);
+  body = nextBody;
   renderStats();
 }
 
@@ -1966,7 +1995,7 @@ function renderHistory() {
   }).join('');
 }
 
-function histEditSet(i, dIdx) {
+async function histEditSet(i, dIdx) {
   const s = history[i];
   const d = s && s.details[dIdx];
   if (!d) return;
@@ -1980,12 +2009,12 @@ function histEditSet(i, dIdx) {
     d.weight = p.w; d.reps = p.r;
   }
   recalcSession(s);
-  rebuildAll();
+  await rebuildAll();
   histOpen.add(i);
   renderHistory();
 }
 
-function histAddSet(i, key) {
+async function histAddSet(i, key) {
   const s = history[i];
   if (!s) return;
   const ls = (lastSets[key] || [])[0];
@@ -1994,14 +2023,14 @@ function histAddSet(i, key) {
   const p = parseSetInput(txt, key);
   if (!p || !validSet(key, p.w, p.r)) { toast('Nieprawidłowy zapis – użyj formatu 80x8'); return; }
   const same = s.details.filter(d => d.exerciseId === key);
-  s.details.push({ exerciseId: key, exerciseName: nameOf(key), setNumber: same.reduce((a, d) => Math.max(a, d.setNumber), 0) + 1, weight: p.w, reps: p.r, date: s.date });
+  s.details.push({ id: createUuid(), exerciseId: key, exerciseName: nameOf(key), setNumber: same.reduce((a, d) => Math.max(a, d.setNumber), 0) + 1, weight: p.w, reps: p.r, date: s.date });
   recalcSession(s);
-  rebuildAll();
+  await rebuildAll();
   histOpen.add(i);
   renderHistory();
 }
 
-function histNew() {
+async function histNew() {
   const plan = getPlan($('histNewPlan').value);
   const v = $('histNewDate').value;
   if (!plan) { toast('Wybierz plan'); return; }
@@ -2009,8 +2038,8 @@ function histNew() {
   if (!m) { toast('Wybierz datę'); return; }
   const dt = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]), 12, 0, 0);
   if (isNaN(dt) || dt.getTime() > Date.now() + DAY) { toast('Data nie może być z przyszłości'); return; }
-  history.push({ date: dt.toISOString(), planId: plan.id, planTitle: plan.title, totalVolume: 0, totalReps: 0, details: [] });
-  saveAll();
+  history.push({ id: createUuid(), date: dt.toISOString(), planId: plan.id, planTitle: plan.title, totalVolume: 0, totalReps: 0, details: [] });
+  await saveAll();
   histOpen.add(history.length - 1);
   renderHistory();
   toast('Dodano trening – dotknij „+ seria", aby wpisać serie');
@@ -2074,33 +2103,33 @@ function renderPlanEditor() {
 }
 
 const peEdit = () => getPlan(editPlanId);
-function peMove(i, d) {
+async function peMove(i, d) {
   const p = peEdit(); const j = i + d;
   if (!p || j < 0 || j >= p.exercises.length) return;
   [p.exercises[i], p.exercises[j]] = [p.exercises[j], p.exercises[i]];
-  savePlans(); renderPlanEditor();
+  await savePlans(); renderPlanEditor();
 }
-function peDel(i) {
+async function peDel(i) {
   const p = peEdit();
   if (!p || !confirm(`Usunąć „${exName(p.exercises[i])}" z planu?`)) return;
   p.exercises.splice(i, 1);
-  savePlans(); renderPlanEditor();
+  await savePlans(); renderPlanEditor();
 }
-function peSets(i, d) {
+async function peSets(i, d) {
   const p = peEdit();
   if (!p) return;
   p.exercises[i].sets = Math.min(12, Math.max(1, p.exercises[i].sets + d));
-  savePlans(); renderPlanEditor();
+  await savePlans(); renderPlanEditor();
 }
-function peAdd() {
+async function peAdd() {
   const p = peEdit();
   const v = $('peAddSelect').value;
   if (!p || !v) { toast('Wybierz ćwiczenie z listy'); return; }
   if (v === '__custom__') { toast('Wypełnij formularz własnego ćwiczenia'); return; }
   p.exercises.push({ key: v, sets: 3, target: '8-12' });
-  savePlans(); renderPlanEditor();
+  await savePlans(); renderPlanEditor();
 }
-function peCreateCustom() {
+async function peCreateCustom() {
   const p = peEdit();
   const name = $('peCName').value.trim();
   if (!p || name.length < 2) { toast('Podaj nazwę ćwiczenia (min. 2 znaki)'); return; }
@@ -2108,53 +2137,92 @@ function peCreateCustom() {
   let key = `c_${slug}_${Date.now().toString(36).slice(-4)}`;
   while (CUSTOM[key]) key += 'x';
   CUSTOM[key] = { name: name.slice(0, 60), group: $('peCGroup').value, bw: $('peCBw').checked };
-  LS.set('gymverse_custom', CUSTOM);
+  await LS.set('gymverse_custom', CUSTOM);
   applyCustom();
   p.exercises.push({ key, sets: 3, target: CUSTOM[key].bw ? '6-10' : '8-12' });
-  savePlans(); renderPlanEditor();
+  await savePlans(); renderPlanEditor();
   toast('Dodano własne ćwiczenie. Zdjęcie (opcjonalne): img/' + key + '.jpg');
 }
-function peNew() {
+async function peNew() {
   const id = 'p_' + Date.now().toString(36);
   PLANS.push({ id, title: 'Nowy plan', exercises: [] });
-  savePlans();
+  await savePlans();
   editPlanId = id;
   renderPlanEditor();
 }
-function peDelPlan() {
+async function peDelPlan() {
   const p = peEdit();
   if (!p) return;
   if (PLANS.length <= 1) { toast('Musi zostać przynajmniej jeden plan'); return; }
   if (!confirm(`Usunąć plan „${p.title}"? Historia treningów zostanie.`)) return;
   PLANS = PLANS.filter(x => x.id !== p.id);
-  savePlans();
+  await savePlans();
   editPlanId = null;
   renderPlanEditor();
 }
-function peReset() {
+async function peReset() {
   if (!confirm('Przywrócić 4 domyślne plany Push/Pull? Twoje zmiany w planach zostaną nadpisane (historia zostaje).')) return;
   PLANS = defaultPlans();
-  savePlans();
+  await savePlans();
   renderPlanEditor();
 }
 
 /* ================== KOPIA ZAPASOWA I EKSPORT ================== */
-async function deliverFile(name, mime, content) {
-  try {
-    const file = new File([content], name, { type: mime });
-    if (navigator.canShare && navigator.canShare({ files: [file] })) {
-      await navigator.share({ files: [file], title: name });
-      return true;
+function deliverFile(name, mime, content) {
+  if (navigator.userActivation && !navigator.userActivation.isActive) return Promise.reject(new Error('FILE_DELIVERY_GESTURE_REQUIRED'));
+  const file = new File([content], name, { type: mime });
+  if (navigator.canShare && navigator.share && navigator.canShare({ files: [file] })) {
+    try {
+      return Promise.resolve(navigator.share({ files: [file], title: name })).then(() => true).catch(error => {
+        if (error && error.name === 'AbortError') return false;
+        throw error;
+      });
+    } catch (error) {
+      if (error && error.name === 'AbortError') return Promise.resolve(false);
+      return Promise.reject(error);
     }
-  } catch (e) {
-    if (e && e.name === 'AbortError') return false;
   }
   const url = URL.createObjectURL(new Blob([content], { type: mime }));
   const a = document.createElement('a');
   a.href = url; a.download = name;
   document.body.appendChild(a); a.click(); a.remove();
   setTimeout(() => URL.revokeObjectURL(url), 2000);
-  return true;
+  return Promise.resolve(true);
+}
+
+function stageFileDelivery(name, mime, content) {
+  if (pendingFileDelivery) pendingFileDelivery.resolve(false);
+  const isAppleMobile = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+  const instructions = isAppleMobile
+    ? `Plik ${name} jest gotowy. Dotknij przycisku, w arkuszu udostępniania wybierz „Zapisz w Plikach”, wskaż folder i zapisz. Po powrocie potwierdź, że plik jest widoczny w Plikach.`
+    : `Plik ${name} jest gotowy. Dotknij przycisku, aby pobrać go lub udostępnić, a potem sprawdź, że został zapisany.`;
+  $('fileDeliveryInstructions').textContent = instructions;
+  $('fileDeliveryPrompt').hidden = false;
+  return new Promise(resolve => { pendingFileDelivery = { name, mime, content, resolve }; });
+}
+
+async function deliverPreparedFile() {
+  const pending = pendingFileDelivery;
+  if (!pending) return false;
+  let delivered = false;
+  try { delivered = await deliverFile(pending.name, pending.mime, pending.content); }
+  catch (error) {
+    toast(error.message === 'FILE_DELIVERY_GESTURE_REQUIRED' ? 'Dotknij przycisku zapisu pliku, aby rozpocząć pobieranie.' : 'Nie udało się udostępnić pliku. Kopia pozostaje przygotowana.');
+    return false;
+  }
+  if (!delivered) {
+    pendingFileDelivery = null;
+    $('fileDeliveryPrompt').hidden = true;
+    pending.resolve(false);
+    return false;
+  }
+  const saved = confirm(/iPhone|iPad|iPod/i.test(navigator.userAgent)
+    ? 'Czy sprawdziłeś aplikację Pliki i potwierdzasz, że kopia została tam zapisana?'
+    : 'Czy sprawdziłeś pobrany plik i potwierdzasz, że kopia została zapisana?');
+  pendingFileDelivery = null;
+  $('fileDeliveryPrompt').hidden = true;
+  pending.resolve(saved);
+  return saved;
 }
 
 async function exportData() {
@@ -2169,17 +2237,17 @@ async function exportData() {
     Object.assign(snapshot, backupSnapshotDefaults(snapshot));
     const legacyInterpretations = await readLegacyInterpretations();
     const customMedia = await readCustomMedia();
-    const archive = await createBackupV5(snapshot, { legacyInterpretations, customMedia });
-    const ok = await deliverFile(`gymverse_backup_${dkey(new Date())}.zip`, 'application/zip', archive);
+    const archive = await createBackupV5(snapshot, {
+      legacyInterpretations, customMedia,
+      validationOptions: { strictExerciseCatalog: true, catalog: CATALOG, bodyweightExerciseIds: Array.from(BW), exerciseIdMap: ID_MAP }
+    });
+    const ok = await stageFileDelivery(`gymverse_backup_${dkey(new Date())}.zip`, 'application/zip', archive);
     if (!ok) { toast('Zapis kopii anulowany; data ostatniej kopii nie została zmieniona.'); return; }
-    const verifiedSaved = confirm('Sprawdź pliki lub wybrane miejsce udostępnienia i potwierdź, że kopia ZIP została tam zapisana.');
-    if (verifiedSaved) {
-      try { await LS.set('gymverse_last_backup', new Date().toISOString()); await STORE.flush(); }
-      catch (_) { toast('Kopia ZIP została przygotowana i jej zapis potwierdzono, ale nie udało się zapisać daty kopii w aplikacji.'); return; }
-    }
+    try { await LS.set('gymverse_last_backup', new Date().toISOString()); await STORE.flush(); }
+    catch (_) { toast('Kopia ZIP została przygotowana i jej zapis potwierdzono, ale nie udało się zapisać daty kopii w aplikacji.'); return; }
     renderPlans();
     $('sumBackup').innerHTML = '';
-    toast(verifiedSaved ? 'Zapis kopii ZIP v5 potwierdzony przez Ciebie.' : 'Kopia ZIP v5 przygotowana; zapisanie pliku nie zostało potwierdzone.');
+    toast('Zapis kopii ZIP v5 potwierdzony przez Ciebie.');
   } catch (error) {
     toast('Nie udało się przygotować kopii. Dane lokalne pozostały bez zmian.');
     if (STORE && STORE.mode === 'indexeddb') await offerEmergencyExport(history, lastSets, active, true);
@@ -2234,7 +2302,7 @@ async function prepareDataMigration() {
     await STORE.flush();
     preview = await STORE.previewMigration();
     const { createBackupV5, previewBackupV5, readLegacyInterpretations, readCustomMedia } = await import('./src/gv-data.js');
-    const snapshot = backupSnapshotDefaults(await runtimeJsonSnapshot());
+    const snapshot = DATA_IDS.addStableIdentifiers(backupSnapshotDefaults(await runtimeJsonSnapshot()));
     const legacy = {
       app: 'gymverse', version: 4, exportedAt: new Date().toISOString(),
       history: snapshot.gymverse_history || [], lastWeights: snapshot.gymverse_last_weights || {},
@@ -2242,17 +2310,18 @@ async function prepareDataMigration() {
       ...(snapshot.gymverse_active == null ? {} : { activeWorkout: snapshot.gymverse_active }),
       ...(snapshot.gymverse_draft_v1 == null ? {} : { drafts: snapshot.gymverse_draft_v1 })
     };
-    const sourceOk = await deliverFile(`gymverse_zrodlo_${dkey(new Date())}.json`, 'application/json', JSON.stringify(legacy, null, 2));
-    if (!sourceOk || !confirm('Otwórz plik JSON v4 i sprawdź, że został zapisany w bezpiecznym miejscu. Czy potwierdzasz sprawdzenie kopii źródłowej?')) {
+    const sourceOk = await stageFileDelivery(`gymverse_zrodlo_${dkey(new Date())}.json`, 'application/json', JSON.stringify(legacy, null, 2));
+    if (!sourceOk) {
       toast('Migracja anulowana; magazyn źródłowy nie został zmieniony.');
       return;
     }
-    const archive = await createBackupV5(snapshot, { legacyInterpretations: await readLegacyInterpretations(), customMedia: await readCustomMedia() });
-    const checked = await previewBackupV5(archive);
+    const validationOptions = { strictExerciseCatalog: true, catalog: CATALOG, bodyweightExerciseIds: Array.from(BW), exerciseIdMap: ID_MAP };
+    const archive = await createBackupV5(snapshot, { legacyInterpretations: await readLegacyInterpretations(), customMedia: await readCustomMedia(), validationOptions });
+    const checked = await previewBackupV5(archive, validationOptions);
     if (!checked.ok) throw new Error('V5_BACKUP_VERIFICATION_FAILED');
-    const ok = await deliverFile(`gymverse_backup_${dkey(new Date())}.zip`, 'application/zip', archive);
+    const ok = await stageFileDelivery(`gymverse_backup_${dkey(new Date())}.zip`, 'application/zip', archive);
     if (!ok) { toast('Przeniesienie anulowano; kopia ZIP nie została potwierdzona.'); return; }
-    if (!confirm(`Zweryfikowana kopia ZIP v5 zawiera ${checked.counts.sessions} treningów i ${checked.counts.sets} serii. Otwórz plik i upewnij się, że jest zapisany w bezpiecznym miejscu. Czy potwierdzasz zapis i sprawdzenie kopii v5?`)) return;
+    toast(`Zweryfikowana kopia ZIP v5 zawiera ${checked.counts.sessions} treningów i ${checked.counts.sets} serii.`);
     if (await activeGymVerseWindowCount() !== 1) throw new Error('OTHER_TABS_OPEN');
     if (!confirm('Ostatnie potwierdzenie: przełączyć bieżący magazyn na IndexedDB? Oryginalne dane localStorage pozostaną zachowane.')) return;
     const result = await STORE.activateMigration(preview, { sourceExportVerified: true, v5ExportVerified: true });
@@ -2289,7 +2358,7 @@ function csvExport() {
   };
   if (rows.length === 1) { toast('Brak danych do eksportu'); return; }
   const csv = '\ufeff' + rows.map(r => r.map(cell).join(';')).join('\r\n');
-  deliverFile(`gymverse_dane_${dkey(new Date())}.csv`, 'text/csv;charset=utf-8', csv);
+  deliverFile(`gymverse_dane_${dkey(new Date())}.csv`, 'text/csv;charset=utf-8', csv).catch(() => toast('Nie udało się zapisać pliku CSV.'));
 }
 
 async function importData(ev) {
@@ -2299,13 +2368,14 @@ async function importData(ev) {
   if (/\.zip$/i.test(file.name) || file.type === 'application/zip') {
     try {
       const { previewBackupV5, restoreBackupV5 } = await import('./src/gv-data.js');
-      const preview = await previewBackupV5(file);
+      const validationOptions = { strictExerciseCatalog: true, catalog: CATALOG, bodyweightExerciseIds: Array.from(BW), exerciseIdMap: ID_MAP };
+      const preview = await previewBackupV5(file, validationOptions);
       const overview = `Kopia v5: ${preview.counts.sessions} treningów, ${preview.counts.sets} serii, ${preview.counts.plans} planów, ${preview.counts.customExercises} ćwiczeń własnych, ${preview.counts.drafts} roboczych wpisów, ${preview.counts.legacyInterpretations} potwierdzonych reguł historii i ${preview.media.length} plików graficznych. Pełne odtworzenie zastąpi obecne dane GymVerse.`;
       if (!confirm(`${overview}\n\nCzy kontynuować do wyboru aktywnego treningu i draftów?`)) return;
       const restoreActive = confirm('Czy odtworzyć aktywny trening z kopii?');
       const restoreDrafts = confirm('Czy odtworzyć niezapisane drafty z kopii?');
       if (!confirm('Ostatnie potwierdzenie: zastąpić dane GymVerse zawartością tej kopii?')) return;
-      await restoreBackupV5(STORE.storage, preview, { confirmed: true, restoreActive, restoreDrafts });
+      await restoreBackupV5(STORE.storage, preview, { confirmed: true, restoreActive, restoreDrafts, validationOptions });
       await STORE.flush();
       toast('Dane odtworzono. Aplikacja uruchomi się ponownie.');
       setTimeout(() => location.reload(), 350);
@@ -2345,8 +2415,24 @@ async function importData(ev) {
       });
       const addedWeights = Object.keys(backupWeights).filter(key => !Object.hasOwn(lastSets, key));
       const keptLocalWeights = Object.keys(backupWeights).length - addedWeights.length;
-      const have = new Set(history.map(s => s.date));
-      const fresh = incoming.filter(s => !have.has(s.date));
+      const knownIds = new Set(history.map(session => session.id).filter(Boolean));
+      const existingLegacyCounts = new Map();
+      history.forEach(session => {
+        const fingerprint = DATA_IDS.legacySessionFingerprint(session);
+        existingLegacyCounts.set(fingerprint, (existingLegacyCounts.get(fingerprint) || 0) + 1);
+      });
+      const incomingLegacyCounts = new Map();
+      const fresh = [];
+      incoming.forEach(session => {
+        if (session.id) {
+          if (!knownIds.has(session.id)) { knownIds.add(session.id); fresh.push(session); }
+          return;
+        }
+        const fingerprint = DATA_IDS.legacySessionFingerprint(session);
+        const occurrence = (incomingLegacyCounts.get(fingerprint) || 0) + 1;
+        incomingLegacyCounts.set(fingerprint, occurrence);
+        if (occurrence > (existingLegacyCounts.get(fingerprint) || 0)) fresh.push(session);
+      });
       const haveBody = new Set(body.map(b => b.date));
       if (parsed.body != null && !Array.isArray(parsed.body)) throw new Error('format');
       const normalizedBody = normalizeBody(parsed.body || []);
@@ -2359,13 +2445,14 @@ async function importData(ev) {
       const replacePlans = !!(plansDiffer && !active);
       if (parsed.app === 'gymverse' && Number(parsed.version) === 4) {
         const { inspectLegacySnapshot, restoreLegacyV4 } = await import('./src/gv-data.js');
-        const preview = await inspectLegacySnapshot(parsed);
+        const validationOptions = { strictExerciseCatalog: true, catalog: CATALOG, bodyweightExerciseIds: Array.from(BW), exerciseIdMap: ID_MAP };
+        const preview = await inspectLegacySnapshot(parsed, validationOptions);
         if (!preview.ok) throw new Error('format');
         if (confirm(`OK = pełne odtworzenie JSON v4, które zastąpi treningi, plany, ćwiczenia własne, pomiary i ciężary z kopii. Anuluj = przejdź do importu łączeniowego. Liczba treningów w kopii: ${preview.counts.sessions}. Ustawienia aplikacji pozostaną bez zmian.`)) {
           const restoreActive = confirm('Czy kopia awaryjna zawiera aktywny trening do odtworzenia? Wybierz OK, aby go przywrócić.');
           const restoreDrafts = confirm('Czy przywrócić niezapisane drafty, jeśli znajdują się w kopii?');
           if (!confirm('Ostatnie potwierdzenie: pełne odtworzenie zastąpi obecny stan danych GymVerse. Kontynuować?')) return;
-          await restoreLegacyV4(STORE.storage, parsed, { confirmed: true, restoreActive, restoreDrafts });
+          await restoreLegacyV4(STORE.storage, parsed, { confirmed: true, restoreActive, restoreDrafts, validationOptions });
           await STORE.flush();
           toast('Dane JSON v4 odtworzono. Aplikacja uruchomi się ponownie.');
           setTimeout(() => location.reload(), 350);
@@ -2381,7 +2468,7 @@ async function importData(ev) {
       const weightsInfo = `, ciężary z kopii – ${addedWeights.length}${keptLocalWeights ? `; ${keptLocalWeights} lokalnych ciężarów pozostanie bez zmian` : ''}`;
       if (!confirm(`Zaimportować dane: treningi – ${fresh.length}, pomiary wagi – ${freshBody.length}${customInfo}${planInfo}${weightsInfo}? Duplikaty zostaną pominięte; niczego nie usunę.`)) return;
 
-      const nextHistory = JSON.parse(JSON.stringify(history.concat(fresh)));
+      const nextHistory = DATA_IDS.ensureStableHistoryIds(JSON.parse(JSON.stringify(history.concat(fresh))));
       const nextBody = body.concat(freshBody).sort((a, b) => a.date.localeCompare(b.date));
       nextHistory.forEach(session => recalcSession2(session, nextBW, nextBody));
       const nextPlans = replacePlans ? inPlans : PLANS;
@@ -2432,7 +2519,7 @@ const ACTIONS = {
   wstep: el => stepWeight(Number(el.dataset.d)),
   copyPrev,
   plates: togglePlates,
-  bar: el => { barKg = Number(el.dataset.kg); LS.set('gymverse_bar', barKg); updatePlates(); },
+  bar: async el => { const next = Number(el.dataset.kg); await LS.set('gymverse_bar', next); barKg = next; updatePlates(); },
   addSet, removeSet, swapOpen,
   rir: el => setRir(Number(el.dataset.v)),
   next: nextStep,
@@ -2443,13 +2530,14 @@ const ACTIONS = {
   timerPause, timerAdd, timerSkip: stopTimer,
   range: setRange,
   export: exportData,
+  deliverPreparedFile,
   migrateData: prepareDataMigration,
   csv: csvExport,
   importBtn: () => $('importFile').click(),
   shareSummary,
-  deloadStart: () => { LS.set('gymverse_deload_until', Date.now() + 7 * DAY); LS.set('gymverse_deload_start', Date.now()); renderPlans(); },
-  deloadSnooze: () => { LS.set('gymverse_deload_snooze', Date.now() + 14 * DAY); renderPlans(); },
-  deloadEnd: () => { LS.set('gymverse_deload_until', 0); renderPlans(); },
+  deloadStart: async () => { const now = Date.now(); await STORE.transact({ gymverse_deload_until: now + 7 * DAY, gymverse_deload_start: now }); renderPlans(); },
+  deloadSnooze: async () => { await LS.set('gymverse_deload_snooze', Date.now() + 14 * DAY); renderPlans(); },
+  deloadEnd: async () => { await LS.set('gymverse_deload_until', 0); renderPlans(); },
   editPlans: () => { if (active) { toast('Najpierw zakończ lub porzuć trwający trening'); return; } switchView('view-planedit'); },
   peOpen: el => { editPlanId = el.dataset.id; renderPlanEditor(); window.scrollTo(0, 0); },
   peNew, peReset, peAdd, peCreateCustom, peDelPlan,
@@ -2473,11 +2561,11 @@ const ACTIONS = {
   histAddSet: el => histAddSet(Number(el.dataset.i), el.dataset.k),
   histNew,
   histClearDay: () => { histFilterDay = null; renderHistory(); },
-  histDelete: el => {
+  histDelete: async el => {
     if (!confirm('Usunąć ten trening z historii?')) return;
     history.splice(Number(el.dataset.i), 1);
     histOpen = new Set();
-    rebuildAll();
+    await rebuildAll();
     renderHistory();
   }
 };
@@ -2520,12 +2608,12 @@ document.addEventListener('change', async e => {
   if (!p) return;
   if (f === 'peTitle') {
     p.title = t.value.trim().slice(0, 40) || 'Plan';
-    savePlans();
+    await savePlans();
   } else if (f === 'peTarget') {
     const v = t.value.trim().replace(/\s+/g, '').replace('–', '-');
     if (!/^\d{1,3}(-\d{1,3})?$/.test(v)) { toast('Zakres w formacie 8-12 lub 15'); renderPlanEditor(); return; }
     p.exercises[Number(t.dataset.i)].target = v;
-    savePlans();
+    await savePlans();
     renderPlanEditor();
   }
   await STORE.flush().catch(error => toast(storageFailureMessage(error)));
@@ -2541,16 +2629,16 @@ document.addEventListener('focusin', e => {
 document.addEventListener('keydown', async e => {
   if (e.key !== 'Enter') return;
   const t = e.target;
-  if (t.id === 'bodyInput') { e.preventDefault(); saveBody(); await STORE.flush().catch(error => toast(storageFailureMessage(error))); return; }
+  if (t.id === 'bodyInput') { e.preventDefault(); await saveBody(); await STORE.flush().catch(error => toast(storageFailureMessage(error))); return; }
   if (!t.classList || !t.classList.contains('input-cell')) return;
   e.preventDefault();
   const i = Number(t.dataset.i);
   if (t.id.startsWith('weight_')) { $('reps_' + i).focus(); return; }
   const btn = $('btnDone_' + i);
-  if (btn && btn.classList.contains('ready')) { if (onDone(i)) focusNextRow(); await STORE.flush().catch(error => toast(storageFailureMessage(error))); }
+  if (btn && btn.classList.contains('ready')) { if (await onDone(i)) focusNextRow(); await STORE.flush().catch(error => toast(storageFailureMessage(error))); }
 });
 $('chartExerciseSelect').addEventListener('change', updateCharts);
-$('swapSelect').addEventListener('change', async e => { applySwap(e.target.value); await STORE.flush().catch(error => toast(storageFailureMessage(error))); });
+$('swapSelect').addEventListener('change', async e => { await applySwap(e.target.value); await STORE.flush().catch(error => toast(storageFailureMessage(error))); });
 $('importFile').addEventListener('change', importData);
 
 document.addEventListener('visibilitychange', async () => {
@@ -2574,7 +2662,9 @@ window.addEventListener('resize', () => {
 /* ================== START ================== */
 async function init() {
   try {
-    const { createRuntimeStore } = await import('./src/gv-data.js');
+    const dataModule = await import('./src/gv-data.js');
+    DATA_IDS = dataModule;
+    const { createRuntimeStore } = dataModule;
     STORE = await createRuntimeStore();
     if (location.hostname === '127.0.0.1' || location.hostname === 'localhost') {
       Object.defineProperty(window, '__gymverseTestHarness', { value: Object.freeze({ getStore: () => STORE }), configurable: true });
@@ -2583,7 +2673,7 @@ async function init() {
       toast(storageFailureMessage(error));
       if (STORE.mode === 'indexeddb') offerEmergencyExport(history, lastSets, active, true);
     });
-    loadState();
+    await loadState();
     await STORE.flush();
     $('migrateDataButton').hidden = STORE.mode !== 'localStorage';
     initChartsSelect();

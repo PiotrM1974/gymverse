@@ -22,9 +22,14 @@ test('starts the first plan, records a set, finishes, survives reload and import
   await page.getByRole('button', { name: /zakończ i zapisz trening/i }).click();
   await expect(page.getByText('Trening zaliczony!')).toBeVisible();
   expect(await page.evaluate(() => localStorage.getItem('gymverse_active'))).toBeNull();
-  expect(await page.evaluate(() => JSON.parse(localStorage.getItem('gymverse_history') || '[]'))).toHaveLength(1);
+  const firstSession = await page.evaluate(() => JSON.parse(localStorage.getItem('gymverse_history') || '[]')[0]);
+  expect(firstSession.id).toMatch(/^[0-9a-f-]{36}$/i);
+  expect(firstSession.details[0].id).toMatch(/^[0-9a-f-]{36}$/i);
   await page.reload();
   expect(pageErrors).toEqual([]);
+  const reloadedSession = await page.evaluate(() => JSON.parse(localStorage.getItem('gymverse_history') || '[]')[0]);
+  expect(reloadedSession.id).toBe(firstSession.id);
+  expect(reloadedSession.details[0].id).toBe(firstSession.details[0].id);
   await page.getByRole('button', { name: 'Historia' }).click();
   await expect(page.locator('#historyList').getByText('Push A1')).toBeVisible();
   await page.locator('#importFile').setInputFiles('tests/fixtures/backup-v4.json');

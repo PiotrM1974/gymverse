@@ -18,6 +18,10 @@ Eksporty nie są automatycznie traktowane jako zapisane. Użytkownik sprawdza pl
 
 Baza `gymverse-db-v3` jest podnoszona do schematu IndexedDB 4. Dane aplikacji są przechowywane jako surowe wartości JSON w `runtimeRecords`, z identyfikatorem generacji i kluczem aplikacji. Wskaźnik `meta.runtimeActive` zawiera generację, wersję schematu, liczbę kluczy i SHA-256 kanonicznego snapshotu. `meta.runtimeRevision` wykrywa zapis oparty na nieaktualnym stanie innej karty. Potwierdzone interpretacje i grafiki mają osobne magazyny.
 
+To jest warstwa kompatybilności magazynu dla istniejących kluczy i kształtów rekordów. `DB_VERSION = 4` oznacza wyłącznie układ object stores IndexedDB; backup `version = 5` oznacza format ZIP. Żaden z tych numerów nie jest `dataSchemaVersion: 3`, a ta gałąź nie jest pełną migracją modelu danych v3. Manifest backupu jawnie zawiera `schema: legacy-storage-snapshot`; nie deklaruje v3.
+
+Nowe treningi otrzymują UUID sesji i serii przy utworzeniu. Normalizacja legacy zachowuje istniejące identyfikatory, a dla rekordów bez nich wylicza deterministyczny fingerprint treści z licznikiem wielokrotności; jednakowe daty nie są kluczem tożsamości. Backup i pełne odtworzenie v4/v5 zachowują lub uzupełniają te identyfikatory bez zmiany historycznych wartości treningu.
+
 Migracja zapisuje znacznik `indexeddb-pending` do klucza sterującego magazynem, przygotowuje dane w transakcji IndexedDB, odczytuje wszystkie zapisane klucze, porównuje liczbę i sumę kontrolną, ponownie porównuje źródło, a dopiero potem zatwierdza `meta.runtimeActive`. Po przełączeniu znacznik otrzymuje wartość `indexeddb`. Wskaźnik w IndexedDB jest rozstrzygający, jeśli nie uda się zapisać końcowego znacznika. Klucz sterujący jest metadanymi selektora; nie zastępuje ani nie czyści danych źródłowych.
 
 Przy starcie aplikacja sprawdza wskaźnik IndexedDB i jego sumę kontrolną. Wskaźnik aktywny albo znacznik `indexeddb`, którego bazy nie da się otworzyć, zatrzymuje normalne uruchomienie/zapisy; aplikacja nie przełącza się po cichu na starą kopię `localStorage`. Przed przełączeniem brak wskaźnika oznacza, że `localStorage` pozostaje aktywny.
@@ -39,6 +43,7 @@ Zapisy do IndexedDB używają rewizji w tej samej transakcji co odczyt wskaźnik
 | Historia, ciężary, pomiary i ustawienia | `LS.get/set/del`, `saveAll`, `commitActiveState` oraz import łączeniowy kierują do adaptera; brak zapisów do starych kluczy po przełączeniu |
 | Import ZIP v5 / pełne odtworzenie JSON v4 | Walidacja i podgląd → jawna zgoda → jedna transakcja obejmująca rekordy, wskaźniki oraz partie interpretacji/grafik → kontrola odczytu |
 | Eksport ZIP v5 | Odczyt po opróżnieniu kolejki z aktywnego adaptera; uwzględnia historię, plany, custom, pomiary, ciężary, ustawienia, aktywną sesję i drafty |
+| Potwierdzenie pliku | ZIP/JSON jest najpierw przygotowany; osobny klik uruchamia `share()` albo pobieranie w aktywnym geście. Na iOS instrukcja każe jawnie wybrać „Zapisz w Plikach” i sprawdzić plik |
 | Eksport awaryjny | Gdy IndexedDB zawiedzie, dostępny cache w pamięci może zostać wyeksportowany jako JSON v4 z ostrzeżeniem, że integralność/odzyskanie nie są gwarantowane |
 | Usuwanie kluczy/rekordów | `STORE.delete()` albo `STORE.storage.removeItem()` usuwa wyłącznie z aktywnego magazynu; nie czyści źródłowego snapshotu |
 | Offline | Service Worker precache'uje stronę, moduł bazowy, `gv-data.js`, bibliotekę ZIP oraz istniejące zasoby aplikacji |
