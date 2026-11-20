@@ -1,0 +1,13 @@
+{
+  "description": "Syntetyczny aktywny trening; wszystkie wartości fikcyjne.",
+  "gymverse_active": {
+    "planId": "push_a1",
+    "step": 0,
+    "sets": [{ "step": 0, "key": "bench_flat", "name": "Wyciskanie testowe", "setNumber": 1, "weight": 40, "reps": 8, "date": "2026-01-05T10:00:00.000Z" }],
+    "startedAt": 1767607200000,
+    "timerEndAt": 0,
+    "swaps": {},
+    "setCount": {},
+    "rir": {}
+  }
+}
