@@ -3,3 +3,4 @@
 *.jpeg binary
 *.webp binary
 *.zip binary
+docs/spec/GymVerse_2_0_MASTER_PROMPT_v*.md -text
