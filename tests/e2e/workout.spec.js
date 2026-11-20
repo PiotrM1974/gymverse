@@ -8,7 +8,7 @@ test.beforeEach(async ({ page }) => {
 
 test('starts the first plan, records a set, finishes, survives reload and imports synthetic backup v4', async ({ page }) => {
   page.on('dialog', dialog => dialog.accept());
-  await page.getByText('Push A1', { exact: true }).first().click();
+  await page.locator('[data-act="startPlan"][data-plan="push_a1"]').click();
   await page.locator('#weight_0').fill('40');
   await page.locator('#reps_0').fill('8');
   await page.locator('#btnDone_0').click();
@@ -16,7 +16,7 @@ test('starts the first plan, records a set, finishes, survives reload and import
   await expect(page.getByText('Trening zaliczony!')).toBeVisible();
   await page.reload();
   await page.getByRole('button', { name: 'Historia' }).click();
-  await expect(page.getByText('Push A1')).toBeVisible();
+  await expect(page.locator('#historyList').getByText('Push A1')).toBeVisible();
   await page.locator('#importFile').setInputFiles('tests/fixtures/backup-v4.json');
   await expect(page.getByText(/Dołączono/)).toBeVisible({ timeout: 3000 });
 });
