@@ -77,8 +77,7 @@
               "sizeBytes": { "type": "null" },
               "sha256": { "type": "null" },
               "altText": { "type": "null" },
-              "origin": { "type": "null" },
-              "reason": { "type": "string", "minLength": 1 }
+              "origin": { "type": "null" }
             }
           },
           "else": {
@@ -90,7 +89,19 @@
               "sizeBytes": { "type": "integer", "minimum": 1 },
               "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
               "altText": { "type": "string", "minLength": 1 },
-              "origin": { "$ref": "#/$defs/origin", "type": "object" },
+              "origin": { "$ref": "#/$defs/origin", "type": "object" }
+            }
+          }
+        },
+        {
+          "if": { "properties": { "status": { "enum": ["pending", "rejected"] } } },
+          "then": {
+            "properties": {
+              "reason": { "type": "string", "minLength": 1 }
+            }
+          },
+          "else": {
+            "properties": {
               "reason": { "type": "null" }
             }
           }

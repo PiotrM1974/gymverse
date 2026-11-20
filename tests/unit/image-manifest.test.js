@@ -50,6 +50,15 @@ describe('GV-IMG-META image manifest contract', () => {
     expect(schema.$schema).toBe('https://json-schema.org/draft/2020-12/schema');
     expect(schema.properties.exerciseAssetsVersion.const).toBe(1);
     expect(schema.properties.manifestSchemaVersion.const).toBe(1);
+    const viewReasonRule = schema.$defs.view.allOf.find(rule =>
+      rule.if?.properties?.status?.enum?.includes('rejected')
+    );
+    expect(viewReasonRule.then.properties.reason).toEqual({ type: 'string', minLength: 1 });
+    expect(viewReasonRule.else.properties.reason).toEqual({ type: 'null' });
+    const ownerRejectionRule = schema.$defs.ownerApproval.allOf.find(rule =>
+      rule.if?.properties?.status?.const === 'rejected'
+    );
+    expect(ownerRejectionRule.then.properties.reason).toEqual({ type: 'string', minLength: 1 });
     expect(EXERCISE_IMAGE_MANIFEST.records).toHaveLength(35);
 
     const expected = [
@@ -125,6 +134,30 @@ describe('GV-IMG-META image manifest contract', () => {
     const record = manifest.records.find(item => item.exerciseId === 'db_bench');
     record.status = 'approved';
     expect(validateImageManifest(manifest).errors).toContain('db_bench/default:STATUS_CONTRADICTION');
+  });
+
+  it('requires a reason for an individually rejected view and preserves the owner rejection reason', () => {
+    const manifest = draftWithTechniqueAsset();
+    const record = manifest.records.find(item => item.exerciseId === 'db_bench');
+    record.status = 'rejected';
+    record.views.technique.status = 'rejected';
+    record.views.technique.reason = 'Pozycja uchwytu nie odpowiada zatwierdzonej konfiguracji.';
+    record.ownerApproval = {
+      status: 'rejected',
+      revision: record.revision,
+      reviewer: 'owner',
+      decidedAt: '2026-11-20T12:01:00.000Z',
+      decisionId: 'owner-decision:synthetic-rejection',
+      reason: 'Właściciel odrzucił całą kompozycję.'
+    };
+    expect(validateImageManifest(manifest).errors).not.toContain('db_bench/default/technique:VIEW_REJECTION_REASON_MISSING');
+
+    record.views.technique.reason = null;
+    expect(validateImageManifest(manifest).errors).toContain('db_bench/default/technique:VIEW_REJECTION_REASON_MISSING');
+
+    record.views.technique.reason = 'Wymagany powód widoku.';
+    record.ownerApproval.reason = null;
+    expect(validateImageManifest(manifest).errors).toContain('db_bench/default:OWNER_REJECTION_REASON_MISSING');
   });
 
   it('does not allow approval without reviewed illustration metadata and owner approval of this revision', () => {

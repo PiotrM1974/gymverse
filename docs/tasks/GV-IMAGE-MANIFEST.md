@@ -34,7 +34,9 @@ Do `imageReadiness` należą tylko dane potrzebne do poprawności ilustracji: to
 - Limity 200 KB dla widoku głównego i 40 KB dla miniatur są celami optymalizacyjnymi. Ich przekroczenie generuje ostrzeżenie, nie automatyczne odrzucenie ani wymóg obniżenia jakości.
 - Teksty alternatywne są osobnymi polami i nie mogą być zastąpione informacją wyłącznie kolorystyczną.
 
-Walidator techniczny sprawdza strukturę, relacje, ścieżki, sygnaturę WebP, SHA-256, rozmiar i wymiary. Nie rozpoznaje poprawności anatomii, ustawienia uchwytów, kierunku ruchu ani zgodności ćwiczącego z referencją. Te punkty wymagają oceny merytorycznej oraz jawnej decyzji właściciela.
+Walidator techniczny sprawdza strukturę, relacje, ścieżki, sygnaturę WebP, SHA-256, rozmiar i wymiary. Kontrola nagłówka/kontenera i wymiarów nie dekoduje całego strumienia obrazu i nie dowodzi, że przeglądarka poprawnie dekoduje ani wyświetla plik. Podczas pilota ilustracji trzeba osobno sprawdzić rzeczywiste dekodowanie WebP oraz wyświetlenie każdego widoku w docelowej przeglądarce i na urządzeniu testowym; wynik tej kontroli należy zapisać jako dowód akceptacji. Nie dodajemy na tym etapie dużej biblioteki graficznej wyłącznie po to, by dublować dekoder przeglądarki.
+
+Walidator nie rozpoznaje też poprawności anatomii, ustawienia uchwytów, kierunku ruchu ani zgodności ćwiczącego z referencją. Te punkty wymagają oceny merytorycznej oraz jawnej decyzji właściciela.
 
 ## Wersjonowanie i pochodzenie
 

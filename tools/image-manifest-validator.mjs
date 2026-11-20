@@ -89,7 +89,11 @@ function validateView(record, viewName, view, errors, warnings) {
     return;
   }
 
-  if (view.reason !== null) addError(errors, label, 'NON_PENDING_REASON_INVALID');
+  if (view.status === 'rejected') {
+    if (!nonempty(view.reason)) addError(errors, label, 'VIEW_REJECTION_REASON_MISSING');
+  } else if (view.reason !== null) {
+    addError(errors, label, 'NON_PENDING_REASON_INVALID');
+  }
   if (view.path === null || view.mimeType === null || view.width === null || view.height === null ||
       view.sizeBytes === null || view.sha256 === null || view.altText === null || view.origin === null) {
     addError(errors, label, 'ASSET_FIELDS_INCOMPLETE');
