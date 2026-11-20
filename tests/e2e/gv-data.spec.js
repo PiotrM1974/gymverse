@@ -19,6 +19,85 @@ const syntheticSnapshot = () => ({
   gymverse_draft_v1: { version: 1, items: [{ planId: 'synthetic', sessionId: '1', step: 0, setNumber: 1, weight: '40', reps: '8' }] }
 });
 
+const seedEditableState = async page => {
+  await page.evaluate(() => {
+    localStorage.setItem('gymverse_plans', JSON.stringify([{ id: 'p_synthetic', title: 'Plan syntetyczny', exercises: [{ key: 'bench_flat', sets: 2, target: '8-10' }] }]));
+    localStorage.setItem('gymverse_custom', JSON.stringify({}));
+    localStorage.setItem('gymverse_history', JSON.stringify([{ id: 'session-synthetic', date: '2026-02-03T12:00:00.000Z', planId: 'p_synthetic', planTitle: 'Plan syntetyczny', details: [{ id: 'set-synthetic', exerciseId: 'bench_flat', exerciseName: 'Wyciskanie sztangi na ławce płaskiej', setNumber: 1, weight: 40, reps: 8, date: '2026-02-03T12:00:00.000Z' }] }]));
+  });
+  await page.reload();
+  await page.waitForFunction(() => !!window.__gymverseTestHarness);
+};
+
+const activateThenFailIndexedDb = page => page.evaluate(async () => {
+  const runtime = window.__gymverseTestHarness.getStore();
+  const preview = await runtime.previewMigration();
+  await runtime.activateMigration(preview, { sourceExportVerified: true, v5ExportVerified: true });
+  IDBFactory.prototype.open = () => { throw new DOMException('synthetic transaction failure', 'UnknownError'); };
+});
+
+const rejectEmergencyExportAndEnter = page => page.on('dialog', async dialog => {
+  if (dialog.type() === 'prompt') await dialog.accept('60x6');
+  else if (/Usunąć ten trening/.test(dialog.message())) await dialog.accept();
+  else await dialog.dismiss();
+});
+
+test('failed IndexedDB edit keeps the committed history set and reports the proposed value as unsaved', async ({ page }) => {
+  await seedEditableState(page);
+  rejectEmergencyExportAndEnter(page);
+  await activateThenFailIndexedDb(page);
+  await page.locator('[data-act="view"][data-view="view-history"]').click();
+  await page.locator('[data-act="histToggle"][data-i="0"]').click();
+  await page.locator('[data-act="histEditSet"][data-i="0"][data-d="0"]').click();
+  await expect(page.locator('#historyList')).toContainText('40×8');
+  await expect(page.locator('#toast')).toContainText('Nie zapisano: Zmiana serii');
+  const stored = await page.evaluate(() => window.__gymverseTestHarness.getStore().get('gymverse_history'));
+  expect(stored[0].details[0]).toMatchObject({ id: 'set-synthetic', weight: 40, reps: 8 });
+});
+
+test('failed IndexedDB workout deletion keeps the committed session in history', async ({ page }) => {
+  await seedEditableState(page);
+  rejectEmergencyExportAndEnter(page);
+  await activateThenFailIndexedDb(page);
+  await page.locator('[data-act="view"][data-view="view-history"]').click();
+  await page.locator('[data-act="histToggle"][data-i="0"]').click();
+  await page.locator('[data-act="histDelete"][data-i="0"]').click();
+  await expect(page.locator('#historyList')).toContainText('Plan syntetyczny');
+  await expect(page.locator('#toast')).toContainText('Nie zapisano: Usunięcie treningu');
+  const stored = await page.evaluate(() => window.__gymverseTestHarness.getStore().get('gymverse_history'));
+  expect(stored).toHaveLength(1);
+  expect(stored[0].id).toBe('session-synthetic');
+});
+
+test('failed IndexedDB plan modification keeps the committed plan and explains the unsaved change', async ({ page }) => {
+  await seedEditableState(page);
+  rejectEmergencyExportAndEnter(page);
+  await activateThenFailIndexedDb(page);
+  await page.locator('[data-act="editPlans"]').click();
+  await page.locator('[data-act="peOpen"][data-id="p_synthetic"]').click();
+  await page.locator('[data-act="peSets"][data-i="0"][data-d="1"]').click();
+  await expect(page.locator('#planEditBody')).toContainText('2');
+  await expect(page.locator('#toast')).toContainText('Nie zapisano: Zmiana liczby serii');
+  const stored = await page.evaluate(() => window.__gymverseTestHarness.getStore().get('gymverse_plans'));
+  expect(stored[0].exercises[0].sets).toBe(2);
+});
+
+test('failed IndexedDB custom exercise creation preserves both the prior custom catalog and plan', async ({ page }) => {
+  await seedEditableState(page);
+  rejectEmergencyExportAndEnter(page);
+  await activateThenFailIndexedDb(page);
+  await page.locator('[data-act="editPlans"]').click();
+  await page.locator('[data-act="peOpen"][data-id="p_synthetic"]').click();
+  await page.locator('#peAddSelect').selectOption('__custom__');
+  await page.locator('#peCName').fill('Własne syntetyczne');
+  await page.locator('[data-act="peCreateCustom"]').click();
+  await expect(page.locator('#toast')).toContainText('Nie zapisano: Utworzenie ćwiczenia');
+  const stored = await page.evaluate(() => ({ custom: window.__gymverseTestHarness.getStore().get('gymverse_custom'), plans: window.__gymverseTestHarness.getStore().get('gymverse_plans') }));
+  expect(stored.custom).toEqual({});
+  expect(stored.plans[0].exercises).toEqual([{ key: 'bench_flat', sets: 2, target: '8-10' }]);
+  await expect(page.locator('#planEditBody')).toContainText('Wyciskanie sztangi');
+});
+
 test('stages, verifies and activates a synthetic snapshot idempotently without changing the source', async ({ page }) => {
   const result = await page.evaluate(async snapshot => {
     const before = JSON.stringify(snapshot);
@@ -250,7 +329,7 @@ test('does not mark a set complete before IndexedDB confirms the write', async (
   await expect(page.locator('#reps_0')).toHaveValue('8');
   await expect(page.locator('#toast')).toContainText('zapis');
   const runtimeActive = await page.evaluate(() => window.__gymverseTestHarness.getStore().get('gymverse_active'));
-  expect(runtimeActive.sets).toHaveLength(1);
+  expect(runtimeActive.sets).toHaveLength(0);
 });
 
 test('does not report a body measurement saved when IndexedDB rejects it', async ({ page }) => {
@@ -269,8 +348,7 @@ test('does not report a body measurement saved when IndexedDB rejects it', async
   await expect(page.locator('#toast')).toContainText('Nie udało się potwierdzić zapisu');
   expect(await page.evaluate(() => localStorage.getItem('gymverse_body'))).toBe(sourceBefore);
   const available = await page.evaluate(() => window.__gymverseTestHarness.getStore().get('gymverse_body'));
-  expect(available).toHaveLength(1);
-  expect(available[0].kg).toBe(80);
+  expect(available).toBeNull();
 });
 
 test('keeps the iOS share action inside a second user gesture and explains saving to Files', async ({ page }) => {

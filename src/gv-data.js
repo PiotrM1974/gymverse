@@ -295,10 +295,10 @@ export async function createRuntimeStore(options = {}) {
     return pointer;
   };
 
-  const persistIndexedSnapshot = async () => {
+  const persistIndexedSnapshot = async (snapshotOverride = null) => {
     const database = await activeDatabase();
     try {
-      const snapshot = await adapter.exportSnapshot();
+      const snapshot = snapshotOverride || await adapter.exportSnapshot();
       const digest = await runtimeDigest(snapshot);
       const nextRevision = revision + 1;
       const tx = database.transaction([RUNTIME_RECORDS, META], 'readwrite');
@@ -332,7 +332,10 @@ export async function createRuntimeStore(options = {}) {
   };
 
   const queueIndexedWrite = () => {
-    persistQueue = persistQueue.then(persistIndexedSnapshot).catch(error => {
+    persistQueue = persistQueue.catch(() => {}).then(() => {
+      if (blocked) throw new Error('ACTIVE_DATABASE_UNAVAILABLE');
+      return persistIndexedSnapshot();
+    }).catch(error => {
       blocked = true;
       onFailure(error);
       throw error;
@@ -364,6 +367,7 @@ export async function createRuntimeStore(options = {}) {
       },
       setItem(key, raw) {
         if (writePaused && key !== RUNTIME_LATCH) throw new Error('MIGRATION_IN_PROGRESS');
+        if (blocked && mode === 'indexeddb') throw new Error('ACTIVE_DATABASE_UNAVAILABLE');
         const value = parseRuntimeValue(String(raw));
         cache.set(key, value);
         if (mode === 'indexeddb') queueIndexedWrite().catch(() => {});
@@ -371,6 +375,7 @@ export async function createRuntimeStore(options = {}) {
       },
       removeItem(key) {
         if (writePaused && key !== RUNTIME_LATCH) throw new Error('MIGRATION_IN_PROGRESS');
+        if (blocked && mode === 'indexeddb') throw new Error('ACTIVE_DATABASE_UNAVAILABLE');
         cache.delete(key);
         if (mode === 'indexeddb') queueIndexedWrite().catch(() => {});
         else storage.removeItem(key);
@@ -533,12 +538,23 @@ export async function createRuntimeStore(options = {}) {
         for (const [key, value] of Object.entries(updates)) value === null ? cache.delete(key) : cache.set(key, cloneRuntimeValue(value));
         return { status: 'saved', mode };
       }
-      for (const [key, value] of Object.entries(updates)) value === null ? cache.delete(key) : cache.set(key, cloneRuntimeValue(value));
-      try { return await queueIndexedWrite(); }
-      catch (error) {
+      const operation = persistQueue.catch(() => {}).then(async () => {
+        if (blocked) throw new Error('ACTIVE_DATABASE_UNAVAILABLE');
+        if (writePaused) throw new Error('MIGRATION_IN_PROGRESS');
+        const snapshot = await adapter.exportSnapshot();
+        for (const [key, value] of Object.entries(updates)) value === null ? delete snapshot[key] : snapshot[key] = JSON.stringify(value);
+        const result = await persistIndexedSnapshot(snapshot);
+        cache.clear();
+        Object.entries(snapshot).forEach(([key, raw]) => cache.set(key, parseRuntimeValue(raw)));
+        return result;
+      }).catch(error => {
+        blocked = true;
+        onFailure(error);
         if (error.message === 'CROSS_TAB_CONFLICT') throw error;
         throw new Error('ACTIVE_DATABASE_UNAVAILABLE', { cause: error });
-      }
+      });
+      persistQueue = operation;
+      return operation;
     },
     async set(key, value) { return adapter.transact({ [key]: value }); },
     async delete(key) { return adapter.transact({ [key]: null }); },

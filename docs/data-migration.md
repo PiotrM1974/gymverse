@@ -61,3 +61,36 @@ Zapisy do IndexedDB używają rewizji w tej samej transakcji co odczyt wskaźnik
 ## Ograniczenia weryfikacji
 
 Testy używają wyłącznie syntetycznych wartości. Test przełączenia na urządzeniu iOS/Safari oraz test z rzeczywistym eksportem właściciela pozostają obowiązkowym krokiem przed przyszłym, osobno zatwierdzonym wdrożeniem. Obecne E2E Edge nie zastępują tego testu.
+
+## Analiza granicy `dataSchemaVersion: 3`
+
+### Stan obecny
+
+Ta gałąź zapisuje wartości aplikacji w rekordach runtime IndexedDB i zachowuje dotychczasowe klucze oraz kształty legacy jako źródło zgodności. `DB_VERSION = 4` opisuje wersję struktury object stores IndexedDB, a `version = 5` kopii ZIP — format archiwum. Żadna z nich nie jest wersją modelu domenowego. Nie deklarujemy, że bieżące rekordy lub ZIP v5 realizują `dataSchemaVersion: 3`.
+
+### Elementy wymagane przez §2.1, których obecny model jeszcze nie realizuje
+
+- **Wersjonowanie modelu domenowego:** brak kanonicznego `dataSchemaVersion: 3` na nowym modelu sesji/kopii; nie istnieje kompletna, walidowana konwersja legacy → v3.
+- **Snapshot wykonania serii:** sesje i serie runtime nadal opierają się na polach legacy. Brakuje kompletnego, obowiązkowego zapisu `variantId`, `exerciseInstanceId`, `repsUnit`, `loadUnit`, `executionMode`, `implementCount` i `trainedSides` dla nowo wykonanej serii oraz jej snapshotu metadanych katalogu.
+- **Jednostronne/asymetryczne wyniki:** brak kanonicznego `sideResults` z jednym UUID serii i wynikiem jednej lub dwóch stron. Nie ma jeszcze kontraktu pełnego zapisu i walidacji stron w UI, normalizacji ani raportach.
+- **Rozdzielenie metryk:** brak w pełni wdrożonych, niezależnych wartości `externalVolume`, `externalVolumeStatus`, `repsTotalMovements` i `repsPerSide` zgodnych z tabelą §3.3. Wartości `totalVolume`/`totalReps` legacy są zachowywane, ale nie są przez to równoważne nowym metrykom.
+- **Stan sesji v3:** nie wszystkie sesje mają jawne `startedAt`, `finishedAt`, `localDate`, `timeZone`, `status` i `sourceSchemaVersion`. Aktywny trening i drafty są zachowane jako zgodne klucze runtime, a nie w pełni znormalizowany graf encji v3.
+- **Identyfikatory i relacje v3:** UUID/deterministyczne ID istnieją dla nowych oraz normalizowanych rekordów historii, ale nie definiują jeszcze kompletnego modelu encji, relacji do instancji ćwiczeń w planie oraz walidacji integralności domenowej v3.
+- **Katalog i warianty:** aktualna konfiguracja aplikacji nie stanowi zatwierdzonego, pełnego katalogu 31 ćwiczeń i 4 wariantów z wymaganymi metadanymi wykonania. Stary katalog nie może służyć do wstecznego zgadywania wariantu ani interpretacji historii.
+
+### Zależności etapowe
+
+1. **GV-IMG-META (osobna zgoda właściciela):** normatywna mapa metadanych 31 ćwiczeń i 4 wariantów oraz walidacja ich kompletności. Ten etap jest prerekwizytem określonym w §3.4 dla konsumentów nowych serii. Niniejsza analiza go nie rozpoczyna ani nie zmienia jego zakresu.
+2. **GV-DB (osobna zgoda właściciela):** interfejs tworzenia nowej serii musi zapisywać snapshot wariantu, jednostek, trybu, liczby przyrządów/stron i wyników stron, a sesja — jawny status i czasy. Kreator interpretacji legacy z §2.5 może dopisać wyłącznie osobne, potwierdzone reguły, nigdy modyfikować oryginalnych metryk.
+3. **GV-COMP / GV-PROG / GV-RPT (osobne etapy):** metryki i raporty muszą rozróżniać legacy totals od nowych metryk zewnętrznych; rekordy `unknown` muszą pozostać poza porównywalnymi sumami. Nie wolno wymagać migracji lub interpretacji tych wartości przez zmianę historycznych pól.
+4. **Walidator, kopie i migracja:** przed konwersją potrzebne są zatwierdzone definicje walidacji v3, fixture'y dla v1/v2/v4 i dane niejednoznaczne, porównanie liczebności/identyfikatorów oraz niezależne kontrole eksportu. v4 JSON pozostaje formatem zgodności; ZIP v5 pozostaje formatem kopii, dopóki właściciel nie zatwierdzi jawnego kontraktu zawartości v3.
+
+### Proponowany bezpieczny podział przyszłych prac — do decyzji właściciela
+
+1. **Kontrakt i walidacja bez migracji:** określić granice encji oraz walidator v3 dla sesji, serii, stron, metryk i stanów aktywnych; nie przepisywać istniejących danych.
+2. **Katalog metadanych:** po zatwierdzeniu GV-IMG-META udostępnić wersjonowany katalog ćwiczeń/wariantów i testy kompletności.
+3. **Zapis nowych treningów v3:** po osobnym zatwierdzeniu GV-DB zapisywać nowe sesje i serie w v3 z snapshotami wykonania oraz osobnymi metrykami; stare rekordy pozostawić legacy.
+4. **Interpretacja legacy jako danych pochodnych:** wdrożyć osobne potwierdzenia użytkownika zgodnie z §2.5, z możliwością wycofania reguły i bez zmiany źródłowych rekordów.
+5. **Konwersja/eksport pełnego modelu:** dopiero po testach zgodności i jawnej akceptacji właściciela rozważyć opcjonalne, idempotentne mapowanie do kopii v3. Zachować oryginalny magazyn, pokazać raport rozbieżności i nie aktywować konwersji po niejednoznaczności.
+
+To jest analiza i propozycja kolejności, nie zatwierdzona strategia produktu. Nie dodano nowego modelu, migracji domenowej ani deklaracji zgodności v3.

@@ -4,6 +4,7 @@ test.beforeEach(async ({ page }) => {
   await page.goto('/');
   await page.evaluate(() => { localStorage.clear(); sessionStorage.clear(); });
   await page.reload();
+  await page.locator('[data-act="startPlan"][data-plan="push_a1"]').waitFor();
 });
 
 async function startPushA1(page) {
