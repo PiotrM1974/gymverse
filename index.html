@@ -644,36 +644,40 @@ let barKg = 20;
 let lastSummary = null;
 
 /* Obciążenie serii do tonażu: dla ćwiczeń z masą ciała dolicza wagę ciała. */
-function bodyAt(iso) {
-  if (!body.length) return 0;
+function bodyAt(iso, measurements = body) {
+  if (!measurements.length) return 0;
   const k = dkey(new Date(iso));
   let v = 0;
-  for (const b of body) { if (b.date <= k) v = b.kg; else break; }
-  return v || body[0].kg;
+  for (const b of measurements) { if (b.date <= k) v = b.kg; else break; }
+  return v || measurements[0].kg;
 }
-const setLoad = (key, w, r, iso) => (isBW(key) ? (bodyAt(iso) + w) : w) * r;
+const setLoad = (key, w, r, iso, bwSet, measurements) => ((bwSet ? bwSet.has(key) : isBW(key)) ? (bodyAt(iso, measurements) + w) : w) * r;
 /* Miara siły serii: szac. 1RM, a dla masy ciała: dodatkowe kg i powtórzenia. */
 const metric = (key, w, r) => isBW(key) ? w * 1000 + r : e1rm(w, r);
 const setStr = (key, w, r) => isBW(key) ? (w > 0 ? `+${fmt(w)} kg × ${r}` : `${r} powt.`) : `${fmt(w)}×${r}`;
 
-function recalcSession(s) {
-  s.totalVolume = (s.details || []).reduce((a, d) => a + setLoad(d.exerciseId, d.weight, d.reps, s.date), 0);
+function recalcSession(s, bwSet = BW, measurements = body) {
+  s.totalVolume = (s.details || []).reduce((a, d) => a + setLoad(d.exerciseId, d.weight, d.reps, s.date, bwSet, measurements), 0);
   s.totalReps = (s.details || []).reduce((a, d) => a + d.reps, 0);
 }
 
-function normalizeSession(s) {
+function normalizeSession(s, catalog = CATALOG, bwSet, strict = false) {
   if (!s || typeof s !== 'object') return null;
   const d = new Date(s.date);
   if (isNaN(d)) return null;
   const details = [];
+  if (strict && s.details != null && !Array.isArray(s.details)) throw importSeriesError();
   (Array.isArray(s.details) ? s.details : []).forEach(x => {
-    if (!x) return;
+    if (!x) { if (strict) throw importSeriesError(); return; }
     const w = Number(x.weight), r = Number(x.reps);
     const id = ID_MAP[x.exerciseId] || String(x.exerciseId || '');
-    if (!isFinite(w) || !isFinite(r) || w < 0 || (w === 0 && !isBW(id)) || r <= 0) return;
+    if (!isFinite(w) || !isFinite(r) || w < 0 || (w === 0 && !(bwSet ? bwSet.has(id) : isBW(id))) || r <= 0 || (strict && (!catalog[id] || x.weight == null || x.weight === '' || x.reps == null || x.reps === ''))) {
+      if (strict) throw importSeriesError();
+      return;
+    }
     details.push({
       exerciseId: id,
-      exerciseName: String(x.exerciseName || CATALOG[id] || id).slice(0, 120),
+      exerciseName: String(x.exerciseName || catalog[id] || id).slice(0, 120),
       setNumber: Number(x.setNumber) || 1,
       weight: w, reps: Math.round(r),
       date: typeof x.date === 'string' ? x.date : d.toISOString()
@@ -682,7 +686,7 @@ function normalizeSession(s) {
   const planTitle = String(s.planTitle || 'Trening').slice(0, 60);
   const plan = getPlan(s.planId) || PLANS.find(p => p.title === planTitle);
   const out = { date: d.toISOString(), planId: plan ? plan.id : (typeof s.planId === 'string' ? s.planId.slice(0, 40) : null), planTitle, totalVolume: 0, totalReps: 0, details };
-  if (details.length) recalcSession(out);
+  if (details.length) recalcSession(out, bwSet);
   else { out.totalVolume = Number(s.totalVolume) || 0; out.totalReps = Number(s.totalReps) || 0; }
   if (Number(s.durationMin) > 0) out.durationMin = Math.round(Number(s.durationMin));
   if (s.rir && typeof s.rir === 'object') {
@@ -691,6 +695,12 @@ function normalizeSession(s) {
     if (Object.keys(r).length) out.rir = r;
   }
   return out;
+}
+
+function importSeriesError() {
+  const error = new Error('Nie można bezpiecznie odczytać serii z kopii. Import odrzucony bez zmian.');
+  error.importValidation = true;
+  return error;
 }
 
 function normalizeBody(arr) {
@@ -703,13 +713,13 @@ function normalizeBody(arr) {
   return Object.keys(map).sort().map(date => ({ date, kg: map[date] }));
 }
 
-function rebuildLastSets() {
+function rebuildLastSets(preserveSaved = false) {
   lastRir = {};
   history.slice().sort(byDate).forEach(s => {
     const grouped = {};
     (s.details || []).forEach(d => { (grouped[d.exerciseId] = grouped[d.exerciseId] || []).push(d); NAMES[d.exerciseId] = d.exerciseName; });
     Object.keys(grouped).forEach(k => {
-      lastSets[k] = grouped[k].sort((a, b) => a.setNumber - b.setNumber).map(d => ({ weight: d.weight, reps: d.reps }));
+      if (!preserveSaved || !Object.hasOwn(lastSets, k)) lastSets[k] = grouped[k].sort((a, b) => a.setNumber - b.setNumber).map(d => ({ weight: d.weight, reps: d.reps }));
     });
     if (s.rir) Object.keys(s.rir).forEach(k => { lastRir[k] = s.rir[k]; });
   });
@@ -759,8 +769,8 @@ function loadState() {
     lastSets = LS.get('gymverse_last_weights', {});
     if (!lastSets || typeof lastSets !== 'object') lastSets = {};
   }
-  history = raw.map(normalizeSession).filter(Boolean);
-  rebuildLastSets();
+  history = raw.map(session => normalizeSession(session)).filter(Boolean);
+  rebuildLastSets(true);
   if (schema < 2) { saveAll(); LS.set('gymverse_schema', 2); }
 
   const r = Number(LS.get('gymverse_rest', 0));
@@ -1415,7 +1425,7 @@ function finishWorkout(fromNext) {
   }
   history = nextHistory;
   lastSets = nextLastSets;
-  rebuildLastSets();
+  rebuildLastSets(true);
   active = null;
   stopTimer();
   unlockScreen();
@@ -2166,13 +2176,24 @@ function importData(ev) {
       if (parsed.custom != null && (typeof parsed.custom !== 'object' || Array.isArray(parsed.custom))) throw new Error('format');
       const inCustom = cleanCustom(parsed.custom || {});
       if (Object.keys(inCustom).length !== Object.keys(parsed.custom || {}).length) throw new Error('format');
-      const nextCustom = Object.assign({}, CUSTOM, inCustom);
+      const nextCustom = Object.assign({}, inCustom, CUSTOM);
       const newCustom = Object.keys(inCustom).filter(k => !CUSTOM[k]);
       const nextCatalog = Object.assign({}, CATALOG_BASE);
       Object.keys(nextCustom).forEach(k => { nextCatalog[k] = nextCustom[k].name; });
+      const nextBW = new Set(BW_BASE);
+      Object.keys(nextCustom).forEach(k => { if (nextCustom[k].bw) nextBW.add(k); });
 
-      const incoming = parsed.history.map(normalizeSession);
+      const incoming = parsed.history.map(session => normalizeSession(session, nextCatalog, nextBW, true));
       if (incoming.some(session => !session)) throw new Error('format');
+      if (parsed.lastWeights != null && (typeof parsed.lastWeights !== 'object' || Array.isArray(parsed.lastWeights))) throw importSeriesError();
+      const backupWeights = {};
+      Object.entries(parsed.lastWeights || {}).forEach(([rawKey, rows]) => {
+        const key = ID_MAP[rawKey] || rawKey;
+        if (!nextCatalog[key] || !Array.isArray(rows) || rows.some(row => !row || row.weight == null || row.weight === '' || row.reps == null || row.reps === '' || !Number.isFinite(Number(row.weight)) || Number(row.weight) < 0 || Number(row.weight) > 1000 || (Number(row.weight) === 0 && !nextBW.has(key)) || !Number.isInteger(Number(row.reps)) || Number(row.reps) < 1 || Number(row.reps) > 200)) throw importSeriesError();
+        backupWeights[key] = rows.map(row => ({ weight: Number(row.weight), reps: Number(row.reps) }));
+      });
+      const addedWeights = Object.keys(backupWeights).filter(key => !Object.hasOwn(lastSets, key));
+      const keptLocalWeights = Object.keys(backupWeights).length - addedWeights.length;
       const have = new Set(history.map(s => s.date));
       const fresh = incoming.filter(s => !have.has(s.date));
       const haveBody = new Set(body.map(b => b.date));
@@ -2185,18 +2206,23 @@ function importData(ev) {
       if (parsed.plans != null && inPlans.length !== parsed.plans.length) throw new Error('format');
       const plansDiffer = inPlans.length > 0 && JSON.stringify(inPlans) !== JSON.stringify(PLANS);
       const replacePlans = !!(plansDiffer && !active);
-      if (!fresh.length && !freshBody.length && !newCustom.length && !replacePlans) { toast('Plik nie zawiera nowych danych'); return; }
+      if (!fresh.length && !freshBody.length && !newCustom.length && !replacePlans && !addedWeights.length) {
+        toast(keptLocalWeights ? `Zachowano ${keptLocalWeights} lokalnych ciężarów; kopia nie zawiera innych nowych danych.` : 'Plik nie zawiera nowych danych');
+        return;
+      }
       const customInfo = newCustom.length ? `, ćwiczenia własne – ${newCustom.length}` : '';
       const planInfo = replacePlans ? ', plany zostaną zastąpione' : (plansDiffer ? ', plany pozostaną bez zmian podczas treningu' : '');
-      if (!confirm(`Zaimportować dane: treningi – ${fresh.length}, pomiary wagi – ${freshBody.length}${customInfo}${planInfo}? Duplikaty zostaną pominięte; niczego nie usunę.`)) return;
+      const weightsInfo = `, ciężary z kopii – ${addedWeights.length}${keptLocalWeights ? `; ${keptLocalWeights} lokalnych ciężarów pozostanie bez zmian` : ''}`;
+      if (!confirm(`Zaimportować dane: treningi – ${fresh.length}, pomiary wagi – ${freshBody.length}${customInfo}${planInfo}${weightsInfo}? Duplikaty zostaną pominięte; niczego nie usunę.`)) return;
 
       const nextHistory = JSON.parse(JSON.stringify(history.concat(fresh)));
       const nextBody = body.concat(freshBody).sort((a, b) => a.date.localeCompare(b.date));
-      nextHistory.forEach(recalcSession2);
+      nextHistory.forEach(session => recalcSession2(session, nextBW, nextBody));
       const nextPlans = replacePlans ? inPlans : PLANS;
-      const nextLastWeights = fresh.length ? lastWeightsFor(nextHistory) : lastSets;
+      const nextLastWeights = Object.assign({}, BASE_B.deriveLastWeights(nextHistory), backupWeights, lastSets);
       const updates = {};
-      if (fresh.length) { updates.gymverse_history = nextHistory; updates.gymverse_last_weights = nextLastWeights; }
+      if (fresh.length) updates.gymverse_history = nextHistory;
+      if (fresh.length || addedWeights.length) updates.gymverse_last_weights = nextLastWeights;
       if (freshBody.length) updates.gymverse_body = nextBody;
       if (newCustom.length) updates.gymverse_custom = nextCustom;
       if (replacePlans) updates.gymverse_plans = nextPlans;
@@ -2207,9 +2233,11 @@ function importData(ev) {
       lastSets = nextLastWeights;
       if (newCustom.length) { CUSTOM = nextCustom; applyCustom(); }
       if (replacePlans) PLANS = nextPlans;
-      rebuildLastSets();
+      rebuildLastSets(true);
       let msg = `Dołączono: ${fresh.length} treningów, ${freshBody.length} pomiarów wagi`;
       if (newCustom.length) msg += `, ${newCustom.length} ćwiczeń własnych`;
+      if (addedWeights.length) msg += `, ${addedWeights.length} ciężarów z kopii`;
+      if (keptLocalWeights) msg += `; ${keptLocalWeights} lokalnych ciężarów zachowano`;
       if (replacePlans) msg += ', plany zastąpione';
       renderPlans();
       toast(msg);
@@ -2219,13 +2247,13 @@ function importData(ev) {
         offerEmergencyExport(history, lastSets, active, true);
         return;
       }
-      toast(e && e.name === 'QuotaExceededError' ? storageFailureMessage(e) : 'Błąd odczytu lub zapisu kopii zapasowej. Dane nie zostały zmienione.');
+      toast(e && e.importValidation ? e.message : (e && e.name === 'QuotaExceededError' ? storageFailureMessage(e) : 'Błąd odczytu lub zapisu kopii zapasowej. Dane nie zostały zmienione.'));
     }
   };
   reader.onerror = () => toast('Nie udało się wczytać pliku');
   reader.readAsText(file);
 }
-function recalcSession2(s) { if (s.details && s.details.length) recalcSession(s); }
+function recalcSession2(s, bwSet = BW, measurements = body) { if (s.details && s.details.length) recalcSession(s, bwSet, measurements); }
 
 /* ================== ZDARZENIA ================== */
 const ACTIONS = {

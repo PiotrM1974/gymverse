@@ -28,6 +28,74 @@ const syntheticBackup = () => ({
   custom: { c_synthetic: { name: 'Ćwiczenie testowe', group: 'Klatka', bw: false } }
 });
 
+test('imports a zero-weight bodyweight set from a new custom exercise in legacy v4', async ({ page }) => {
+  const backup = syntheticBackup();
+  backup.custom.c_synthetic.bw = true;
+  backup.history[0].details = [{ exerciseId: 'c_synthetic', exerciseName: 'Ćwiczenie testowe', setNumber: 1, weight: 0, reps: 10 }];
+  page.on('dialog', dialog => dialog.accept());
+  await uploadSyntheticBackup(page, backup);
+  await expect.poll(() => page.evaluate(() => JSON.parse(localStorage.getItem('gymverse_history') || '[]').length)).toBe(1);
+  const state = await page.evaluate(() => ({ history: JSON.parse(localStorage.getItem('gymverse_history')), custom: JSON.parse(localStorage.getItem('gymverse_custom')) }));
+  expect(state.history[0].details).toMatchObject([{ exerciseId: 'c_synthetic', weight: 0, reps: 10 }]);
+  expect(state.custom.c_synthetic.bw).toBe(true);
+});
+
+test('restores v4 lastWeights absent from history while retaining newer local values', async ({ page }) => {
+  await page.evaluate(() => localStorage.setItem('gymverse_last_weights', JSON.stringify({ bench_flat: [{ weight: 75, reps: 5 }] })));
+  await page.reload();
+  const backup = syntheticBackup();
+  backup.lastWeights = {
+    bench_flat: [{ weight: 40, reps: 8 }],
+    row_v: [{ weight: 50, reps: 10 }]
+  };
+  const dialogs = [];
+  page.on('dialog', async dialog => { dialogs.push(dialog.message()); await dialog.accept(); });
+  await uploadSyntheticBackup(page, backup);
+  await expect.poll(() => page.evaluate(() => JSON.parse(localStorage.getItem('gymverse_last_weights') || '{}').row_v)).toEqual([{ weight: 50, reps: 10 }]);
+  const weights = await page.evaluate(() => JSON.parse(localStorage.getItem('gymverse_last_weights')));
+  expect(weights.bench_flat).toEqual([{ weight: 75, reps: 5 }]);
+  expect(dialogs.some(message => /lokaln.*ciężar/i.test(message))).toBe(true);
+});
+
+test('imports valid v4 lastWeights even when the backup has no new history', async ({ page }) => {
+  const backup = syntheticBackup();
+  backup.history = [];
+  backup.body = [];
+  backup.plans = [];
+  backup.custom = {};
+  backup.lastWeights = { row_v: [{ weight: 52, reps: 9 }] };
+  page.on('dialog', dialog => dialog.accept());
+  await uploadSyntheticBackup(page, backup);
+  await expect.poll(() => page.evaluate(() => JSON.parse(localStorage.getItem('gymverse_last_weights') || '{}').row_v))
+    .toEqual([{ weight: 52, reps: 9 }]);
+});
+
+test('keeps a v4 saved weight that differs from its history after reload', async ({ page }) => {
+  const backup = syntheticBackup();
+  backup.plans = [];
+  backup.custom = {};
+  backup.lastWeights = { bench_flat: [{ weight: 65, reps: 6 }] };
+  page.on('dialog', dialog => dialog.accept());
+  await uploadSyntheticBackup(page, backup);
+  await expect.poll(() => page.evaluate(() => JSON.parse(localStorage.getItem('gymverse_last_weights') || '{}').bench_flat))
+    .toEqual([{ weight: 65, reps: 6 }]);
+  await page.reload();
+  await startPushA1(page);
+  await expect(page.locator('#setsBody .prev-val[data-i="0"]')).toContainText('65×6');
+});
+
+test('rejects an uninterpretable imported series without changing history', async ({ page }) => {
+  const backup = syntheticBackup();
+  backup.history[0].details[0].exerciseId = 'unknown_synthetic';
+  const before = await page.evaluate(() => localStorage.getItem('gymverse_history'));
+  const dialogs = [];
+  page.on('dialog', dialog => { dialogs.push(dialog.message()); return dialog.dismiss(); });
+  await uploadSyntheticBackup(page, backup);
+  await expect.poll(() => page.locator('#toast').textContent()).toMatch(/nie można bezpiecznie odczytać serii/i);
+  expect(dialogs).toHaveLength(0);
+  expect(await page.evaluate(() => localStorage.getItem('gymverse_history'))).toBe(before);
+});
+
 test('final-step completion asks before saving an incomplete session and shows real X/Y', async ({ page }) => {
   const dialogs = [];
   page.on('dialog', async dialog => { dialogs.push(dialog.message()); await dialog.dismiss(); });
