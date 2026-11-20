@@ -4,13 +4,14 @@
   function calculateWorkoutProgress(plan, active) {
     const exercises = plan && Array.isArray(plan.exercises) ? plan.exercises : [];
     const overrides = active && active.setCount && typeof active.setCount === 'object' ? active.setCount : {};
-    const required = exercises.reduce((sum, exercise, step) => {
+    const requiredByStep = exercises.map((exercise, step) => {
       const override = Number(overrides[step]);
       const planned = Number.isInteger(override) && override >= 1 && override <= 12
         ? override
         : Number(exercise && exercise.sets) || 0;
-      return sum + Math.max(0, planned);
-    }, 0);
+      return Math.max(0, planned);
+    });
+    const required = requiredByStep.reduce((sum, count) => sum + count, 0);
     const uniqueSets = new Set();
     (active && Array.isArray(active.sets) ? active.sets : []).forEach(set => {
       const step = Number(set && set.step);
@@ -20,7 +21,30 @@
       }
     });
     const completed = uniqueSets.size;
-    return { required, completed, missing: Math.max(0, required - completed), excess: Math.max(0, completed - required) };
+    const completedByStep = new Array(exercises.length).fill(0);
+    uniqueSets.forEach(key => { completedByStep[Number(key.slice(0, key.indexOf(':')))] += 1; });
+    let missing = 0;
+    let excess = 0;
+    requiredByStep.forEach((planned, step) => {
+      const actual = completedByStep[step];
+      missing += Math.max(0, planned - actual);
+      excess += Math.max(0, actual - planned);
+    });
+    return { required, completed, missing, excess };
+  }
+
+  function deriveLastWeights(sessions, existing = {}) {
+    const result = Object.assign({}, existing && typeof existing === 'object' ? existing : {});
+    (Array.isArray(sessions) ? sessions : []).slice().sort((a, b) => String(a.date).localeCompare(String(b.date))).forEach(session => {
+      const grouped = {};
+      (session.details || []).forEach(detail => {
+        if (detail && detail.exerciseId != null) (grouped[detail.exerciseId] = grouped[detail.exerciseId] || []).push(detail);
+      });
+      Object.keys(grouped).forEach(key => {
+        result[key] = grouped[key].sort((a, b) => a.setNumber - b.setNumber).map(detail => ({ weight: detail.weight, reps: detail.reps }));
+      });
+    });
+    return result;
   }
 
   function persistJsonTransaction(storage, updates) {
@@ -105,6 +129,7 @@
   root.GymVerseBaseB = Object.freeze({
     DRAFT_KEY,
     calculateWorkoutProgress,
+    deriveLastWeights,
     persistJsonTransaction,
     readDraftPayload,
     putDraft,

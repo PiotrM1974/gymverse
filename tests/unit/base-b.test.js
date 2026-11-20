@@ -1,7 +1,7 @@
 import '../../src/gv-base-b.js';
 import { describe, expect, it } from 'vitest';
 
-const { calculateWorkoutProgress, persistJsonTransaction, putDraft, getDraft, removeDraft } = globalThis.GymVerseBaseB;
+const { calculateWorkoutProgress, deriveLastWeights, persistJsonTransaction, putDraft, getDraft, removeDraft } = globalThis.GymVerseBaseB;
 
 class MemoryStorage {
   values = new Map();
@@ -25,6 +25,25 @@ describe('GV-BASE-B core regressions', () => {
       { sets: [{ step: 0, setNumber: 1 }, { step: 0, setNumber: 1 }, { step: 0, setNumber: 2 }, { step: 0, setNumber: 3 }] }
     );
     expect(progress).toEqual({ required: 2, completed: 3, missing: 0, excess: 1 });
+  });
+
+  it('counts missing and excess sets per exercise even when their global totals cancel out', () => {
+    const progress = calculateWorkoutProgress(
+      { exercises: [{ sets: 2 }, { sets: 2 }] },
+      { sets: [1, 2, 3, 4].map(setNumber => ({ step: 0, setNumber })) }
+    );
+    expect(progress).toEqual({ required: 4, completed: 4, missing: 2, excess: 2 });
+  });
+
+  it('preserves saved weights for exercises absent from the supplied history', () => {
+    const existing = { absent_exercise: [{ weight: 35, reps: 10 }] };
+    const result = deriveLastWeights([
+      { date: '2026-01-02', details: [{ exerciseId: 'present_exercise', setNumber: 1, weight: 20, reps: 8 }] }
+    ], existing);
+    expect(result).toEqual({
+      absent_exercise: [{ weight: 35, reps: 10 }],
+      present_exercise: [{ weight: 20, reps: 8 }]
+    });
   });
 
   it('keeps zero completed series incomplete', () => {
@@ -51,6 +70,24 @@ describe('GV-BASE-B core regressions', () => {
     expect(failure && failure.name).toBe('QuotaExceededError');
     expect(storage.getItem('gymverse_history')).toBe('old-history');
     expect(storage.getItem('gymverse_last_weights')).toBeNull();
+  });
+
+  it('reports when a failed write also fails during rollback', () => {
+    const storage = new MemoryStorage();
+    storage.setItem('history', 'previous');
+    const originalSet = storage.setItem.bind(storage);
+    let historyWrites = 0;
+    storage.setItem = (key, value) => {
+      if (key === 'body') throw new DOMException('full', 'QuotaExceededError');
+      if (key === 'history' && ++historyWrites === 2) throw new Error('restore failed');
+      originalSet(key, value);
+    };
+    let failure;
+    try { persistJsonTransaction(storage, { history: ['new'], body: [{ date: 'synthetic' }] }); }
+    catch (error) { failure = error; }
+    expect(failure.name).toBe('QuotaExceededError');
+    expect(failure.rollbackErrors).toHaveLength(1);
+    expect(storage.getItem('history')).toBe(JSON.stringify(['new']));
   });
 
   it('persists unfinished draft strings, finds them by session and removes only the matching row', () => {

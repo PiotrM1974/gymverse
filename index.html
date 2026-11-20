@@ -735,15 +735,7 @@ function commitActiveState(nextActive, extraUpdates = {}) {
 }
 
 function lastWeightsFor(sessions) {
-  const result = {};
-  sessions.slice().sort(byDate).forEach(session => {
-    const grouped = {};
-    (session.details || []).forEach(detail => { (grouped[detail.exerciseId] = grouped[detail.exerciseId] || []).push(detail); });
-    Object.keys(grouped).forEach(key => {
-      result[key] = grouped[key].sort((a, b) => a.setNumber - b.setNumber).map(detail => ({ weight: detail.weight, reps: detail.reps }));
-    });
-  });
-  return result;
+  return BASE_B.deriveLastWeights(sessions, lastSets);
 }
 
 function loadState() {
@@ -1168,6 +1160,7 @@ function stepWeight(d) {
   lastRow = i;
   validateRow(i);
   updatePlates();
+  scheduleDraftSave(active.step);
 }
 
 function copyPrev() {
@@ -1182,6 +1175,7 @@ function copyPrev() {
   lastRow = i;
   validateRow(i);
   updatePlates();
+  scheduleDraftSave(active.step);
 }
 
 function fillPrev(i) {
@@ -1194,6 +1188,7 @@ function fillPrev(i) {
   lastRow = i;
   validateRow(i);
   updatePlates();
+  scheduleDraftSave(active.step);
 }
 
 /* ---- Kalkulator talerzy ---- */
@@ -1461,8 +1456,11 @@ function finishWorkout(fromNext) {
   switchView('view-summary');
 }
 
-async function offerEmergencyExport(pendingHistory, pendingLastWeights, activeSnapshot = active) {
-  if (!confirm('Trening pozostał aktywny, ale zapis do pamięci nie powiódł się. Pobrać awaryjny JSON z bieżącymi danymi i treningiem?')) return;
+async function offerEmergencyExport(pendingHistory, pendingLastWeights, activeSnapshot = active, integrityUncertain = false) {
+  const prompt = integrityUncertain
+    ? 'Zapis importu i jego wycofanie nie powiodły się. Integralność lokalnego zapisu jest niepewna. Pobrać awaryjny eksport JSON z danymi dostępnymi obecnie w pamięci aplikacji? Eksport nie gwarantuje odzyskania wszystkich danych.'
+    : 'Trening pozostał aktywny, ale zapis do pamięci nie powiódł się. Pobrać awaryjny JSON z bieżącymi danymi i treningiem?';
+  if (!confirm(prompt)) return;
   const payload = {
     app: 'gymverse', version: 4, exportedAt: new Date().toISOString(),
     history: pendingHistory, lastWeights: pendingLastWeights, body, plans: PLANS, custom: CUSTOM,
@@ -1470,7 +1468,9 @@ async function offerEmergencyExport(pendingHistory, pendingLastWeights, activeSn
   };
   try {
     const ok = await deliverFile(`gymverse_awaryjna_${dkey(new Date())}.json`, 'application/json', JSON.stringify(payload, null, 2));
-    toast(ok ? 'Awaryjny JSON przygotowany. Trening nadal pozostaje aktywny.' : 'Eksport awaryjny anulowany. Trening nadal pozostaje aktywny.');
+    toast(integrityUncertain
+      ? (ok ? 'Awaryjny JSON przygotowany z dostępnego stanu. Integralność zapisu pozostaje niepewna.' : 'Eksport anulowany. Integralność zapisu pozostaje niepewna.')
+      : (ok ? 'Awaryjny JSON przygotowany. Trening nadal pozostaje aktywny.' : 'Eksport awaryjny anulowany. Trening nadal pozostaje aktywny.'));
   } catch (error) {
     toast(`Nie udało się pobrać awaryjnego JSON: ${storageFailureMessage(error)}`);
   }
@@ -2214,6 +2214,11 @@ function importData(ev) {
       renderPlans();
       toast(msg);
     } catch (e) {
+      if (e && e.rollbackErrors && e.rollbackErrors.length) {
+        toast('Integralność lokalnego zapisu jest niepewna.');
+        offerEmergencyExport(history, lastSets, active, true);
+        return;
+      }
       toast(e && e.name === 'QuotaExceededError' ? storageFailureMessage(e) : 'Błąd odczytu lub zapisu kopii zapasowej. Dane nie zostały zmienione.');
     }
   };

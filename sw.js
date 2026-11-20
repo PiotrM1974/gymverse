@@ -5,7 +5,7 @@ const SHELL = ['./', 'index.html', 'src/gv-base-b.js', 'manifest.webmanifest', '
 self.addEventListener('install', e => {
   e.waitUntil(
     caches.open(CACHE)
-      .then(c => Promise.allSettled(SHELL.map(u => c.add(u))))
+      .then(c => Promise.all(SHELL.map(u => c.add(u))))
   );
 });
 

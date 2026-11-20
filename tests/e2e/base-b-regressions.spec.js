@@ -86,6 +86,36 @@ test('uncommitted inputs survive a reload and are clearly marked until the set i
   await expect.poll(() => page.evaluate(() => localStorage.getItem('gymverse_draft_v1'))).toBeNull();
 });
 
+test('weight changed by a programmatic button is drafted and restored after reload', async ({ page }) => {
+  await startPushA1(page);
+  await page.locator('#weight_0').fill('40');
+  await page.locator('#reps_0').fill('8');
+  await page.locator('#btnDone_0').click();
+  await page.locator('[data-act="copyPrev"]').click();
+  await page.locator('[data-act="wstep"][data-d="2.5"]').click();
+  await expect.poll(() => page.evaluate(() => JSON.parse(localStorage.getItem('gymverse_draft_v1') || '{"items":[]}').items))
+    .toContainEqual(expect.objectContaining({ weight: '42.5', reps: '8' }));
+  await page.reload();
+  await page.getByRole('button', { name: 'Wznów' }).click();
+  await expect(page.locator('#weight_1')).toHaveValue('42.5');
+  await expect(page.locator('#reps_1')).toHaveValue('8');
+  await expect(page.getByText('Wpis niezatwierdzony')).toBeVisible();
+});
+
+test('finishing a different workout preserves saved weights absent from history', async ({ page }) => {
+  await page.evaluate(() => localStorage.setItem('gymverse_last_weights', JSON.stringify({ legacy_orphan: [{ weight: 35, reps: 10 }] })));
+  await page.reload();
+  await startPushA1(page);
+  await page.locator('#weight_0').fill('40');
+  await page.locator('#reps_0').fill('8');
+  await page.locator('#btnDone_0').click();
+  page.on('dialog', dialog => dialog.accept());
+  await page.getByRole('button', { name: /zakończ i zapisz trening/i }).click();
+  await expect(page.getByText('Trening zaliczony!')).toBeVisible();
+  const stored = await page.evaluate(() => JSON.parse(localStorage.getItem('gymverse_last_weights')));
+  expect(stored.legacy_orphan).toEqual([{ weight: 35, reps: 10 }]);
+});
+
 test('confirmed workout abandonment removes its active session and draft', async ({ page }) => {
   page.on('dialog', dialog => dialog.accept());
   await startPushA1(page);
@@ -196,4 +226,28 @@ test('a failed synthetic import save rolls back persisted state and does not pub
     body: localStorage.getItem('gymverse_body')
   }));
   expect(state).toEqual(before);
+});
+
+test('an import with failed rollback warns about uncertain integrity and offers the available JSON export', async ({ page }, testInfo) => {
+  await page.evaluate(() => {
+    const original = Storage.prototype.setItem;
+    let historyWrites = 0;
+    Storage.prototype.setItem = function (key, value) {
+      if (key === 'gymverse_body') throw new DOMException('Storage full', 'QuotaExceededError');
+      if (key === 'gymverse_history' && ++historyWrites === 2) throw new Error('Restore failed');
+      return original.call(this, key, value);
+    };
+  });
+  const dialogs = [];
+  page.on('dialog', async dialog => { dialogs.push(dialog.message()); await dialog.accept(); });
+  const downloadPromise = page.waitForEvent('download');
+  await uploadSyntheticBackup(page, syntheticBackup());
+  const download = await downloadPromise;
+  const path = testInfo.outputPath(await download.suggestedFilename());
+  await download.saveAs(path);
+  const backup = JSON.parse(await readFile(path, 'utf8'));
+  expect(dialogs.some(message => /integralność.*niepewna/i.test(message))).toBe(true);
+  expect(dialogs.some(message => /awaryjn/i.test(message))).toBe(true);
+  expect(backup.version).toBe(4);
+  expect(await page.evaluate(() => document.querySelector('#toast').textContent)).not.toMatch(/Dane nie zostały zmienione/i);
 });
