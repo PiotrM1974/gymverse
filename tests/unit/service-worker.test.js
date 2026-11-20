@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest';
 
 const source = readFileSync(new URL('../../sw.js', import.meta.url), 'utf8');
 
-function createWorkerHarness({ cacheNames = ['gymverse-v3', 'gymverse-v4', 'other-app-cache'], offline = false, failAddUrl = null } = {}) {
+function createWorkerHarness({ cacheNames = ['gymverse-v3', 'gymverse-v4', 'other-app-cache'], offline = false, failAddUrl = null, appClients = [] } = {}) {
   const listeners = {};
   const deleted = [];
   const opened = [];
@@ -36,7 +36,8 @@ function createWorkerHarness({ cacheNames = ['gymverse-v3', 'gymverse-v4', 'othe
     self: {
       addEventListener: (name, handler) => { listeners[name] = handler; },
       skipWaiting: async () => { skipWaitingCalls += 1; },
-      clients: { claim: async () => { claimCalls += 1; } }
+      clients: { claim: async () => { claimCalls += 1; }, matchAll: async () => appClients },
+      registration: { scope: 'https://gymverse.test/gymverse/' }
     },
     caches,
     location: { origin: 'https://gymverse.test' },
@@ -72,8 +73,10 @@ describe('service worker cache safety', () => {
     let installation;
     harness.listeners.install({ waitUntil: promise => { installation = promise; } });
     await installation;
-    expect(harness.opened).toContain('gymverse-v5');
+    expect(harness.opened).toContain('gymverse-v6');
     expect(harness.added).toContain('src/gv-base-b.js');
+    expect(harness.added).toContain('src/gv-data.js');
+    expect(harness.added).toContain('src/vendor/zip.min.js');
   });
 
   it('rejects installation if the critical helper cannot be cached', async () => {
@@ -124,5 +127,22 @@ describe('service worker cache safety', () => {
       respondWith: promise => { response = promise; }
     });
     await expect(response).resolves.toBe(shell);
+  });
+
+  it('counts only GymVerse windows in the service-worker scope for migration safety', async () => {
+    const harness = createWorkerHarness({ appClients: [
+      { url: 'https://gymverse.test/gymverse/' },
+      { url: 'https://gymverse.test/gymverse/history' },
+      { url: 'https://gymverse.test/other-app/' }
+    ] });
+    let response;
+    let work;
+    harness.listeners.message({
+      data: { type: 'GYMVERSE_COUNT_APP_CLIENTS' },
+      ports: [{ postMessage: message => { response = message; } }],
+      waitUntil: promise => { work = promise; }
+    });
+    await work;
+    expect(response).toEqual({ type: 'GYMVERSE_APP_CLIENT_COUNT', count: 2 });
   });
 });

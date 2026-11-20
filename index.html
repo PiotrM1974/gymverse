@@ -248,6 +248,7 @@ select.select-custom, input.select-custom { width: 100%; background: var(--card-
     <button class="btn-link" data-act="editPlans">✎ Edytuj plany i ćwiczenia</button>
     <div class="data-box">
       <div class="small muted" id="backupInfo"></div>
+      <div class="small muted">Kopia ZIP v5 obejmuje także aktywny trening i robocze wpisy; import JSON v4 pozostaje obsługiwany.</div>
       <div class="row">
         <button class="btn-secondary" data-act="export">💾 Zapisz kopię</button>
         <button class="btn-secondary" data-act="importBtn">📂 Wczytaj kopię</button>
@@ -255,7 +256,9 @@ select.select-custom, input.select-custom { width: 100%; background: var(--card-
       <div class="row">
         <button class="btn-secondary" data-act="csv">📄 Eksport do CSV (Excel)</button>
       </div>
-      <input type="file" id="importFile" accept=".json,application/json" style="display:none">
+      <div class="small muted">Przeniesienie danych do IndexedDB jest ręczne. Wymaga sprawdzonej kopii źródłowej i sprawdzonego eksportu ZIP v5.</div>
+      <button class="btn-secondary" data-act="migrateData" id="migrateDataButton" hidden>Przygotuj bezpieczne przeniesienie danych</button>
+      <input type="file" id="importFile" accept=".zip,.json,application/zip,application/json" style="display:none">
     </div>
   </div>
 
@@ -420,6 +423,10 @@ select.select-custom, input.select-custom { width: 100%; background: var(--card-
 </div>
 
 <div id="toast" role="status" aria-live="polite"></div>
+<div class="banner soft" id="fileDeliveryPrompt" hidden style="position:fixed;left:12px;right:12px;bottom:calc(env(safe-area-inset-bottom, 0px) + 14px);z-index:500;box-shadow:0 8px 32px #0009">
+  <p id="fileDeliveryInstructions"></p>
+  <button class="btn-secondary" style="margin-top:0;padding:10px" data-act="deliverPreparedFile">Udostępnij / zapisz plik</button>
+</div>
 
 <script src="src/gv-base-b.js"></script>
 <script>
@@ -438,6 +445,20 @@ const byDate = (a, b) => new Date(a.date) - new Date(b.date);
 const pad2 = n => String(n).padStart(2, '0');
 const dkey = d => `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
 const DAY = 864e5;
+let STORE = null;
+let DATA_IDS = null;
+let suppressNextStoreFlushError = false;
+let pendingFileDelivery = null;
+
+function createUuid() {
+  if (globalThis.crypto && typeof globalThis.crypto.randomUUID === 'function') return globalThis.crypto.randomUUID();
+  if (!globalThis.crypto || typeof globalThis.crypto.getRandomValues !== 'function') throw new Error('SECURE_UUID_UNAVAILABLE');
+  const bytes = globalThis.crypto.getRandomValues(new Uint8Array(16));
+  bytes[6] = (bytes[6] & 0x0f) | 0x40;
+  bytes[8] = (bytes[8] & 0x3f) | 0x80;
+  const hex = Array.from(bytes, byte => byte.toString(16).padStart(2, '0')).join('');
+  return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
+}
 
 let toastTimer = null;
 let draftSaveTimer = null;
@@ -451,22 +472,19 @@ function toast(msg) {
 
 const LS = {
   get(key, fallback) {
-    let raw = null;
     try {
-      raw = localStorage.getItem(key);
-      return raw == null ? fallback : JSON.parse(raw);
+      return STORE.get(key, fallback);
     } catch (e) {
-      try { if (raw != null) localStorage.setItem(key + '__corrupt', raw); } catch (e2) {}
+      const raw = STORE.storage.getItem(key);
+      if (raw != null) STORE.storage.setItem(key + '__corrupt', raw);
       return fallback;
     }
   },
   set(key, value) {
-    try { return BASE_B.persistJsonTransaction(localStorage, { [key]: value }); }
-    catch (e) { toast(storageFailureMessage(e)); return false; }
+    return STORE.set(key, value);
   },
   del(key) {
-    try { return BASE_B.persistJsonTransaction(localStorage, { [key]: null }); }
-    catch (e) { toast(storageFailureMessage(e)); return false; }
+    return STORE.delete(key).then(() => true).catch(e => { toast(storageFailureMessage(e)); return false; });
   }
 };
 function storageFailureMessage(error) {
@@ -620,7 +638,20 @@ function loadPlans() {
   const cleaned = cleanPlans(LS.get('gymverse_plans', null));
   PLANS = cleaned.length ? cleaned : defaultPlans();
 }
-const savePlans = () => LS.set('gymverse_plans', PLANS);
+function clonePlans(plans = PLANS) { return JSON.parse(JSON.stringify(plans)); }
+async function savePlanChanges(nextPlans, options = {}) {
+  const updates = { gymverse_plans: nextPlans };
+  if (Object.hasOwn(options, 'custom')) updates.gymverse_custom = options.custom;
+  try { await STORE.transact(updates); }
+  catch (_) {
+    suppressNextStoreFlushError = true;
+    toast(`Nie zapisano: ${options.failureMessage || 'zmiana planu'}. Zachowano poprzedni plan i katalog ćwiczeń.`);
+    return false;
+  }
+  PLANS = nextPlans;
+  if (Object.hasOwn(options, 'custom')) { CUSTOM = options.custom; applyCustom(); }
+  return true;
+}
 
 const PLACEHOLDER = 'data:image/svg+xml,' + encodeURIComponent(
   '<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300"><rect width="400" height="300" fill="#090b0e"/>' +
@@ -676,6 +707,7 @@ function normalizeSession(s, catalog = CATALOG, bwSet, strict = false) {
       return;
     }
     details.push({
+      ...(typeof x.id === 'string' && x.id ? { id: x.id } : {}),
       exerciseId: id,
       exerciseName: String(x.exerciseName || catalog[id] || id).slice(0, 120),
       setNumber: Number(x.setNumber) || 1,
@@ -685,7 +717,7 @@ function normalizeSession(s, catalog = CATALOG, bwSet, strict = false) {
   });
   const planTitle = String(s.planTitle || 'Trening').slice(0, 60);
   const plan = getPlan(s.planId) || PLANS.find(p => p.title === planTitle);
-  const out = { date: d.toISOString(), planId: plan ? plan.id : (typeof s.planId === 'string' ? s.planId.slice(0, 40) : null), planTitle, totalVolume: 0, totalReps: 0, details };
+  const out = { ...(typeof s.id === 'string' && s.id ? { id: s.id } : {}), date: d.toISOString(), planId: plan ? plan.id : (typeof s.planId === 'string' ? s.planId.slice(0, 40) : null), planTitle, totalVolume: 0, totalReps: 0, details };
   if (details.length) recalcSession(out, bwSet);
   else { out.totalVolume = Number(s.totalVolume) || 0; out.totalReps = Number(s.totalReps) || 0; }
   if (Number(s.durationMin) > 0) out.durationMin = Math.round(Number(s.durationMin));
@@ -724,22 +756,60 @@ function rebuildLastSets(preserveSaved = false) {
     if (s.rir) Object.keys(s.rir).forEach(k => { lastRir[k] = s.rir[k]; });
   });
 }
-function saveAll() {
-  try {
-    BASE_B.persistJsonTransaction(localStorage, { gymverse_history: history, gymverse_last_weights: lastSets });
-    return true;
-  } catch (e) { toast(storageFailureMessage(e)); return false; }
+async function saveAll(nextHistory = history, nextLastSets = lastSets) {
+  await STORE.transact({ gymverse_history: nextHistory, gymverse_last_weights: nextLastSets });
+  return true;
 }
-function rebuildAll() { lastSets = {}; rebuildLastSets(); saveAll(); }
-function saveActive() { return active ? LS.set('gymverse_active', active) : true; }
-function commitActiveState(nextActive, extraUpdates = {}) {
+function deriveHistoryIndexes(sessions, savedLastSets = lastSets) {
+  const nextLastSets = JSON.parse(JSON.stringify(savedLastSets || {}));
+  const nextLastRir = {};
+  const names = {};
+  sessions.slice().sort(byDate).forEach(session => {
+    const grouped = {};
+    (session.details || []).forEach(detail => {
+      (grouped[detail.exerciseId] = grouped[detail.exerciseId] || []).push(detail);
+      names[detail.exerciseId] = detail.exerciseName;
+    });
+    Object.keys(grouped).forEach(key => {
+      nextLastSets[key] = grouped[key].sort((a, b) => a.setNumber - b.setNumber).map(detail => ({ weight: detail.weight, reps: detail.reps }));
+    });
+    if (session.rir) Object.keys(session.rir).forEach(key => { nextLastRir[key] = session.rir[key]; });
+  });
+  return { lastSets: nextLastSets, lastRir: nextLastRir, names };
+}
+async function commitHistoryChanges(nextHistory, failureMessage) {
+  const candidate = JSON.parse(JSON.stringify(nextHistory));
+  const indexes = deriveHistoryIndexes(candidate);
   try {
-    BASE_B.persistJsonTransaction(localStorage, Object.assign({ gymverse_active: nextActive }, extraUpdates));
+    await STORE.transact({ gymverse_history: candidate, gymverse_last_weights: indexes.lastSets });
+  } catch (_) {
+    suppressNextStoreFlushError = true;
+    toast(`Nie zapisano: ${failureMessage}. W historii i ciężarach zachowano poprzednie dane.`);
+    return false;
+  }
+  history = candidate;
+  lastSets = indexes.lastSets;
+  lastRir = indexes.lastRir;
+  Object.assign(NAMES, indexes.names);
+  return true;
+}
+async function saveActive() {
+  if (!active) return true;
+  try { await LS.set('gymverse_active', active); return true; }
+  catch (error) {
+    toast(storageFailureMessage(error));
+    await offerEmergencyExport(history, lastSets, active, true);
+    return false;
+  }
+}
+async function commitActiveState(nextActive, extraUpdates = {}) {
+  try {
+    await STORE.transact(Object.assign({ gymverse_active: nextActive }, extraUpdates));
     active = nextActive;
     return true;
   } catch (error) {
     toast(storageFailureMessage(error));
-    offerEmergencyExport(history, lastSets, nextActive);
+    await offerEmergencyExport(history, lastSets, nextActive);
     return false;
   }
 }
@@ -748,7 +818,7 @@ function lastWeightsFor(sessions) {
   return BASE_B.deriveLastWeights(sessions, lastSets);
 }
 
-function loadState() {
+async function loadState() {
   CUSTOM = cleanCustom(LS.get('gymverse_custom', {}));
   applyCustom();
   loadPlans();
@@ -758,7 +828,7 @@ function loadState() {
   if (!Array.isArray(raw)) raw = [];
   const schema = LS.get('gymverse_schema', 1);
   if (schema < 2) {
-    LS.set('gymverse_history_backup_v1', raw);
+    await LS.set('gymverse_history_backup_v1', raw);
     lastSets = {};
     const legacy = LS.get('gymverse_last_weights', {});
     Object.keys(legacy || {}).forEach(id => {
@@ -769,9 +839,9 @@ function loadState() {
     lastSets = LS.get('gymverse_last_weights', {});
     if (!lastSets || typeof lastSets !== 'object') lastSets = {};
   }
-  history = raw.map(session => normalizeSession(session)).filter(Boolean);
+  history = DATA_IDS.ensureStableHistoryIds(raw.map(session => normalizeSession(session)).filter(Boolean));
   rebuildLastSets(true);
-  if (schema < 2) { saveAll(); LS.set('gymverse_schema', 2); }
+  if (schema < 2) { await saveAll(); await LS.set('gymverse_schema', 2); }
 
   const r = Number(LS.get('gymverse_rest', 0));
   restSetting = [0, 90, 120, 180, 240].includes(r) ? r : 0;
@@ -781,6 +851,9 @@ function loadState() {
   const a = LS.get('gymverse_active', null);
   const plan = a && getPlan(a.planId);
   if (a && plan && plan.exercises.length && Array.isArray(a.sets)) {
+    const identifiedActive = DATA_IDS.addStableIdentifiers({ gymverse_active: a }).gymverse_active;
+    a.id = identifiedActive.id;
+    a.sets = identifiedActive.sets;
     a.step = Math.min(Math.max(Number(a.step) || 0, 0), plan.exercises.length - 1);
     a.swaps = a.swaps && typeof a.swaps === 'object' ? a.swaps : {};
     a.setCount = a.setCount && typeof a.setCount === 'object' ? a.setCount : {};
@@ -954,14 +1027,14 @@ function plannedSets() {
 }
 const restFor = e => restSetting ? restSetting : (COMPOUND.has(e.key) ? 180 : 90);
 
-function startWorkout(planId) {
+async function startWorkout(planId) {
   const plan = getPlan(planId);
   if (!plan || !plan.exercises.length) { toast('Ten plan nie ma ćwiczeń'); return; }
   if (active && active.planId !== planId && !confirm('Masz niedokończony trening. Porzucić go i zacząć nowy?')) return;
   if (active && active.planId === planId) { openWorkout(); return; }
-  if (active && !discardActive()) return;
-  active = { planId, step: 0, sets: [], startedAt: Date.now(), timerEndAt: 0, swaps: {}, setCount: {}, rir: {} };
-  if (!saveActive()) { active = null; return; }
+  if (active && !await discardActive()) return;
+  active = { id: createUuid(), planId, step: 0, sets: [], startedAt: Date.now(), timerEndAt: 0, swaps: {}, setCount: {}, rir: {} };
+  if (!await saveActive()) { active = null; return; }
   openWorkout();
 }
 function openWorkout() {
@@ -972,20 +1045,21 @@ function openWorkout() {
   lockScreen();
   if (active.timerEndAt && active.timerEndAt > Date.now()) startTimerAt(active.timerEndAt);
 }
-function discardActive() {
+async function discardActive() {
   const sessionId = active ? String(active.startedAt) : '';
-  const drafts = BASE_B.draftPayloadWithout(localStorage, item => item.sessionId === sessionId);
+  const drafts = BASE_B.draftPayloadWithout(STORE.storage, item => item.sessionId === sessionId);
   try {
-    BASE_B.persistJsonTransaction(localStorage, { gymverse_active: null, [BASE_B.DRAFT_KEY]: drafts });
+    BASE_B.persistJsonTransaction(STORE.storage, { gymverse_active: null, [BASE_B.DRAFT_KEY]: drafts });
+    await STORE.flush();
   } catch (e) { toast(storageFailureMessage(e)); return false; }
   active = null;
   stopTimer();
   unlockScreen();
   return true;
 }
-function discardWorkout() {
+async function discardWorkout() {
   if (!confirm('Porzucić trening? Wykonane serie NIE zostaną zapisane.')) return;
-  if (!discardActive()) return;
+  if (!await discardActive()) return;
   switchView('view-plans');
 }
 
@@ -1067,7 +1141,7 @@ function renderStep() {
   let hasDraft = false;
   for (let i = 0; i < n; i++) {
     const logged = active.sets.find(s => s.step === active.step && s.setNumber === i + 1);
-    const draft = !logged && BASE_B.getDraft(localStorage, draftQuery(active.step, i + 1));
+    const draft = !logged && BASE_B.getDraft(STORE.storage, draftQuery(active.step, i + 1));
     if (draft) hasDraft = true;
     const p = last[i];
     const prev = p ? setStr(e.key, p.weight, p.reps) : '—';
@@ -1104,7 +1178,7 @@ function flushDraftsForStep(step) {
   if (!active || step !== active.step) return true;
   clearTimeout(draftSaveTimer);
   const sessionId = String(active.startedAt || active.planId);
-  const payload = BASE_B.readDraftPayload(localStorage);
+  const payload = BASE_B.readDraftPayload(STORE.storage);
   payload.items = payload.items.filter(item => !(item.planId === active.planId && item.sessionId === sessionId && item.step === step));
   const count = setsFor(step);
   for (let i = 0; i < count; i += 1) {
@@ -1115,7 +1189,7 @@ function flushDraftsForStep(step) {
     payload.items.push({ planId: active.planId, sessionId, step, setNumber: i + 1, weight, reps, updatedAt: Date.now() });
   }
   try {
-    BASE_B.persistJsonTransaction(localStorage, { [BASE_B.DRAFT_KEY]: payload.items.length ? payload : null });
+    BASE_B.persistJsonTransaction(STORE.storage, { [BASE_B.DRAFT_KEY]: payload.items.length ? payload : null });
     $('draftStatus').hidden = !payload.items.some(item => item.planId === active.planId && item.sessionId === sessionId && item.step === step);
     return true;
   } catch (error) {
@@ -1126,7 +1200,13 @@ function flushDraftsForStep(step) {
 function scheduleDraftSave(step) {
   clearTimeout(draftSaveTimer);
   if ($('draftStatus')) $('draftStatus').hidden = false;
-  draftSaveTimer = setTimeout(() => flushDraftsForStep(step), 300);
+  draftSaveTimer = setTimeout(() => {
+    flushDraftsForStep(step);
+    STORE.flush().catch(error => {
+      toast(storageFailureMessage(error));
+      offerEmergencyExport(history, lastSets, active, true);
+    });
+  }, 300);
 }
 
 function readRow(i) {
@@ -1229,7 +1309,7 @@ function togglePlates() {
   updatePlates();
 }
 
-function onDone(i) {
+async function onDone(i) {
   const btn = $('btnDone_' + i);
   if (!btn) return false;
   if (btn.classList.contains('completed')) {
@@ -1250,12 +1330,12 @@ function onDone(i) {
   if (existing) {
     existing.weight = w; existing.reps = r;
   } else {
-    nextActive.sets.push({ step: nextActive.step, key: e.key, name: e.name, setNumber: i + 1, weight: w, reps: r, date: new Date().toISOString() });
+    nextActive.sets.push({ id: createUuid(), step: nextActive.step, key: e.key, name: e.name, setNumber: i + 1, weight: w, reps: r, date: new Date().toISOString() });
   }
   const query = draftQuery(active.step, i + 1);
-  const nextDrafts = BASE_B.draftPayloadWithout(localStorage, item => item.planId === query.planId && item.sessionId === query.sessionId && item.step === query.step && item.setNumber === query.setNumber);
+  const nextDrafts = BASE_B.draftPayloadWithout(STORE.storage, item => item.planId === query.planId && item.sessionId === query.sessionId && item.step === query.step && item.setNumber === query.setNumber);
   try {
-    BASE_B.persistJsonTransaction(localStorage, { gymverse_active: nextActive, [BASE_B.DRAFT_KEY]: nextDrafts });
+    await STORE.transact({ gymverse_active: nextActive, [BASE_B.DRAFT_KEY]: nextDrafts });
   } catch (error) {
     toast(storageFailureMessage(error));
     offerEmergencyExport(history, lastSets, nextActive);
@@ -1275,15 +1355,15 @@ function focusNextRow() {
   }
 }
 
-function addSet() {
+async function addSet() {
   const n = setsFor(active.step);
   if (n >= 12) return;
   const nextActive = JSON.parse(JSON.stringify(active));
   nextActive.setCount[active.step] = n + 1;
-  if (!commitActiveState(nextActive)) return;
+  if (!await commitActiveState(nextActive)) return;
   renderStep();
 }
-function removeSet() {
+async function removeSet() {
   const n = setsFor(active.step);
   if (n <= 1) return;
   const loggedLast = active.sets.find(s => s.step === active.step && s.setNumber === n);
@@ -1292,8 +1372,8 @@ function removeSet() {
   nextActive.sets = nextActive.sets.filter(s => !(s.step === nextActive.step && s.setNumber === n));
   nextActive.setCount[nextActive.step] = n - 1;
   const query = { planId: active.planId, sessionId: String(active.startedAt || active.planId), step: active.step, setNumber: n };
-  const nextDrafts = BASE_B.draftPayloadWithout(localStorage, item => item.planId === query.planId && item.sessionId === query.sessionId && item.step === query.step && item.setNumber === query.setNumber);
-  if (!commitActiveState(nextActive, { [BASE_B.DRAFT_KEY]: nextDrafts })) return;
+  const nextDrafts = BASE_B.draftPayloadWithout(STORE.storage, item => item.planId === query.planId && item.sessionId === query.sessionId && item.step === query.step && item.setNumber === query.setNumber);
+  if (!await commitActiveState(nextActive, { [BASE_B.DRAFT_KEY]: nextDrafts })) return;
   renderStep();
 }
 
@@ -1313,7 +1393,7 @@ function swapOpen() {
   $('swapSelect').innerHTML = html;
   box.hidden = false;
 }
-function applySwap(val) {
+async function applySwap(val) {
   if (!val) return;
   const hasSets = active.sets.some(s => s.step === active.step);
   if (hasSets && !confirm('Zamiana usunie zapisane serie tego ćwiczenia. Kontynuować?')) { $('swapSelect').value = ''; return; }
@@ -1322,39 +1402,39 @@ function applySwap(val) {
   delete nextActive.rir[nextActive.step];
   if (val === '__base__') delete nextActive.swaps[nextActive.step]; else nextActive.swaps[nextActive.step] = val;
   const query = { planId: active.planId, sessionId: String(active.startedAt || active.planId), step: active.step };
-  const nextDrafts = BASE_B.draftPayloadWithout(localStorage, item => item.planId === query.planId && item.sessionId === query.sessionId && item.step === query.step);
-  if (!commitActiveState(nextActive, { [BASE_B.DRAFT_KEY]: nextDrafts })) return;
+  const nextDrafts = BASE_B.draftPayloadWithout(STORE.storage, item => item.planId === query.planId && item.sessionId === query.sessionId && item.step === query.step);
+  if (!await commitActiveState(nextActive, { [BASE_B.DRAFT_KEY]: nextDrafts })) return;
   $('swapBox').hidden = true;
   renderStep();
 }
 
-function setRir(v) {
+async function setRir(v) {
   const nextActive = JSON.parse(JSON.stringify(active));
   if (nextActive.rir[nextActive.step] === v) delete nextActive.rir[nextActive.step]; else nextActive.rir[nextActive.step] = v;
-  if (!commitActiveState(nextActive)) return;
+  if (!await commitActiveState(nextActive)) return;
   renderStep();
 }
 
-function nextStep() {
+async function nextStep() {
   const plan = getPlan(active.planId);
   $('swapBox').hidden = true;
   if (active.step < plan.exercises.length - 1) {
     if (!flushDraftsForStep(active.step)) return;
     const nextActive = JSON.parse(JSON.stringify(active));
     nextActive.step++;
-    if (!commitActiveState(nextActive)) return;
+    if (!await commitActiveState(nextActive)) return;
     renderStep();
     window.scrollTo(0, 0);
   } else {
-    finishWorkout(true);
+    await finishWorkout(true);
   }
 }
-function prevStep() {
+async function prevStep() {
   if (active.step > 0) {
     if (!flushDraftsForStep(active.step)) return;
     const nextActive = JSON.parse(JSON.stringify(active));
     nextActive.step--;
-    if (!commitActiveState(nextActive)) return;
+    if (!await commitActiveState(nextActive)) return;
     $('swapBox').hidden = true; renderStep(); window.scrollTo(0, 0);
   }
 }
@@ -1374,13 +1454,15 @@ function findRecords(sets) {
   return out;
 }
 
-function finishWorkout(fromNext) {
+async function finishWorkout(fromNext) {
   const plan = getPlan(active.planId);
   if (!flushDraftsForStep(active.step)) return;
+  try { await STORE.flush(); }
+  catch (error) { toast(storageFailureMessage(error)); await offerEmergencyExport(history, lastSets, active, true); return; }
   const progress = BASE_B.calculateWorkoutProgress(plan, active);
   if (progress.completed === 0) {
     if (!confirm(`Wykonano ${progress.completed}/${progress.required} serii. Porzucić pusty trening? Historia nie zostanie zmieniona.`)) return;
-    if (!discardActive()) return;
+    if (!await discardActive()) return;
     toast('Brak zapisanych serii – nic nie dodano do historii');
     switchView('view-plans');
     return;
@@ -1391,6 +1473,7 @@ function finishWorkout(fromNext) {
   const records = findRecords(active.sets);
   const nowIso = new Date().toISOString();
   const details = active.sets.map(s => ({
+    id: s.id || createUuid(),
     exerciseId: s.key, exerciseName: s.name, setNumber: s.setNumber, weight: s.weight, reps: s.reps, date: s.date
   }));
   const totalVolume = details.reduce((a, d) => a + setLoad(d.exerciseId, d.weight, d.reps, nowIso), 0);
@@ -1404,19 +1487,20 @@ function finishWorkout(fromNext) {
   });
 
   const prevSame = history.filter(h => h.planId === plan.id).sort(byDate).pop();
-  const entry = { date: nowIso, planId: plan.id, planTitle: plan.title, totalVolume, totalReps, durationMin, details };
+  const entry = { id: active.id || createUuid(), date: nowIso, planId: plan.id, planTitle: plan.title, totalVolume, totalReps, durationMin, details };
   if (Object.keys(rir).length) entry.rir = rir;
-  const nextHistory = history.concat(entry);
+  const nextHistory = DATA_IDS.ensureStableHistoryIds(history.concat(entry));
   const nextLastSets = lastWeightsFor(nextHistory);
   const sessionId = String(active.startedAt || active.planId);
-  const nextDrafts = BASE_B.draftPayloadWithout(localStorage, item => item.planId === active.planId && item.sessionId === sessionId);
+  const nextDrafts = BASE_B.draftPayloadWithout(STORE.storage, item => item.planId === active.planId && item.sessionId === sessionId);
   try {
-    BASE_B.persistJsonTransaction(localStorage, {
+    BASE_B.persistJsonTransaction(STORE.storage, {
       gymverse_history: nextHistory,
       gymverse_last_weights: nextLastSets,
       gymverse_active: null,
       [BASE_B.DRAFT_KEY]: nextDrafts
     });
+    await STORE.flush();
   } catch (error) {
     toast(storageFailureMessage(error));
     if (error.rollbackErrors && error.rollbackErrors.length) toast('Nie udało się w pełni odtworzyć poprzedniego zapisu. Pobierz awaryjny JSON przed zamknięciem aplikacji.');
@@ -1468,16 +1552,21 @@ function finishWorkout(fromNext) {
 
 async function offerEmergencyExport(pendingHistory, pendingLastWeights, activeSnapshot = active, integrityUncertain = false) {
   const prompt = integrityUncertain
-    ? 'Zapis importu i jego wycofanie nie powiodły się. Integralność lokalnego zapisu jest niepewna. Pobrać awaryjny eksport JSON z danymi dostępnymi obecnie w pamięci aplikacji? Eksport nie gwarantuje odzyskania wszystkich danych.'
+    ? 'Integralność aktywnego zapisu jest niepewna. Pobrać awaryjny eksport JSON z danymi dostępnymi obecnie w pamięci aplikacji? Eksport nie gwarantuje odzyskania wszystkich danych.'
     : 'Trening pozostał aktywny, ale zapis do pamięci nie powiódł się. Pobrać awaryjny JSON z bieżącymi danymi i treningiem?';
   if (!confirm(prompt)) return;
+  let current = {};
+  try { current = await runtimeJsonSnapshot(); } catch (_) {}
   const payload = {
     app: 'gymverse', version: 4, exportedAt: new Date().toISOString(),
-    history: pendingHistory, lastWeights: pendingLastWeights, body, plans: PLANS, custom: CUSTOM,
-    activeWorkout: activeSnapshot, drafts: BASE_B.readDraftPayload(localStorage)
+    history: integrityUncertain ? (current.gymverse_history || pendingHistory) : pendingHistory,
+    lastWeights: integrityUncertain ? (current.gymverse_last_weights || pendingLastWeights) : pendingLastWeights,
+    body: current.gymverse_body || body, plans: current.gymverse_plans || PLANS, custom: current.gymverse_custom || CUSTOM,
+    activeWorkout: integrityUncertain && current.gymverse_active !== undefined ? current.gymverse_active : activeSnapshot,
+    drafts: current.gymverse_draft_v1 || BASE_B.readDraftPayload(STORE.storage)
   };
   try {
-    const ok = await deliverFile(`gymverse_awaryjna_${dkey(new Date())}.json`, 'application/json', JSON.stringify(payload, null, 2));
+    const ok = await stageFileDelivery(`gymverse_awaryjna_${dkey(new Date())}.json`, 'application/json', JSON.stringify(payload, null, 2));
     toast(integrityUncertain
       ? (ok ? 'Awaryjny JSON przygotowany z dostępnego stanu. Integralność zapisu pozostaje niepewna.' : 'Eksport anulowany. Integralność zapisu pozostaje niepewna.')
       : (ok ? 'Awaryjny JSON przygotowany. Trening nadal pozostaje aktywny.' : 'Eksport awaryjny anulowany. Trening nadal pozostaje aktywny.'));
@@ -1583,7 +1672,11 @@ function stopTimer() {
   clearInterval(timerInt);
   timerInt = null; timerEndAt = 0; timerPausedLeft = null;
   $('timerBar').style.display = 'none';
-  if (active) { active.timerEndAt = 0; saveActive(); }
+  if (active) {
+    active.timerEndAt = 0;
+    saveActive();
+    STORE.flush().catch(error => { toast(storageFailureMessage(error)); offerEmergencyExport(history, lastSets, active, true); });
+  }
 }
 function timerPause() {
   if (timerPausedLeft == null) { timerPausedLeft = remaining(); $('btnTimerPause').textContent = '▶'; }
@@ -1594,9 +1687,9 @@ function timerAdd() {
   if (active && timerPausedLeft == null) { active.timerEndAt = timerEndAt; saveActive(); }
   renderTimer();
 }
-function setRest(sec) {
+async function setRest(sec) {
+  await LS.set('gymverse_rest', sec);
   restSetting = sec;
-  LS.set('gymverse_rest', sec);
   document.querySelectorAll('[data-act="rest"]').forEach(b => b.classList.toggle('active', Number(b.dataset.sec) === sec));
 }
 
@@ -1760,13 +1853,13 @@ function getGoal() {
   if (g && Number.isInteger(g.min) && Number.isInteger(g.max) && g.min >= 1 && g.max >= g.min && g.max <= 60) return g;
   return { min: 10, max: 20 };
 }
-function editGoal() {
+async function editGoal() {
   const g = getGoal();
   const txt = prompt('Cel: ile serii tygodniowo na partię mięśniową (format min-max, np. 10-20)', `${g.min}-${g.max}`);
   if (txt === null) return;
   const m = txt.match(/^\s*(\d{1,2})\s*[-–]\s*(\d{1,2})\s*$/);
   if (!m || Number(m[1]) < 1 || Number(m[2]) < Number(m[1]) || Number(m[2]) > 60) { toast('Podaj zakres, np. 10-20'); return; }
-  LS.set('gymverse_goal', { min: Number(m[1]), max: Number(m[2]) });
+  await LS.set('gymverse_goal', { min: Number(m[1]), max: Number(m[2]) });
   renderStats();
 }
 
@@ -1862,21 +1955,23 @@ function calDay(el) {
   }
 }
 
-function saveBody() {
+async function saveBody() {
   const kg = num($('bodyInput').value);
   if (!isFinite(kg) || kg < 20 || kg > 400) { toast('Podaj wagę w kg (20–400)'); return; }
   const date = dkey(new Date());
-  body = body.filter(b => b.date !== date).concat([{ date, kg }]).sort((a, b) => a.date.localeCompare(b.date));
-  LS.set('gymverse_body', body);
+  const nextBody = body.filter(b => b.date !== date).concat([{ date, kg }]).sort((a, b) => a.date.localeCompare(b.date));
+  await LS.set('gymverse_body', nextBody);
+  body = nextBody;
   $('bodyInput').value = '';
   toast(`Zapisano: ${fmt(kg)} kg`);
   renderStats();
 }
-function delLastBody() {
+async function delLastBody() {
   if (!body.length) return;
   if (!confirm('Usunąć ostatni pomiar wagi?')) return;
-  body.pop();
-  LS.set('gymverse_body', body);
+  const nextBody = body.slice(0, -1);
+  await LS.set('gymverse_body', nextBody);
+  body = nextBody;
   renderStats();
 }
 
@@ -1946,26 +2041,33 @@ function renderHistory() {
   }).join('');
 }
 
-function histEditSet(i, dIdx) {
+async function histEditSet(i, dIdx) {
   const s = history[i];
   const d = s && s.details[dIdx];
   if (!d) return;
   const txt = prompt(`${d.exerciseName}\nCiężar × powtórzenia (np. 80x8${isBW(d.exerciseId) ? ' lub samo 8' : ''}).\nWpisz „usuń", aby skasować serię.`, `${d.weight}x${d.reps}`);
   if (txt === null) return;
+  const nextHistory = JSON.parse(JSON.stringify(history));
+  const nextSession = nextHistory[i];
+  const nextDetail = nextSession && nextSession.details[dIdx];
+  if (!nextDetail) return;
   if (/^\s*(usu[nń]|del|delete)\s*$/i.test(txt)) {
-    s.details.splice(dIdx, 1);
+    nextSession.details.splice(dIdx, 1);
   } else {
     const p = parseSetInput(txt, d.exerciseId);
     if (!p || !validSet(d.exerciseId, p.w, p.r)) { toast('Nieprawidłowy zapis – użyj formatu 80x8'); return; }
-    d.weight = p.w; d.reps = p.r;
+    nextDetail.weight = p.w; nextDetail.reps = p.r;
   }
-  recalcSession(s);
-  rebuildAll();
+  recalcSession(nextSession);
+  const message = /^\s*(usu[nń]|del|delete)\s*$/i.test(txt)
+    ? `Usunięcie serii ${d.exerciseName}`
+    : `Zmiana serii ${d.exerciseName} na ${parseSetInput(txt, d.exerciseId).w}×${parseSetInput(txt, d.exerciseId).r}`;
+  if (!await commitHistoryChanges(nextHistory, message)) return;
   histOpen.add(i);
   renderHistory();
 }
 
-function histAddSet(i, key) {
+async function histAddSet(i, key) {
   const s = history[i];
   if (!s) return;
   const ls = (lastSets[key] || [])[0];
@@ -1973,15 +2075,17 @@ function histAddSet(i, key) {
   if (txt === null || !txt.trim()) return;
   const p = parseSetInput(txt, key);
   if (!p || !validSet(key, p.w, p.r)) { toast('Nieprawidłowy zapis – użyj formatu 80x8'); return; }
-  const same = s.details.filter(d => d.exerciseId === key);
-  s.details.push({ exerciseId: key, exerciseName: nameOf(key), setNumber: same.reduce((a, d) => Math.max(a, d.setNumber), 0) + 1, weight: p.w, reps: p.r, date: s.date });
-  recalcSession(s);
-  rebuildAll();
+  const nextHistory = JSON.parse(JSON.stringify(history));
+  const nextSession = nextHistory[i];
+  const same = nextSession.details.filter(d => d.exerciseId === key);
+  nextSession.details.push({ id: createUuid(), exerciseId: key, exerciseName: nameOf(key), setNumber: same.reduce((a, d) => Math.max(a, d.setNumber), 0) + 1, weight: p.w, reps: p.r, date: s.date });
+  recalcSession(nextSession);
+  if (!await commitHistoryChanges(nextHistory, `Nowa seria ${nameOf(key)} ${p.w}×${p.r}`)) return;
   histOpen.add(i);
   renderHistory();
 }
 
-function histNew() {
+async function histNew() {
   const plan = getPlan($('histNewPlan').value);
   const v = $('histNewDate').value;
   if (!plan) { toast('Wybierz plan'); return; }
@@ -1989,11 +2093,21 @@ function histNew() {
   if (!m) { toast('Wybierz datę'); return; }
   const dt = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]), 12, 0, 0);
   if (isNaN(dt) || dt.getTime() > Date.now() + DAY) { toast('Data nie może być z przyszłości'); return; }
-  history.push({ date: dt.toISOString(), planId: plan.id, planTitle: plan.title, totalVolume: 0, totalReps: 0, details: [] });
-  saveAll();
+  const nextHistory = JSON.parse(JSON.stringify(history));
+  nextHistory.push({ id: createUuid(), date: dt.toISOString(), planId: plan.id, planTitle: plan.title, totalVolume: 0, totalReps: 0, details: [] });
+  if (!await commitHistoryChanges(nextHistory, `Nowy trening ${plan.title} (${dkey(dt)})`)) return;
   histOpen.add(history.length - 1);
   renderHistory();
   toast('Dodano trening – dotknij „+ seria", aby wpisać serie');
+}
+
+async function histDelete(index) {
+  const session = history[index];
+  if (!session || !confirm('Usunąć ten trening z historii?')) return;
+  const nextHistory = history.filter((_, row) => row !== index);
+  if (!await commitHistoryChanges(nextHistory, `Usunięcie treningu ${session.planTitle} (${dkey(new Date(session.date))})`)) return;
+  histOpen = new Set();
+  renderHistory();
 }
 
 /* ================== EDYTOR PLANÓW ================== */
@@ -2054,97 +2168,253 @@ function renderPlanEditor() {
 }
 
 const peEdit = () => getPlan(editPlanId);
-function peMove(i, d) {
+async function peMove(i, d) {
   const p = peEdit(); const j = i + d;
   if (!p || j < 0 || j >= p.exercises.length) return;
-  [p.exercises[i], p.exercises[j]] = [p.exercises[j], p.exercises[i]];
-  savePlans(); renderPlanEditor();
+  const nextPlans = clonePlans();
+  const nextPlan = nextPlans.find(plan => plan.id === p.id);
+  [nextPlan.exercises[i], nextPlan.exercises[j]] = [nextPlan.exercises[j], nextPlan.exercises[i]];
+  if (await savePlanChanges(nextPlans, { failureMessage: `Zmiana kolejności ćwiczeń w planie „${p.title}”` })) renderPlanEditor();
 }
-function peDel(i) {
+async function peDel(i) {
   const p = peEdit();
   if (!p || !confirm(`Usunąć „${exName(p.exercises[i])}" z planu?`)) return;
-  p.exercises.splice(i, 1);
-  savePlans(); renderPlanEditor();
+  const nextPlans = clonePlans();
+  nextPlans.find(plan => plan.id === p.id).exercises.splice(i, 1);
+  if (await savePlanChanges(nextPlans, { failureMessage: `Usunięcie ćwiczenia z planu „${p.title}”` })) renderPlanEditor();
 }
-function peSets(i, d) {
+async function peSets(i, d) {
   const p = peEdit();
   if (!p) return;
-  p.exercises[i].sets = Math.min(12, Math.max(1, p.exercises[i].sets + d));
-  savePlans(); renderPlanEditor();
+  const nextPlans = clonePlans();
+  const nextExercise = nextPlans.find(plan => plan.id === p.id).exercises[i];
+  const nextSets = Math.min(12, Math.max(1, nextExercise.sets + d));
+  if (nextSets === nextExercise.sets) return;
+  nextExercise.sets = nextSets;
+  if (await savePlanChanges(nextPlans, { failureMessage: `Zmiana liczby serii ćwiczenia ${exName(p.exercises[i])} w planie „${p.title}”` })) renderPlanEditor();
 }
-function peAdd() {
+async function peAdd() {
   const p = peEdit();
   const v = $('peAddSelect').value;
   if (!p || !v) { toast('Wybierz ćwiczenie z listy'); return; }
   if (v === '__custom__') { toast('Wypełnij formularz własnego ćwiczenia'); return; }
-  p.exercises.push({ key: v, sets: 3, target: '8-12' });
-  savePlans(); renderPlanEditor();
+  const nextPlans = clonePlans();
+  nextPlans.find(plan => plan.id === p.id).exercises.push({ key: v, sets: 3, target: '8-12' });
+  if (await savePlanChanges(nextPlans, { failureMessage: `Dodanie ćwiczenia ${nameOf(v)} do planu „${p.title}”` })) renderPlanEditor();
 }
-function peCreateCustom() {
+async function peCreateCustom() {
   const p = peEdit();
   const name = $('peCName').value.trim();
   if (!p || name.length < 2) { toast('Podaj nazwę ćwiczenia (min. 2 znaki)'); return; }
   const slug = name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/ł/g, 'l').replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '').slice(0, 20) || 'cw';
   let key = `c_${slug}_${Date.now().toString(36).slice(-4)}`;
-  while (CUSTOM[key]) key += 'x';
-  CUSTOM[key] = { name: name.slice(0, 60), group: $('peCGroup').value, bw: $('peCBw').checked };
-  LS.set('gymverse_custom', CUSTOM);
-  applyCustom();
-  p.exercises.push({ key, sets: 3, target: CUSTOM[key].bw ? '6-10' : '8-12' });
-  savePlans(); renderPlanEditor();
+  const nextCustom = JSON.parse(JSON.stringify(CUSTOM));
+  while (nextCustom[key]) key += 'x';
+  nextCustom[key] = { name: name.slice(0, 60), group: $('peCGroup').value, bw: $('peCBw').checked };
+  const nextPlans = clonePlans();
+  nextPlans.find(plan => plan.id === p.id).exercises.push({ key, sets: 3, target: nextCustom[key].bw ? '6-10' : '8-12' });
+  if (!await savePlanChanges(nextPlans, { custom: nextCustom, failureMessage: `Utworzenie ćwiczenia „${name.slice(0, 60)}” i przypisanie go do planu „${p.title}”` })) return;
+  renderPlanEditor();
   toast('Dodano własne ćwiczenie. Zdjęcie (opcjonalne): img/' + key + '.jpg');
 }
-function peNew() {
+async function peNew() {
   const id = 'p_' + Date.now().toString(36);
-  PLANS.push({ id, title: 'Nowy plan', exercises: [] });
-  savePlans();
+  const nextPlans = clonePlans();
+  nextPlans.push({ id, title: 'Nowy plan', exercises: [] });
+  if (!await savePlanChanges(nextPlans, { failureMessage: 'Utworzenie nowego planu' })) return;
   editPlanId = id;
   renderPlanEditor();
 }
-function peDelPlan() {
+async function peDelPlan() {
   const p = peEdit();
   if (!p) return;
   if (PLANS.length <= 1) { toast('Musi zostać przynajmniej jeden plan'); return; }
   if (!confirm(`Usunąć plan „${p.title}"? Historia treningów zostanie.`)) return;
-  PLANS = PLANS.filter(x => x.id !== p.id);
-  savePlans();
+  const nextPlans = PLANS.filter(x => x.id !== p.id);
+  if (!await savePlanChanges(nextPlans, { failureMessage: `Usunięcie planu „${p.title}”` })) return;
   editPlanId = null;
   renderPlanEditor();
 }
-function peReset() {
+async function peReset() {
   if (!confirm('Przywrócić 4 domyślne plany Push/Pull? Twoje zmiany w planach zostaną nadpisane (historia zostaje).')) return;
-  PLANS = defaultPlans();
-  savePlans();
-  renderPlanEditor();
+  if (await savePlanChanges(defaultPlans(), { failureMessage: 'Przywrócenie domyślnych planów' })) renderPlanEditor();
 }
 
 /* ================== KOPIA ZAPASOWA I EKSPORT ================== */
-async function deliverFile(name, mime, content) {
-  try {
-    const file = new File([content], name, { type: mime });
-    if (navigator.canShare && navigator.canShare({ files: [file] })) {
-      await navigator.share({ files: [file], title: name });
-      return true;
+function deliverFile(name, mime, content) {
+  if (navigator.userActivation && !navigator.userActivation.isActive) return Promise.reject(new Error('FILE_DELIVERY_GESTURE_REQUIRED'));
+  const file = new File([content], name, { type: mime });
+  if (navigator.canShare && navigator.share && navigator.canShare({ files: [file] })) {
+    try {
+      return Promise.resolve(navigator.share({ files: [file], title: name })).then(() => true).catch(error => {
+        if (error && error.name === 'AbortError') return false;
+        throw error;
+      });
+    } catch (error) {
+      if (error && error.name === 'AbortError') return Promise.resolve(false);
+      return Promise.reject(error);
     }
-  } catch (e) {
-    if (e && e.name === 'AbortError') return false;
   }
   const url = URL.createObjectURL(new Blob([content], { type: mime }));
   const a = document.createElement('a');
   a.href = url; a.download = name;
   document.body.appendChild(a); a.click(); a.remove();
   setTimeout(() => URL.revokeObjectURL(url), 2000);
-  return true;
+  return Promise.resolve(true);
+}
+
+function stageFileDelivery(name, mime, content) {
+  if (pendingFileDelivery) pendingFileDelivery.resolve(false);
+  const isAppleMobile = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+  const instructions = isAppleMobile
+    ? `Plik ${name} jest gotowy. Dotknij przycisku, w arkuszu udostępniania wybierz „Zapisz w Plikach”, wskaż folder i zapisz. Po powrocie potwierdź, że plik jest widoczny w Plikach.`
+    : `Plik ${name} jest gotowy. Dotknij przycisku, aby pobrać go lub udostępnić, a potem sprawdź, że został zapisany.`;
+  $('fileDeliveryInstructions').textContent = instructions;
+  $('fileDeliveryPrompt').hidden = false;
+  return new Promise(resolve => { pendingFileDelivery = { name, mime, content, resolve }; });
+}
+
+async function deliverPreparedFile() {
+  const pending = pendingFileDelivery;
+  if (!pending) return false;
+  let delivered = false;
+  try { delivered = await deliverFile(pending.name, pending.mime, pending.content); }
+  catch (error) {
+    toast(error.message === 'FILE_DELIVERY_GESTURE_REQUIRED' ? 'Dotknij przycisku zapisu pliku, aby rozpocząć pobieranie.' : 'Nie udało się udostępnić pliku. Kopia pozostaje przygotowana.');
+    return false;
+  }
+  if (!delivered) {
+    pendingFileDelivery = null;
+    $('fileDeliveryPrompt').hidden = true;
+    pending.resolve(false);
+    return false;
+  }
+  const saved = confirm(/iPhone|iPad|iPod/i.test(navigator.userAgent)
+    ? 'Czy sprawdziłeś aplikację Pliki i potwierdzasz, że kopia została tam zapisana?'
+    : 'Czy sprawdziłeś pobrany plik i potwierdzasz, że kopia została zapisana?');
+  pendingFileDelivery = null;
+  $('fileDeliveryPrompt').hidden = true;
+  pending.resolve(saved);
+  return saved;
 }
 
 async function exportData() {
-  const payload = JSON.stringify({ app: 'gymverse', version: 4, exportedAt: new Date().toISOString(), history, lastWeights: lastSets, body, plans: PLANS, custom: CUSTOM }, null, 2);
-  const ok = await deliverFile(`gymverse_backup_${dkey(new Date())}.json`, 'application/json', payload);
-  if (ok) {
-    LS.set('gymverse_last_backup', new Date().toISOString());
+  try {
+    await STORE.flush();
+    const { createBackupV5, GV_DATA_LEGACY_KEYS, readLegacyInterpretations, readCustomMedia } = await import('./src/gv-data.js');
+    const snapshot = {};
+    GV_DATA_LEGACY_KEYS.forEach(key => {
+      const raw = STORE.storage.getItem(key);
+      if (raw !== null) snapshot[key] = JSON.parse(raw);
+    });
+    Object.assign(snapshot, backupSnapshotDefaults(snapshot));
+    const legacyInterpretations = await readLegacyInterpretations();
+    const customMedia = await readCustomMedia();
+    const archive = await createBackupV5(snapshot, {
+      legacyInterpretations, customMedia,
+      validationOptions: { strictExerciseCatalog: true, catalog: CATALOG, bodyweightExerciseIds: Array.from(BW), exerciseIdMap: ID_MAP }
+    });
+    const ok = await stageFileDelivery(`gymverse_backup_${dkey(new Date())}.zip`, 'application/zip', archive);
+    if (!ok) { toast('Zapis kopii anulowany; data ostatniej kopii nie została zmieniona.'); return; }
+    try { await LS.set('gymverse_last_backup', new Date().toISOString()); await STORE.flush(); }
+    catch (_) { toast('Kopia ZIP została przygotowana i jej zapis potwierdzono, ale nie udało się zapisać daty kopii w aplikacji.'); return; }
     renderPlans();
     $('sumBackup').innerHTML = '';
-    toast('Kopia zapasowa gotowa');
+    toast('Zapis kopii ZIP v5 potwierdzony przez Ciebie.');
+  } catch (error) {
+    toast('Nie udało się przygotować kopii. Dane lokalne pozostały bez zmian.');
+    if (STORE && STORE.mode === 'indexeddb') await offerEmergencyExport(history, lastSets, active, true);
+  }
+}
+
+function runtimeJsonSnapshot() {
+  return STORE.exportSnapshot().then(raw => {
+    const snapshot = {};
+    Object.entries(raw).forEach(([key, value]) => { snapshot[key] = JSON.parse(value); });
+    return snapshot;
+  });
+}
+
+function backupSnapshotDefaults(snapshot) {
+  const result = { ...snapshot };
+  if (!Object.hasOwn(result, 'gymverse_schema')) result.gymverse_schema = 4;
+  if (!Object.hasOwn(result, 'gymverse_history')) result.gymverse_history = history;
+  if (!Object.hasOwn(result, 'gymverse_last_weights')) result.gymverse_last_weights = lastSets;
+  if (!Object.hasOwn(result, 'gymverse_body')) result.gymverse_body = body;
+  if (!Object.hasOwn(result, 'gymverse_plans')) result.gymverse_plans = PLANS;
+  if (!Object.hasOwn(result, 'gymverse_custom')) result.gymverse_custom = CUSTOM;
+  if (!Object.hasOwn(result, 'gymverse_active') && active) result.gymverse_active = active;
+  if (!Object.hasOwn(result, 'gymverse_draft_v1')) result.gymverse_draft_v1 = BASE_B.readDraftPayload(STORE.storage);
+  if (!Object.hasOwn(result, 'gymverse_rest')) result.gymverse_rest = restSetting;
+  if (!Object.hasOwn(result, 'gymverse_bar')) result.gymverse_bar = barKg;
+  return result;
+}
+
+function activeGymVerseWindowCount() {
+  const controller = navigator.serviceWorker && navigator.serviceWorker.controller;
+  if (!controller || typeof MessageChannel !== 'function') return Promise.reject(new Error('SERVICE_WORKER_NOT_READY'));
+  return new Promise((resolve, reject) => {
+    const channel = new MessageChannel();
+    const timeout = setTimeout(() => { channel.port1.close(); reject(new Error('SERVICE_WORKER_CLIENT_CHECK_FAILED')); }, 3000);
+    channel.port1.onmessage = event => {
+      clearTimeout(timeout);
+      channel.port1.close();
+      if (!event.data || event.data.error || !Number.isInteger(event.data.count)) reject(new Error('SERVICE_WORKER_CLIENT_CHECK_FAILED'));
+      else resolve(event.data.count);
+    };
+    controller.postMessage({ type: 'GYMVERSE_COUNT_APP_CLIENTS' }, [channel.port2]);
+  });
+}
+
+async function prepareDataMigration() {
+  if (!STORE || STORE.mode !== 'localStorage') { toast('Dane korzystają już z IndexedDB albo magazyn nie jest gotowy.'); return; }
+  let preview;
+  try {
+    const appWindows = await activeGymVerseWindowCount();
+    if (appWindows !== 1) throw new Error('OTHER_TABS_OPEN');
+    await STORE.flush();
+    preview = await STORE.previewMigration();
+    const { createBackupV5, previewBackupV5, readLegacyInterpretations, readCustomMedia } = await import('./src/gv-data.js');
+    const snapshot = DATA_IDS.addStableIdentifiers(backupSnapshotDefaults(await runtimeJsonSnapshot()));
+    const legacy = {
+      app: 'gymverse', version: 4, exportedAt: new Date().toISOString(),
+      history: snapshot.gymverse_history || [], lastWeights: snapshot.gymverse_last_weights || {},
+      body: snapshot.gymverse_body || [], plans: snapshot.gymverse_plans || [], custom: snapshot.gymverse_custom || {},
+      ...(snapshot.gymverse_active == null ? {} : { activeWorkout: snapshot.gymverse_active }),
+      ...(snapshot.gymverse_draft_v1 == null ? {} : { drafts: snapshot.gymverse_draft_v1 })
+    };
+    const sourceOk = await stageFileDelivery(`gymverse_zrodlo_${dkey(new Date())}.json`, 'application/json', JSON.stringify(legacy, null, 2));
+    if (!sourceOk) {
+      toast('Migracja anulowana; magazyn źródłowy nie został zmieniony.');
+      return;
+    }
+    const validationOptions = { strictExerciseCatalog: true, catalog: CATALOG, bodyweightExerciseIds: Array.from(BW), exerciseIdMap: ID_MAP };
+    const archive = await createBackupV5(snapshot, { legacyInterpretations: await readLegacyInterpretations(), customMedia: await readCustomMedia(), validationOptions });
+    const checked = await previewBackupV5(archive, validationOptions);
+    if (!checked.ok) throw new Error('V5_BACKUP_VERIFICATION_FAILED');
+    const ok = await stageFileDelivery(`gymverse_backup_${dkey(new Date())}.zip`, 'application/zip', archive);
+    if (!ok) { toast('Przeniesienie anulowano; kopia ZIP nie została potwierdzona.'); return; }
+    toast(`Zweryfikowana kopia ZIP v5 zawiera ${checked.counts.sessions} treningów i ${checked.counts.sets} serii.`);
+    if (await activeGymVerseWindowCount() !== 1) throw new Error('OTHER_TABS_OPEN');
+    if (!confirm('Ostatnie potwierdzenie: przełączyć bieżący magazyn na IndexedDB? Oryginalne dane localStorage pozostaną zachowane.')) return;
+    const result = await STORE.activateMigration(preview, { sourceExportVerified: true, v5ExportVerified: true });
+    await STORE.flush();
+    $('migrateDataButton').hidden = true;
+    toast(`Migracja zakończona i zweryfikowana: ${result.records ?? preview.count} rekordów. Dane źródłowe zachowano.`);
+  } catch (error) {
+    toast(error.message === 'MIGRATION_LOCK_UNAVAILABLE'
+      ? 'Nie można bezpiecznie zablokować innych kart w tej przeglądarce. Migracja nie została uruchomiona.'
+      : error.message === 'SOURCE_CHANGED_DURING_MIGRATION'
+        ? 'Dane zmieniły się podczas przygotowania. Migracja nie została aktywowana; przygotuj ją ponownie.'
+        : error.message === 'SERVICE_WORKER_NOT_READY'
+          ? 'Aplikacja wymaga jednego przeładowania, aby sprawdzić otwarte karty. Dane nie zostały zmienione.'
+          : error.message === 'SERVICE_WORKER_CLIENT_CHECK_FAILED'
+            ? 'Nie udało się sprawdzić innych okien aplikacji. Migracja nie została uruchomiona.'
+        : error.message === 'MIGRATION_LOCK_BUSY'
+          ? 'Inna karta lub okno wykonuje teraz migrację. Zamknij pozostałe okna GymVerse i spróbuj ponownie.'
+          : error.message === 'OTHER_TABS_OPEN'
+            ? 'Wykryto inne otwarte okno GymVerse. Zamknij je, aby zablokować równoczesne zmiany, i spróbuj ponownie.'
+          : 'Nie udało się zweryfikować migracji. Aktywny magazyn pozostał bez zmian; zachowaj kopię źródłową.' );
   }
 }
 
@@ -2161,15 +2431,39 @@ function csvExport() {
   };
   if (rows.length === 1) { toast('Brak danych do eksportu'); return; }
   const csv = '\ufeff' + rows.map(r => r.map(cell).join(';')).join('\r\n');
-  deliverFile(`gymverse_dane_${dkey(new Date())}.csv`, 'text/csv;charset=utf-8', csv);
+  deliverFile(`gymverse_dane_${dkey(new Date())}.csv`, 'text/csv;charset=utf-8', csv).catch(() => toast('Nie udało się zapisać pliku CSV.'));
 }
 
-function importData(ev) {
+async function importData(ev) {
   const file = ev.target.files[0];
   ev.target.value = '';
   if (!file) return;
+  if (/\.zip$/i.test(file.name) || file.type === 'application/zip') {
+    try {
+      const { previewBackupV5, restoreBackupV5 } = await import('./src/gv-data.js');
+      const validationOptions = { strictExerciseCatalog: true, catalog: CATALOG, bodyweightExerciseIds: Array.from(BW), exerciseIdMap: ID_MAP };
+      const preview = await previewBackupV5(file, validationOptions);
+      const overview = `Kopia v5: ${preview.counts.sessions} treningów, ${preview.counts.sets} serii, ${preview.counts.plans} planów, ${preview.counts.customExercises} ćwiczeń własnych, ${preview.counts.drafts} roboczych wpisów, ${preview.counts.legacyInterpretations} potwierdzonych reguł historii i ${preview.media.length} plików graficznych. Pełne odtworzenie zastąpi obecne dane GymVerse.`;
+      if (!confirm(`${overview}\n\nCzy kontynuować do wyboru aktywnego treningu i draftów?`)) return;
+      const restoreActive = confirm('Czy odtworzyć aktywny trening z kopii?');
+      const restoreDrafts = confirm('Czy odtworzyć niezapisane drafty z kopii?');
+      if (!confirm('Ostatnie potwierdzenie: zastąpić dane GymVerse zawartością tej kopii?')) return;
+      await restoreBackupV5(STORE.storage, preview, { confirmed: true, restoreActive, restoreDrafts, validationOptions });
+      await STORE.flush();
+      toast('Dane odtworzono. Aplikacja uruchomi się ponownie.');
+      setTimeout(() => location.reload(), 350);
+    } catch (error) {
+      if (error && error.integrityUncertain) {
+        toast('Integralność lokalnego zapisu jest niepewna.');
+        offerEmergencyExport(history, lastSets, active, true);
+      } else {
+        toast(error && error.message === 'RESTORE_CONFIRMATION_REQUIRED' ? 'Odtworzenie anulowano.' : 'Nie udało się zweryfikować ani odtworzyć kopii ZIP. Dane nie zostały celowo zmienione.');
+      }
+    }
+    return;
+  }
   const reader = new FileReader();
-  reader.onload = () => {
+  reader.onload = async () => {
     try {
       const parsed = JSON.parse(reader.result);
       if (!parsed || typeof parsed !== 'object' || !Array.isArray(parsed.history) || (parsed.version != null && Number(parsed.version) > 4)) throw new Error('format');
@@ -2194,8 +2488,24 @@ function importData(ev) {
       });
       const addedWeights = Object.keys(backupWeights).filter(key => !Object.hasOwn(lastSets, key));
       const keptLocalWeights = Object.keys(backupWeights).length - addedWeights.length;
-      const have = new Set(history.map(s => s.date));
-      const fresh = incoming.filter(s => !have.has(s.date));
+      const knownIds = new Set(history.map(session => session.id).filter(Boolean));
+      const existingLegacyCounts = new Map();
+      history.forEach(session => {
+        const fingerprint = DATA_IDS.legacySessionFingerprint(session);
+        existingLegacyCounts.set(fingerprint, (existingLegacyCounts.get(fingerprint) || 0) + 1);
+      });
+      const incomingLegacyCounts = new Map();
+      const fresh = [];
+      incoming.forEach(session => {
+        if (session.id) {
+          if (!knownIds.has(session.id)) { knownIds.add(session.id); fresh.push(session); }
+          return;
+        }
+        const fingerprint = DATA_IDS.legacySessionFingerprint(session);
+        const occurrence = (incomingLegacyCounts.get(fingerprint) || 0) + 1;
+        incomingLegacyCounts.set(fingerprint, occurrence);
+        if (occurrence > (existingLegacyCounts.get(fingerprint) || 0)) fresh.push(session);
+      });
       const haveBody = new Set(body.map(b => b.date));
       if (parsed.body != null && !Array.isArray(parsed.body)) throw new Error('format');
       const normalizedBody = normalizeBody(parsed.body || []);
@@ -2206,6 +2516,22 @@ function importData(ev) {
       if (parsed.plans != null && inPlans.length !== parsed.plans.length) throw new Error('format');
       const plansDiffer = inPlans.length > 0 && JSON.stringify(inPlans) !== JSON.stringify(PLANS);
       const replacePlans = !!(plansDiffer && !active);
+      if (parsed.app === 'gymverse' && Number(parsed.version) === 4) {
+        const { inspectLegacySnapshot, restoreLegacyV4 } = await import('./src/gv-data.js');
+        const validationOptions = { strictExerciseCatalog: true, catalog: CATALOG, bodyweightExerciseIds: Array.from(BW), exerciseIdMap: ID_MAP };
+        const preview = await inspectLegacySnapshot(parsed, validationOptions);
+        if (!preview.ok) throw new Error('format');
+        if (confirm(`OK = pełne odtworzenie JSON v4, które zastąpi treningi, plany, ćwiczenia własne, pomiary i ciężary z kopii. Anuluj = przejdź do importu łączeniowego. Liczba treningów w kopii: ${preview.counts.sessions}. Ustawienia aplikacji pozostaną bez zmian.`)) {
+          const restoreActive = confirm('Czy kopia awaryjna zawiera aktywny trening do odtworzenia? Wybierz OK, aby go przywrócić.');
+          const restoreDrafts = confirm('Czy przywrócić niezapisane drafty, jeśli znajdują się w kopii?');
+          if (!confirm('Ostatnie potwierdzenie: pełne odtworzenie zastąpi obecny stan danych GymVerse. Kontynuować?')) return;
+          await restoreLegacyV4(STORE.storage, parsed, { confirmed: true, restoreActive, restoreDrafts, validationOptions });
+          await STORE.flush();
+          toast('Dane JSON v4 odtworzono. Aplikacja uruchomi się ponownie.');
+          setTimeout(() => location.reload(), 350);
+          return;
+        }
+      }
       if (!fresh.length && !freshBody.length && !newCustom.length && !replacePlans && !addedWeights.length) {
         toast(keptLocalWeights ? `Zachowano ${keptLocalWeights} lokalnych ciężarów; kopia nie zawiera innych nowych danych.` : 'Plik nie zawiera nowych danych');
         return;
@@ -2215,7 +2541,7 @@ function importData(ev) {
       const weightsInfo = `, ciężary z kopii – ${addedWeights.length}${keptLocalWeights ? `; ${keptLocalWeights} lokalnych ciężarów pozostanie bez zmian` : ''}`;
       if (!confirm(`Zaimportować dane: treningi – ${fresh.length}, pomiary wagi – ${freshBody.length}${customInfo}${planInfo}${weightsInfo}? Duplikaty zostaną pominięte; niczego nie usunę.`)) return;
 
-      const nextHistory = JSON.parse(JSON.stringify(history.concat(fresh)));
+      const nextHistory = DATA_IDS.ensureStableHistoryIds(JSON.parse(JSON.stringify(history.concat(fresh))));
       const nextBody = body.concat(freshBody).sort((a, b) => a.date.localeCompare(b.date));
       nextHistory.forEach(session => recalcSession2(session, nextBW, nextBody));
       const nextPlans = replacePlans ? inPlans : PLANS;
@@ -2226,7 +2552,7 @@ function importData(ev) {
       if (freshBody.length) updates.gymverse_body = nextBody;
       if (newCustom.length) updates.gymverse_custom = nextCustom;
       if (replacePlans) updates.gymverse_plans = nextPlans;
-      BASE_B.persistJsonTransaction(localStorage, updates);
+      await STORE.transact(updates);
 
       history = nextHistory;
       body = nextBody;
@@ -2242,7 +2568,7 @@ function importData(ev) {
       renderPlans();
       toast(msg);
     } catch (e) {
-      if (e && e.rollbackErrors && e.rollbackErrors.length) {
+      if (e && (e.integrityUncertain || (e.rollbackErrors && e.rollbackErrors.length))) {
         toast('Integralność lokalnego zapisu jest niepewna.');
         offerEmergencyExport(history, lastSets, active, true);
         return;
@@ -2260,13 +2586,13 @@ const ACTIONS = {
   view: el => switchView(el.dataset.view),
   startPlan: el => startWorkout(el.dataset.plan),
   resume: openWorkout,
-  resumeDiscard: () => { if (confirm('Porzucić niedokończony trening?')) { discardActive(); renderPlans(); } },
+  resumeDiscard: async () => { if (confirm('Porzucić niedokończony trening?') && await discardActive()) renderPlans(); },
   done: el => onDone(Number(el.dataset.i)),
   fillprev: el => fillPrev(Number(el.dataset.i)),
   wstep: el => stepWeight(Number(el.dataset.d)),
   copyPrev,
   plates: togglePlates,
-  bar: el => { barKg = Number(el.dataset.kg); LS.set('gymverse_bar', barKg); updatePlates(); },
+  bar: async el => { const next = Number(el.dataset.kg); await LS.set('gymverse_bar', next); barKg = next; updatePlates(); },
   addSet, removeSet, swapOpen,
   rir: el => setRir(Number(el.dataset.v)),
   next: nextStep,
@@ -2277,12 +2603,14 @@ const ACTIONS = {
   timerPause, timerAdd, timerSkip: stopTimer,
   range: setRange,
   export: exportData,
+  deliverPreparedFile,
+  migrateData: prepareDataMigration,
   csv: csvExport,
   importBtn: () => $('importFile').click(),
   shareSummary,
-  deloadStart: () => { LS.set('gymverse_deload_until', Date.now() + 7 * DAY); LS.set('gymverse_deload_start', Date.now()); renderPlans(); },
-  deloadSnooze: () => { LS.set('gymverse_deload_snooze', Date.now() + 14 * DAY); renderPlans(); },
-  deloadEnd: () => { LS.set('gymverse_deload_until', 0); renderPlans(); },
+  deloadStart: async () => { const now = Date.now(); await STORE.transact({ gymverse_deload_until: now + 7 * DAY, gymverse_deload_start: now }); renderPlans(); },
+  deloadSnooze: async () => { await LS.set('gymverse_deload_snooze', Date.now() + 14 * DAY); renderPlans(); },
+  deloadEnd: async () => { await LS.set('gymverse_deload_until', 0); renderPlans(); },
   editPlans: () => { if (active) { toast('Najpierw zakończ lub porzuć trwający trening'); return; } switchView('view-planedit'); },
   peOpen: el => { editPlanId = el.dataset.id; renderPlanEditor(); window.scrollTo(0, 0); },
   peNew, peReset, peAdd, peCreateCustom, peDelPlan,
@@ -2306,21 +2634,29 @@ const ACTIONS = {
   histAddSet: el => histAddSet(Number(el.dataset.i), el.dataset.k),
   histNew,
   histClearDay: () => { histFilterDay = null; renderHistory(); },
-  histDelete: el => {
-    if (!confirm('Usunąć ten trening z historii?')) return;
-    history.splice(Number(el.dataset.i), 1);
-    histOpen = new Set();
-    rebuildAll();
-    renderHistory();
-  }
+  histDelete: el => histDelete(Number(el.dataset.i))
 };
 
-document.addEventListener('click', e => {
+document.addEventListener('click', async e => {
   unlockAudio();
   const el = e.target.closest('[data-act]');
   if (!el) return;
   const fn = ACTIONS[el.dataset.act];
-  if (fn) fn(el);
+  if (!fn) return;
+  try {
+    await fn(el);
+    if (STORE) {
+      try { await STORE.flush(); }
+      catch (error) {
+        if (suppressNextStoreFlushError) suppressNextStoreFlushError = false;
+        else throw error;
+      }
+    }
+  } catch (error) {
+    suppressNextStoreFlushError = false;
+    toast(storageFailureMessage(error));
+    if (STORE && STORE.mode === 'indexeddb') await offerEmergencyExport(history, lastSets, active, true);
+  }
 });
 document.addEventListener('input', e => {
   const t = e.target;
@@ -2330,27 +2666,39 @@ document.addEventListener('input', e => {
     if (t.id.startsWith('weight_')) { lastRow = Number(t.dataset.i); updatePlates(); }
   }
 });
-document.addEventListener('focusout', e => {
+document.addEventListener('focusout', async e => {
   const t = e.target;
-  if (t.classList && t.classList.contains('input-cell') && active) flushDraftsForStep(active.step);
+  if (t.classList && t.classList.contains('input-cell') && active) {
+    flushDraftsForStep(active.step);
+    await STORE.flush().catch(error => toast(storageFailureMessage(error)));
+  }
 });
-document.addEventListener('change', e => {
+document.addEventListener('change', async e => {
   const t = e.target;
   if (t.id === 'peAddSelect') { $('peCustom').hidden = t.value !== '__custom__'; return; }
   const f = t.dataset && t.dataset.field;
   if (!f) return;
   const p = peEdit();
   if (!p) return;
+  let saved = true;
   if (f === 'peTitle') {
-    p.title = t.value.trim().slice(0, 40) || 'Plan';
-    savePlans();
+    const nextPlans = clonePlans();
+    nextPlans.find(plan => plan.id === p.id).title = t.value.trim().slice(0, 40) || 'Plan';
+    saved = await savePlanChanges(nextPlans, { failureMessage: `Zmiana nazwy planu „${p.title}”` });
+    renderPlanEditor();
   } else if (f === 'peTarget') {
     const v = t.value.trim().replace(/\s+/g, '').replace('–', '-');
     if (!/^\d{1,3}(-\d{1,3})?$/.test(v)) { toast('Zakres w formacie 8-12 lub 15'); renderPlanEditor(); return; }
-    p.exercises[Number(t.dataset.i)].target = v;
-    savePlans();
+    const exerciseIndex = Number(t.dataset.i);
+    const nextPlans = clonePlans();
+    const nextExercise = nextPlans.find(plan => plan.id === p.id).exercises[exerciseIndex];
+    const exerciseName = exName(p.exercises[exerciseIndex]);
+    nextExercise.target = v;
+    saved = await savePlanChanges(nextPlans, { failureMessage: `Zmiana zakresu powtórzeń dla ${exerciseName} w planie „${p.title}”` });
     renderPlanEditor();
   }
+  if (!saved) suppressNextStoreFlushError = false;
+  if (saved) await STORE.flush().catch(error => toast(storageFailureMessage(error)));
 });
 document.addEventListener('focusin', e => {
   const t = e.target;
@@ -2360,29 +2708,30 @@ document.addEventListener('focusin', e => {
     updatePlates();
   }
 });
-document.addEventListener('keydown', e => {
+document.addEventListener('keydown', async e => {
   if (e.key !== 'Enter') return;
   const t = e.target;
-  if (t.id === 'bodyInput') { e.preventDefault(); saveBody(); return; }
+  if (t.id === 'bodyInput') { e.preventDefault(); await saveBody(); await STORE.flush().catch(error => toast(storageFailureMessage(error))); return; }
   if (!t.classList || !t.classList.contains('input-cell')) return;
   e.preventDefault();
   const i = Number(t.dataset.i);
   if (t.id.startsWith('weight_')) { $('reps_' + i).focus(); return; }
   const btn = $('btnDone_' + i);
-  if (btn && btn.classList.contains('ready')) { if (onDone(i)) focusNextRow(); }
+  if (btn && btn.classList.contains('ready')) { if (await onDone(i)) focusNextRow(); await STORE.flush().catch(error => toast(storageFailureMessage(error))); }
 });
 $('chartExerciseSelect').addEventListener('change', updateCharts);
-$('swapSelect').addEventListener('change', e => applySwap(e.target.value));
+$('swapSelect').addEventListener('change', async e => { await applySwap(e.target.value); await STORE.flush().catch(error => toast(storageFailureMessage(error))); });
 $('importFile').addEventListener('change', importData);
 
-document.addEventListener('visibilitychange', () => {
+document.addEventListener('visibilitychange', async () => {
   if (document.visibilityState === 'hidden' && active) flushDraftsForStep(active.step);
+  if (document.visibilityState === 'hidden' && STORE) await STORE.flush().catch(error => toast(storageFailureMessage(error)));
   if (document.visibilityState === 'visible') {
     if (active && $('view-workout').classList.contains('active')) lockScreen();
     if (timerInt) tick();
   }
 });
-window.addEventListener('pagehide', () => { if (active) flushDraftsForStep(active.step); });
+window.addEventListener('pagehide', () => { if (active) flushDraftsForStep(active.step); if (STORE) STORE.flush().catch(() => {}); });
 let resizeT = null;
 window.addEventListener('resize', () => {
   clearTimeout(resizeT);
@@ -2393,13 +2742,34 @@ window.addEventListener('resize', () => {
 });
 
 /* ================== START ================== */
-function init() {
-  loadState();
-  initChartsSelect();
-  renderPlans();
-  try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch (e) {}
-  if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
-    navigator.serviceWorker.register('sw.js').catch(() => {});
+async function init() {
+  try {
+    const dataModule = await import('./src/gv-data.js');
+    DATA_IDS = dataModule;
+    const { createRuntimeStore } = dataModule;
+    STORE = await createRuntimeStore();
+    if (location.hostname === '127.0.0.1' || location.hostname === 'localhost') {
+      Object.defineProperty(window, '__gymverseTestHarness', { value: Object.freeze({ getStore: () => STORE }), configurable: true });
+    }
+    STORE.setFailureHandler(error => {
+      toast(storageFailureMessage(error));
+      if (STORE.mode === 'indexeddb') offerEmergencyExport(history, lastSets, active, true);
+    });
+    await loadState();
+    await STORE.flush();
+    $('migrateDataButton').hidden = STORE.mode !== 'localStorage';
+    initChartsSelect();
+    renderPlans();
+    if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
+      navigator.serviceWorker.register('sw.js').catch(() => {});
+    }
+  } catch (error) {
+    const notice = $('toast');
+    notice.textContent = error && error.message === 'ACTIVE_DATABASE_UNAVAILABLE'
+      ? 'IndexedDB jest niedostępne, a aplikacja nie może bezpiecznie odczytać aktywnych danych. Nie zapisuj zmian ani nie przełączaj magazynu.'
+      : 'Nie udało się bezpiecznie uruchomić magazynu danych. Dane nie zostały przełączone.';
+    notice.classList.add('show');
+    notice.setAttribute('role', 'alert');
   }
 }
 init();
