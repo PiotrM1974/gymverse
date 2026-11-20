@@ -1,0 +1,12 @@
+{
+  "description": "Syntetyczny pusty stan; wszystkie klucze fikcyjne.",
+  "storage": {
+    "gymverse_schema": 2,
+    "gymverse_history": [],
+    "gymverse_active": null,
+    "gymverse_plans": null,
+    "gymverse_custom": {},
+    "gymverse_body": [],
+    "gymverse_last_weights": {}
+  }
+}
