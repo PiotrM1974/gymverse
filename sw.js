@@ -1,6 +1,6 @@
 /* GymVerse – service worker: aplikacja działa offline po pierwszym wejściu. */
-const CACHE = 'gymverse-v5';
-const SHELL = ['./', 'index.html', 'src/gv-base-b.js', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png', 'apple-touch-icon.png'];
+const CACHE = 'gymverse-v6';
+const SHELL = ['./', 'index.html', 'src/gv-base-b.js', 'src/gv-data.js', 'src/vendor/zip.min.js', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png', 'apple-touch-icon.png'];
 
 self.addEventListener('install', e => {
   e.waitUntil(
@@ -14,6 +14,17 @@ self.addEventListener('activate', e => {
     caches.keys()
       .then(keys => Promise.all(keys.filter(k => k.startsWith('gymverse-') && k !== CACHE).map(k => caches.delete(k))))
   );
+});
+
+self.addEventListener('message', event => {
+  if (!event.data || event.data.type !== 'GYMVERSE_COUNT_APP_CLIENTS' || !event.ports || !event.ports[0]) return;
+  event.waitUntil(self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(clients => {
+    const scopePath = new URL(self.registration.scope).pathname;
+    const appClients = clients.filter(client => {
+      try { return new URL(client.url).pathname.startsWith(scopePath); } catch (_) { return false; }
+    });
+    event.ports[0].postMessage({ type: 'GYMVERSE_APP_CLIENT_COUNT', count: appClients.length });
+  }).catch(() => event.ports[0].postMessage({ type: 'GYMVERSE_APP_CLIENT_COUNT', error: true })));
 });
 
 self.addEventListener('fetch', e => {

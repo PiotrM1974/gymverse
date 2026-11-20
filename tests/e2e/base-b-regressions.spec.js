@@ -19,6 +19,11 @@ async function uploadSyntheticBackup(page, backup) {
   });
 }
 
+async function keepLegacyV4Merge(dialog) {
+  if (dialog.message().startsWith('OK = pełne odtworzenie JSON v4')) await dialog.dismiss();
+  else await dialog.accept();
+}
+
 const syntheticBackup = () => ({
   app: 'gymverse', version: 4, exportedAt: '2026-01-01T00:00:00.000Z',
   history: [{ date: '2026-01-01T10:00:00.000Z', planId: 'push_a1', planTitle: 'Push A1', details: [{ exerciseId: 'bench_flat', exerciseName: 'Wyciskanie leżąc', setNumber: 1, weight: 40, reps: 8, date: '2026-01-01T10:00:00.000Z' }] }],
@@ -32,7 +37,7 @@ test('imports a zero-weight bodyweight set from a new custom exercise in legacy 
   const backup = syntheticBackup();
   backup.custom.c_synthetic.bw = true;
   backup.history[0].details = [{ exerciseId: 'c_synthetic', exerciseName: 'Ćwiczenie testowe', setNumber: 1, weight: 0, reps: 10 }];
-  page.on('dialog', dialog => dialog.accept());
+  page.on('dialog', keepLegacyV4Merge);
   await uploadSyntheticBackup(page, backup);
   await expect.poll(() => page.evaluate(() => JSON.parse(localStorage.getItem('gymverse_history') || '[]').length)).toBe(1);
   const state = await page.evaluate(() => ({ history: JSON.parse(localStorage.getItem('gymverse_history')), custom: JSON.parse(localStorage.getItem('gymverse_custom')) }));
@@ -49,7 +54,7 @@ test('restores v4 lastWeights absent from history while retaining newer local va
     row_v: [{ weight: 50, reps: 10 }]
   };
   const dialogs = [];
-  page.on('dialog', async dialog => { dialogs.push(dialog.message()); await dialog.accept(); });
+  page.on('dialog', async dialog => { dialogs.push(dialog.message()); await keepLegacyV4Merge(dialog); });
   await uploadSyntheticBackup(page, backup);
   await expect.poll(() => page.evaluate(() => JSON.parse(localStorage.getItem('gymverse_last_weights') || '{}').row_v)).toEqual([{ weight: 50, reps: 10 }]);
   const weights = await page.evaluate(() => JSON.parse(localStorage.getItem('gymverse_last_weights')));
@@ -64,7 +69,7 @@ test('imports valid v4 lastWeights even when the backup has no new history', asy
   backup.plans = [];
   backup.custom = {};
   backup.lastWeights = { row_v: [{ weight: 52, reps: 9 }] };
-  page.on('dialog', dialog => dialog.accept());
+  page.on('dialog', keepLegacyV4Merge);
   await uploadSyntheticBackup(page, backup);
   await expect.poll(() => page.evaluate(() => JSON.parse(localStorage.getItem('gymverse_last_weights') || '{}').row_v))
     .toEqual([{ weight: 52, reps: 9 }]);
@@ -75,7 +80,7 @@ test('keeps a v4 saved weight that differs from its history after reload', async
   backup.plans = [];
   backup.custom = {};
   backup.lastWeights = { bench_flat: [{ weight: 65, reps: 6 }] };
-  page.on('dialog', dialog => dialog.accept());
+  page.on('dialog', keepLegacyV4Merge);
   await uploadSyntheticBackup(page, backup);
   await expect.poll(() => page.evaluate(() => JSON.parse(localStorage.getItem('gymverse_last_weights') || '{}').bench_flat))
     .toEqual([{ weight: 65, reps: 6 }]);
@@ -227,16 +232,22 @@ test('a failed completion save keeps the active session and downloads an emergen
 
 test('rejecting a synthetic backup import leaves custom exercises, plans and history unchanged', async ({ page }) => {
   const dialogs = [];
-  page.on('dialog', async dialog => { dialogs.push(dialog.message()); await dialog.dismiss(); });
+  let resolveMerge;
+  const mergeConfirmation = new Promise(resolve => { resolveMerge = resolve; });
+  page.on('dialog', async dialog => {
+    if (dialog.message().startsWith('OK = pełne odtworzenie JSON v4')) { await dialog.dismiss(); return; }
+    dialogs.push(dialog.message());
+    await dialog.dismiss();
+    resolveMerge();
+  });
   const before = await page.evaluate(() => ({
     custom: localStorage.getItem('gymverse_custom'),
     plans: localStorage.getItem('gymverse_plans'),
     history: localStorage.getItem('gymverse_history'),
     body: localStorage.getItem('gymverse_body')
   }));
-  const dialogPromise = page.waitForEvent('dialog');
   await uploadSyntheticBackup(page, syntheticBackup());
-  await dialogPromise;
+  await mergeConfirmation;
   const state = await page.evaluate(() => ({
     custom: localStorage.getItem('gymverse_custom'),
     plans: localStorage.getItem('gymverse_plans'),

@@ -6,10 +6,15 @@ test.beforeEach(async ({ page }) => {
   await page.reload();
 });
 
+async function keepLegacyV4Merge(dialog) {
+  if (dialog.message().startsWith('OK = pełne odtworzenie JSON v4')) await dialog.dismiss();
+  else await dialog.accept();
+}
+
 test('starts the first plan, records a set, finishes, survives reload and imports synthetic backup v4', async ({ page }) => {
   const pageErrors = [];
   page.on('pageerror', error => pageErrors.push(error.message));
-  page.on('dialog', dialog => dialog.accept());
+  page.on('dialog', keepLegacyV4Merge);
   await page.locator('[data-act="startPlan"][data-plan="push_a1"]').click();
   await page.locator('#weight_0').fill('40');
   await page.locator('#reps_0').fill('8');
