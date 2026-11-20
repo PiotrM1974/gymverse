@@ -1,0 +1,2460 @@
+{
+  "exerciseAssetsVersion": 1,
+  "manifestSchemaVersion": 1,
+  "records": [
+    {
+      "exerciseId": "bench_flat",
+      "variantId": "default",
+      "revision": 1,
+      "status": "pending",
+      "provenance": {
+        "masterVersion": "2.8",
+        "references": [
+          "§3.4:bench_flat",
+          "§4.1:bench_flat"
+        ],
+        "ownerClarificationIds": []
+      },
+      "imageReadiness": {
+        "status": "pending",
+        "catalogFingerprint": null,
+        "reviewer": null,
+        "reviewedAt": null,
+        "reviewedFields": []
+      },
+      "ownerApproval": {
+        "status": "pending",
+        "revision": 1,
+        "reviewer": null,
+        "decidedAt": null,
+        "decisionId": null,
+        "reason": null
+      },
+      "views": {
+        "technique": {
+          "status": "pending",
+          "path": null,
+          "mimeType": null,
+          "width": null,
+          "height": null,
+          "sizeBytes": null,
+          "sha256": null,
+          "altText": null,
+          "derivedFrom": null,
+          "origin": null,
+          "reason": "Ilustracja nie została jeszcze przygotowana."
+        },
+        "muscles": {
+          "status": "pending",
+          "path": null,
+          "mimeType": null,
+          "width": null,
+          "height": null,
+          "sizeBytes": null,
+          "sha256": null,
+          "altText": null,
+          "derivedFrom": "technique",
+          "origin": null,
+          "reason": "Mapa mięśni nie została jeszcze przygotowana."
+        },
+        "thumbnail": {
+          "status": "pending",
+          "path": null,
+          "mimeType": null,
+          "width": null,
+          "height": null,
+          "sizeBytes": null,
+          "sha256": null,
+          "altText": null,
+          "derivedFrom": "technique",
+          "origin": null,
+          "reason": "Miniatura nie została jeszcze przygotowana."
+        }
+      }
+    },
+    {
+      "exerciseId": "db_incline",
+      "variantId": "default",
+      "revision": 1,
+      "status": "pending",
+      "provenance": {
+        "masterVersion": "2.8",
+        "references": [
+          "§3.4:db_incline",
+          "§4.1:db_incline"
+        ],
+        "ownerClarificationIds": []
+      },
+      "imageReadiness": {
+        "status": "pending",
+        "catalogFingerprint": null,
+        "reviewer": null,
+        "reviewedAt": null,
+        "reviewedFields": []
+      },
+      "ownerApproval": {
+        "status": "pending",
+        "revision": 1,
+        "reviewer": null,
+        "decidedAt": null,
+        "decisionId": null,
+        "reason": null
+      },
+      "views": {
+        "technique": {
+          "status": "pending",
+          "path": null,
+          "mimeType": null,
+          "width": null,
+          "height": null,
+          "sizeBytes": null,
+          "sha256": null,
+          "altText": null,
+          "derivedFrom": null,
+          "origin": null,
+          "reason": "Ilustracja nie została jeszcze przygotowana."
+        },
+        "muscles": {
+          "status": "pending",
+          "path": null,
+          "mimeType": null,
+          "width": null,
+          "height": null,
+          "sizeBytes": null,
+          "sha256": null,
+          "altText": null,
+          "derivedFrom": "technique",
+          "origin": null,
+          "reason": "Mapa mięśni nie została jeszcze przygotowana."
+        },
+        "thumbnail": {
+          "status": "pending",
+          "path": null,
+          "mimeType": null,
+          "width": null,
+          "height": null,
+          "sizeBytes": null,
+          "sha256": null,
+          "altText": null,
+          "derivedFrom": "technique",
+          "origin": null,
+          "reason": "Miniatura nie została jeszcze przygotowana."
+        }
+      }
+    },
+    {
+      "exerciseId": "lat_raise_stand",
+      "variantId": "default",
+      "revision": 1,
+      "status": "pending",
+      "provenance": {
+        "masterVersion": "2.8",
+        "references": [
+          "§3.4:lat_raise_stand",
+          "§4.3:lat_raise_stand"
+        ],
+        "ownerClarificationIds": []
+      },
+      "imageReadiness": {
+        "status": "pending",
+        "catalogFingerprint": null,
+        "reviewer": null,
+        "reviewedAt": null,
+        "reviewedFields": []
+      },
+      "ownerApproval": {
+        "status": "pending",
+        "revision": 1,
+        "reviewer": null,
+        "decidedAt": null,
+        "decisionId": null,
+        "reason": null
+      },
+      "views": {
+        "technique": {
+          "status": "pending",
+          "path": null,
+          "mimeType": null,
+          "width": null,
+          "height": null,
+          "sizeBytes": null,
+          "sha256": null,
+          "altText": null,
+          "derivedFrom": null,
+          "origin": null,
+          "reason": "Ilustracja nie została jeszcze przygotowana."
+        },
+        "muscles": {
+          "status": "pending",
+          "path": null,
+          "mimeType": null,
+          "width": null,
+          "height": null,
+          "sizeBytes": null,
+          "sha256": null,
+          "altText": null,
+          "derivedFrom": "technique",
+          "origin": null,
+          "reason": "Mapa mięśni nie została jeszcze przygotowana."
+        },
+        "thumbnail": {
+          "status": "pending",
+          "path": null,
+          "mimeType": null,
+          "width": null,
+          "height": null,
+          "sizeBytes": null,
+          "sha256": null,
+          "altText": null,
+          "derivedFrom": "technique",
+          "origin": null,
+          "reason": "Miniatura nie została jeszcze przygotowana."
+        }
+      }
+    },
+    {
+      "exerciseId": "tri_rope",
+      "variantId": "default",
+      "revision": 1,
+      "status": "pending",
+      "provenance": {
+        "masterVersion": "2.8",
+        "references": [
+          "§3.4:tri_rope",
+          "§4.5:tri_rope"
+        ],
+        "ownerClarificationIds": []
+      },
+      "imageReadiness": {
+        "status": "pending",
+        "catalogFingerprint": null,
+        "reviewer": null,
+        "reviewedAt": null,
+        "reviewedFields": []
+      },
+      "ownerApproval": {
+        "status": "pending",
+        "revision": 1,
+        "reviewer": null,
+        "decidedAt": null,
+        "decisionId": null,
+        "reason": null
+      },
+      "views": {
+        "technique": {
+          "status": "pending",
+          "path": null,
+          "mimeType": null,
+          "width": null,
+          "height": null,
+          "sizeBytes": null,
+          "sha256": null,
+          "altText": null,
+          "derivedFrom": null,
+          "origin": null,
+          "reason": "Ilustracja nie została jeszcze przygotowana."
+        },
+        "muscles": {
+          "status": "pending",
+          "path": null,
+          "mimeType": null,
+          "width": null,
+          "height": null,
+          "sizeBytes": null,
+          "sha256": null,
+          "altText": null,
+          "derivedFrom": "technique",
+          "origin": null,
+          "reason": "Mapa mięśni nie została jeszcze przygotowana."
+        },
+        "thumbnail": {
+          "status": "pending",
+          "path": null,
+          "mimeType": null,
+          "width": null,
+          "height": null,
+          "sizeBytes": null,
+          "sha256": null,
+          "altText": null,
+          "derivedFrom": "technique",
+          "origin": null,
+          "reason": "Miniatura nie została jeszcze przygotowana."
+        }
+      }
+    },
+    {
+      "exerciseId": "leg_press",
+      "variantId": "default",
+      "revision": 1,
+      "status": "pending",
+      "provenance": {
+        "masterVersion": "2.8",
+        "references": [
+          "§3.4:leg_press",
+          "§4.6:leg_press"
+        ],
+        "ownerClarificationIds": []
+      },
+      "imageReadiness": {
+        "status": "pending",
+        "catalogFingerprint": null,
+        "reviewer": null,
+        "reviewedAt": null,
+        "reviewedFields": []
+      },
+      "ownerApproval": {
+        "status": "pending",
+        "revision": 1,
+        "reviewer": null,
+        "decidedAt": null,
+        "decisionId": null,
+        "reason": null
+      },
+      "views": {
+        "technique": {
+          "status": "pending",
+          "path": null,
+          "mimeType": null,
+          "width": null,
+          "height": null,
+          "sizeBytes": null,
+          "sha256": null,
+          "altText": null,
+          "derivedFrom": null,
+          "origin": null,
+          "reason": "Ilustracja nie została jeszcze przygotowana."
+        },
+        "muscles": {
+          "status": "pending",
+          "path": null,
+          "mimeType": null,
+          "width": null,
+          "height": null,
+          "sizeBytes": null,
+          "sha256": null,
+          "altText": null,
+          "derivedFrom": "technique",
+          "origin": null,
+          "reason": "Mapa mięśni nie została jeszcze przygotowana."
+        },
+        "thumbnail": {
+          "status": "pending",
+          "path": null,
+          "mimeType": null,
+          "width": null,
+          "height": null,
+          "sizeBytes": null,
+          "sha256": null,
+          "altText": null,
+          "derivedFrom": "technique",
+          "origin": null,
+          "reason": "Miniatura nie została jeszcze przygotowana."
+        }
+      }
+    },
+    {
+      "exerciseId": "lat_pulldown_wide",
+      "variantId": "default",
+      "revision": 1,
+      "status": "pending",
+      "provenance": {
+        "masterVersion": "2.8",
+        "references": [
+          "§3.4:lat_pulldown_wide",
+          "§4.2:lat_pulldown_wide"
+        ],
+        "ownerClarificationIds": []
+      },
+      "imageReadiness": {
+        "status": "pending",
+        "catalogFingerprint": null,
+        "reviewer": null,
+        "reviewedAt": null,
+        "reviewedFields": []
+      },
+      "ownerApproval": {
+        "status": "pending",
+        "revision": 1,
+        "reviewer": null,
+        "decidedAt": null,
+        "decisionId": null,
+        "reason": null
+      },
+      "views": {
+        "technique": {
+          "status": "pending",
+          "path": null,
+          "mimeType": null,
+          "width": null,
+          "height": null,
+          "sizeBytes": null,
+          "sha256": null,
+          "altText": null,
+          "derivedFrom": null,
+          "origin": null,
+          "reason": "Ilustracja nie została jeszcze przygotowana."
+        },
+        "muscles": {
+          "status": "pending",
+          "path": null,
+          "mimeType": null,
+          "width": null,
+          "height": null,
+          "sizeBytes": null,
+          "sha256": null,
+          "altText": null,
+          "derivedFrom": "technique",
+          "origin": null,
+          "reason": "Mapa mięśni nie została jeszcze przygotowana."
+        },
+        "thumbnail": {
+          "status": "pending",
+          "path": null,
+          "mimeType": null,
+          "width": null,
+          "height": null,
+          "sizeBytes": null,
+          "sha256": null,
+          "altText": null,
+          "derivedFrom": "technique",
+          "origin": null,
+          "reason": "Miniatura nie została jeszcze przygotowana."
+        }
+      }
+    },
+    {
+      "exerciseId": "row_v",
+      "variantId": "default",
+      "revision": 1,
+      "status": "pending",
+      "provenance": {
+        "masterVersion": "2.8",
+        "references": [
+          "§3.4:row_v",
+          "§4.2:row_v"
+        ],
+        "ownerClarificationIds": []
+      },
+      "imageReadiness": {
+        "status": "pending",
+        "catalogFingerprint": null,
+        "reviewer": null,
+        "reviewedAt": null,
+        "reviewedFields": []
+      },
+      "ownerApproval": {
+        "status": "pending",
+        "revision": 1,
+        "reviewer": null,
+        "decidedAt": null,
+        "decisionId": null,
+        "reason": null
+      },
+      "views": {
+        "technique": {
+          "status": "pending",
+          "path": null,
+          "mimeType": null,
+          "width": null,
+          "height": null,
+          "sizeBytes": null,
+          "sha256": null,
+          "altText": null,
+          "derivedFrom": null,
+          "origin": null,
+          "reason": "Ilustracja nie została jeszcze przygotowana."
+        },
+        "muscles": {
+          "status": "pending",
+          "path": null,
+          "mimeType": null,
+          "width": null,
+          "height": null,
+          "sizeBytes": null,
+          "sha256": null,
+          "altText": null,
+          "derivedFrom": "technique",
+          "origin": null,
+          "reason": "Mapa mięśni nie została jeszcze przygotowana."
+        },
+        "thumbnail": {
+          "status": "pending",
+          "path": null,
+          "mimeType": null,
+          "width": null,
+          "height": null,
+          "sizeBytes": null,
+          "sha256": null,
+          "altText": null,
+          "derivedFrom": "technique",
+          "origin": null,
+          "reason": "Miniatura nie została jeszcze przygotowana."
+        }
+      }
+    },
+    {
+      "exerciseId": "rear_delt",
+      "variantId": "default",
+      "revision": 1,
+      "status": "pending",
+      "provenance": {
+        "masterVersion": "2.8",
+        "references": [
+          "§3.4:rear_delt",
+          "§4.3:rear_delt"
+        ],
+        "ownerClarificationIds": []
+      },
+      "imageReadiness": {
+        "status": "pending",
+        "catalogFingerprint": null,
+        "reviewer": null,
+        "reviewedAt": null,
+        "reviewedFields": []
+      },
+      "ownerApproval": {
+        "status": "pending",
+        "revision": 1,
+        "reviewer": null,
+        "decidedAt": null,
+        "decisionId": null,
+        "reason": null
+      },
+      "views": {
+        "technique": {
+          "status": "pending",
+          "path": null,
+          "mimeType": null,
+          "width": null,
+          "height": null,
+          "sizeBytes": null,
+          "sha256": null,
+          "altText": null,
+          "derivedFrom": null,
+          "origin": null,
+          "reason": "Ilustracja nie została jeszcze przygotowana."
+        },
+        "muscles": {
+          "status": "pending",
+          "path": null,
+          "mimeType": null,
+          "width": null,
+          "height": null,
+          "sizeBytes": null,
+          "sha256": null,
+          "altText": null,
+          "derivedFrom": "technique",
+          "origin": null,
+          "reason": "Mapa mięśni nie została jeszcze przygotowana."
+        },
+        "thumbnail": {
+          "status": "pending",
+          "path": null,
+          "mimeType": null,
+          "width": null,
+          "height": null,
+          "sizeBytes": null,
+          "sha256": null,
+          "altText": null,
+          "derivedFrom": "technique",
+          "origin": null,
+          "reason": "Miniatura nie została jeszcze przygotowana."
+        }
+      }
+    },
+    {
+      "exerciseId": "biceps_preacher",
+      "variantId": "default",
+      "revision": 1,
+      "status": "pending",
+      "provenance": {
+        "masterVersion": "2.8",
+        "references": [
+          "§3.4:biceps_preacher",
+          "§4.4:biceps_preacher"
+        ],
+        "ownerClarificationIds": [
+          "owner-clarification:2026-11-20:tri-machine-dual-function"
+        ]
+      },
+      "imageReadiness": {
+        "status": "pending",
+        "catalogFingerprint": null,
+        "reviewer": null,
+        "reviewedAt": null,
+        "reviewedFields": []
+      },
+      "ownerApproval": {
+        "status": "pending",
+        "revision": 1,
+        "reviewer": null,
+        "decidedAt": null,
+        "decisionId": null,
+        "reason": null
+      },
+      "views": {
+        "technique": {
+          "status": "pending",
+          "path": null,
+          "mimeType": null,
+          "width": null,
+          "height": null,
+          "sizeBytes": null,
+          "sha256": null,
+          "altText": null,
+          "derivedFrom": null,
+          "origin": null,
+          "reason": "Ilustracja nie została jeszcze przygotowana."
+        },
+        "muscles": {
+          "status": "pending",
+          "path": null,
+          "mimeType": null,
+          "width": null,
+          "height": null,
+          "sizeBytes": null,
+          "sha256": null,
+          "altText": null,
+          "derivedFrom": "technique",
+          "origin": null,
+          "reason": "Mapa mięśni nie została jeszcze przygotowana."
+        },
+        "thumbnail": {
+          "status": "pending",
+          "path": null,
+          "mimeType": null,
+          "width": null,
+          "height": null,
+          "sizeBytes": null,
+          "sha256": null,
+          "altText": null,
+          "derivedFrom": "technique",
+          "origin": null,
+          "reason": "Miniatura nie została jeszcze przygotowana."
+        }
+      }
+    },
+    {
+      "exerciseId": "leg_curl",
+      "variantId": "default",
+      "revision": 1,
+      "status": "pending",
+      "provenance": {
+        "masterVersion": "2.8",
+        "references": [
+          "§3.4:leg_curl",
+          "§4.6:leg_curl"
+        ],
+        "ownerClarificationIds": []
+      },
+      "imageReadiness": {
+        "status": "pending",
+        "catalogFingerprint": null,
+        "reviewer": null,
+        "reviewedAt": null,
+        "reviewedFields": []
+      },
+      "ownerApproval": {
+        "status": "pending",
+        "revision": 1,
+        "reviewer": null,
+        "decidedAt": null,
+        "decisionId": null,
+        "reason": null
+      },
+      "views": {
+        "technique": {
+          "status": "pending",
+          "path": null,
+          "mimeType": null,
+          "width": null,
+          "height": null,
+          "sizeBytes": null,
+          "sha256": null,
+          "altText": null,
+          "derivedFrom": null,
+          "origin": null,
+          "reason": "Ilustracja nie została jeszcze przygotowana."
+        },
+        "muscles": {
+          "status": "pending",
+          "path": null,
+          "mimeType": null,
+          "width": null,
+          "height": null,
+          "sizeBytes": null,
+          "sha256": null,
+          "altText": null,
+          "derivedFrom": "technique",
+          "origin": null,
+          "reason": "Mapa mięśni nie została jeszcze przygotowana."
+        },
+        "thumbnail": {
+          "status": "pending",
+          "path": null,
+          "mimeType": null,
+          "width": null,
+          "height": null,
+          "sizeBytes": null,
+          "sha256": null,
+          "altText": null,
+          "derivedFrom": "technique",
+          "origin": null,
+          "reason": "Miniatura nie została jeszcze przygotowana."
+        }
+      }
+    },
+    {
+      "exerciseId": "db_bench",
+      "variantId": "default",
+      "revision": 1,
+      "status": "pending",
+      "provenance": {
+        "masterVersion": "2.8",
+        "references": [
+          "§3.4:db_bench",
+          "§4.1:db_bench"
+        ],
+        "ownerClarificationIds": []
+      },
+      "imageReadiness": {
+        "status": "pending",
+        "catalogFingerprint": null,
+        "reviewer": null,
+        "reviewedAt": null,
+        "reviewedFields": []
+      },
+      "ownerApproval": {
+        "status": "pending",
+        "revision": 1,
+        "reviewer": null,
+        "decidedAt": null,
+        "decisionId": null,
+        "reason": null
+      },
+      "views": {
+        "technique": {
+          "status": "pending",
+          "path": null,
+          "mimeType": null,
+          "width": null,
+          "height": null,
+          "sizeBytes": null,
+          "sha256": null,
+          "altText": null,
+          "derivedFrom": null,
+          "origin": null,
+          "reason": "Ilustracja nie została jeszcze przygotowana."
+        },
+        "muscles": {
+          "status": "pending",
+          "path": null,
+          "mimeType": null,
+          "width": null,
+          "height": null,
+          "sizeBytes": null,
+          "sha256": null,
+          "altText": null,
+          "derivedFrom": "technique",
+          "origin": null,
+          "reason": "Mapa mięśni nie została jeszcze przygotowana."
+        },
+        "thumbnail": {
+          "status": "pending",
+          "path": null,
+          "mimeType": null,
+          "width": null,
+          "height": null,
+          "sizeBytes": null,
+          "sha256": null,
+          "altText": null,
+          "derivedFrom": "technique",
+          "origin": null,
+          "reason": "Miniatura nie została jeszcze przygotowana."
+        }
+      }
+    },
+    {
+      "exerciseId": "db_fly",
+      "variantId": "default",
+      "revision": 1,
+      "status": "pending",
+      "provenance": {
+        "masterVersion": "2.8",
+        "references": [
+          "§3.4:db_fly",
+          "§4.1:db_fly"
+        ],
+        "ownerClarificationIds": []
+      },
+      "imageReadiness": {
+        "status": "pending",
+        "catalogFingerprint": null,
+        "reviewer": null,
+        "reviewedAt": null,
+        "reviewedFields": []
+      },
+      "ownerApproval": {
+        "status": "pending",
+        "revision": 1,
+        "reviewer": null,
+        "decidedAt": null,
+        "decisionId": null,
+        "reason": null
+      },
+      "views": {
+        "technique": {
+          "status": "pending",
+          "path": null,
+          "mimeType": null,
+          "width": null,
+          "height": null,
+          "sizeBytes": null,
+          "sha256": null,
+          "altText": null,
+          "derivedFrom": null,
+          "origin": null,
+          "reason": "Ilustracja nie została jeszcze przygotowana."
+        },
+        "muscles": {
+          "status": "pending",
+          "path": null,
+          "mimeType": null,
+          "width": null,
+          "height": null,
+          "sizeBytes": null,
+          "sha256": null,
+          "altText": null,
+          "derivedFrom": "technique",
+          "origin": null,
+          "reason": "Mapa mięśni nie została jeszcze przygotowana."
+        },
+        "thumbnail": {
+          "status": "pending",
+          "path": null,
+          "mimeType": null,
+          "width": null,
+          "height": null,
+          "sizeBytes": null,
+          "sha256": null,
+          "altText": null,
+          "derivedFrom": "technique",
+          "origin": null,
+          "reason": "Miniatura nie została jeszcze przygotowana."
+        }
+      }
+    },
+    {
+      "exerciseId": "front_raise",
+      "variantId": "default",
+      "revision": 1,
+      "status": "pending",
+      "provenance": {
+        "masterVersion": "2.8",
+        "references": [
+          "§3.4:front_raise",
+          "§4.3:front_raise"
+        ],
+        "ownerClarificationIds": []
+      },
+      "imageReadiness": {
+        "status": "pending",
+        "catalogFingerprint": null,
+        "reviewer": null,
+        "reviewedAt": null,
+        "reviewedFields": []
+      },
+      "ownerApproval": {
+        "status": "pending",
+        "revision": 1,
+        "reviewer": null,
+        "decidedAt": null,
+        "decisionId": null,
+        "reason": null
+      },
+      "views": {
+        "technique": {
+          "status": "pending",
+          "path": null,
+          "mimeType": null,
+          "width": null,
+          "height": null,
+          "sizeBytes": null,
+          "sha256": null,
+          "altText": null,
+          "derivedFrom": null,
+          "origin": null,
+          "reason": "Ilustracja nie została jeszcze przygotowana."
+        },
+        "muscles": {
+          "status": "pending",
+          "path": null,
+          "mimeType": null,
+          "width": null,
+          "height": null,
+          "sizeBytes": null,
+          "sha256": null,
+          "altText": null,
+          "derivedFrom": "technique",
+          "origin": null,
+          "reason": "Mapa mięśni nie została jeszcze przygotowana."
+        },
+        "thumbnail": {
+          "status": "pending",
+          "path": null,
+          "mimeType": null,
+          "width": null,
+          "height": null,
+          "sizeBytes": null,
+          "sha256": null,
+          "altText": null,
+          "derivedFrom": "technique",
+          "origin": null,
+          "reason": "Miniatura nie została jeszcze przygotowana."
+        }
+      }
+    },
+    {
+      "exerciseId": "lat_raise_seated",
+      "variantId": "default",
+      "revision": 1,
+      "status": "pending",
+      "provenance": {
+        "masterVersion": "2.8",
+        "references": [
+          "§3.4:lat_raise_seated",
+          "§4.3:lat_raise_seated"
+        ],
+        "ownerClarificationIds": []
+      },
+      "imageReadiness": {
+        "status": "pending",
+        "catalogFingerprint": null,
+        "reviewer": null,
+        "reviewedAt": null,
+        "reviewedFields": []
+      },
+      "ownerApproval": {
+        "status": "pending",
+        "revision": 1,
+        "reviewer": null,
+        "decidedAt": null,
+        "decisionId": null,
+        "reason": null
+      },
+      "views": {
+        "technique": {
+          "status": "pending",
+          "path": null,
+          "mimeType": null,
+          "width": null,
+          "height": null,
+          "sizeBytes": null,
+          "sha256": null,
+          "altText": null,
+          "derivedFrom": null,
+          "origin": null,
+          "reason": "Ilustracja nie została jeszcze przygotowana."
+        },
+        "muscles": {
+          "status": "pending",
+          "path": null,
+          "mimeType": null,
+          "width": null,
+          "height": null,
+          "sizeBytes": null,
+          "sha256": null,
+          "altText": null,
+          "derivedFrom": "technique",
+          "origin": null,
+          "reason": "Mapa mięśni nie została jeszcze przygotowana."
+        },
+        "thumbnail": {
+          "status": "pending",
+          "path": null,
+          "mimeType": null,
+          "width": null,
+          "height": null,
+          "sizeBytes": null,
+          "sha256": null,
+          "altText": null,
+          "derivedFrom": "technique",
+          "origin": null,
+          "reason": "Miniatura nie została jeszcze przygotowana."
+        }
+      }
+    },
+    {
+      "exerciseId": "tri_machine",
+      "variantId": "default",
+      "revision": 1,
+      "status": "pending",
+      "provenance": {
+        "masterVersion": "2.8",
+        "references": [
+          "§3.4:tri_machine",
+          "§4.5:tri_machine"
+        ],
+        "ownerClarificationIds": [
+          "owner-clarification:2026-11-20:tri-machine-dual-function"
+        ]
+      },
+      "imageReadiness": {
+        "status": "pending",
+        "catalogFingerprint": null,
+        "reviewer": null,
+        "reviewedAt": null,
+        "reviewedFields": []
+      },
+      "ownerApproval": {
+        "status": "pending",
+        "revision": 1,
+        "reviewer": null,
+        "decidedAt": null,
+        "decisionId": null,
+        "reason": null
+      },
+      "views": {
+        "technique": {
+          "status": "pending",
+          "path": null,
+          "mimeType": null,
+          "width": null,
+          "height": null,
+          "sizeBytes": null,
+          "sha256": null,
+          "altText": null,
+          "derivedFrom": null,
+          "origin": null,
+          "reason": "Ilustracja nie została jeszcze przygotowana."
+        },
+        "muscles": {
+          "status": "pending",
+          "path": null,
+          "mimeType": null,
+          "width": null,
+          "height": null,
+          "sizeBytes": null,
+          "sha256": null,
+          "altText": null,
+          "derivedFrom": "technique",
+          "origin": null,
+          "reason": "Mapa mięśni nie została jeszcze przygotowana."
+        },
+        "thumbnail": {
+          "status": "pending",
+          "path": null,
+          "mimeType": null,
+          "width": null,
+          "height": null,
+          "sizeBytes": null,
+          "sha256": null,
+          "altText": null,
+          "derivedFrom": "technique",
+          "origin": null,
+          "reason": "Miniatura nie została jeszcze przygotowana."
+        }
+      }
+    },
+    {
+      "exerciseId": "lat_pulldown_neutral",
+      "variantId": "default",
+      "revision": 1,
+      "status": "pending",
+      "provenance": {
+        "masterVersion": "2.8",
+        "references": [
+          "§3.4:lat_pulldown_neutral",
+          "§4.2:lat_pulldown_neutral"
+        ],
+        "ownerClarificationIds": []
+      },
+      "imageReadiness": {
+        "status": "pending",
+        "catalogFingerprint": null,
+        "reviewer": null,
+        "reviewedAt": null,
+        "reviewedFields": []
+      },
+      "ownerApproval": {
+        "status": "pending",
+        "revision": 1,
+        "reviewer": null,
+        "decidedAt": null,
+        "decisionId": null,
+        "reason": null
+      },
+      "views": {
+        "technique": {
+          "status": "pending",
+          "path": null,
+          "mimeType": null,
+          "width": null,
+          "height": null,
+          "sizeBytes": null,
+          "sha256": null,
+          "altText": null,
+          "derivedFrom": null,
+          "origin": null,
+          "reason": "Ilustracja nie została jeszcze przygotowana."
+        },
+        "muscles": {
+          "status": "pending",
+          "path": null,
+          "mimeType": null,
+          "width": null,
+          "height": null,
+          "sizeBytes": null,
+          "sha256": null,
+          "altText": null,
+          "derivedFrom": "technique",
+          "origin": null,
+          "reason": "Mapa mięśni nie została jeszcze przygotowana."
+        },
+        "thumbnail": {
+          "status": "pending",
+          "path": null,
+          "mimeType": null,
+          "width": null,
+          "height": null,
+          "sizeBytes": null,
+          "sha256": null,
+          "altText": null,
+          "derivedFrom": "technique",
+          "origin": null,
+          "reason": "Miniatura nie została jeszcze przygotowana."
+        }
+      }
+    },
+    {
+      "exerciseId": "row_straight",
+      "variantId": "default",
+      "revision": 1,
+      "status": "pending",
+      "provenance": {
+        "masterVersion": "2.8",
+        "references": [
+          "§3.4:row_straight",
+          "§4.2:row_straight"
+        ],
+        "ownerClarificationIds": []
+      },
+      "imageReadiness": {
+        "status": "pending",
+        "catalogFingerprint": null,
+        "reviewer": null,
+        "reviewedAt": null,
+        "reviewedFields": []
+      },
+      "ownerApproval": {
+        "status": "pending",
+        "revision": 1,
+        "reviewer": null,
+        "decidedAt": null,
+        "decisionId": null,
+        "reason": null
+      },
+      "views": {
+        "technique": {
+          "status": "pending",
+          "path": null,
+          "mimeType": null,
+          "width": null,
+          "height": null,
+          "sizeBytes": null,
+          "sha256": null,
+          "altText": null,
+          "derivedFrom": null,
+          "origin": null,
+          "reason": "Ilustracja nie została jeszcze przygotowana."
+        },
+        "muscles": {
+          "status": "pending",
+          "path": null,
+          "mimeType": null,
+          "width": null,
+          "height": null,
+          "sizeBytes": null,
+          "sha256": null,
+          "altText": null,
+          "derivedFrom": "technique",
+          "origin": null,
+          "reason": "Mapa mięśni nie została jeszcze przygotowana."
+        },
+        "thumbnail": {
+          "status": "pending",
+          "path": null,
+          "mimeType": null,
+          "width": null,
+          "height": null,
+          "sizeBytes": null,
+          "sha256": null,
+          "altText": null,
+          "derivedFrom": "technique",
+          "origin": null,
+          "reason": "Miniatura nie została jeszcze przygotowana."
+        }
+      }
+    },
+    {
+      "exerciseId": "chest_machine",
+      "variantId": "default",
+      "revision": 1,
+      "status": "pending",
+      "provenance": {
+        "masterVersion": "2.8",
+        "references": [
+          "§3.4:chest_machine",
+          "§4.1:chest_machine"
+        ],
+        "ownerClarificationIds": []
+      },
+      "imageReadiness": {
+        "status": "pending",
+        "catalogFingerprint": null,
+        "reviewer": null,
+        "reviewedAt": null,
+        "reviewedFields": []
+      },
+      "ownerApproval": {
+        "status": "pending",
+        "revision": 1,
+        "reviewer": null,
+        "decidedAt": null,
+        "decisionId": null,
+        "reason": null
+      },
+      "views": {
+        "technique": {
+          "status": "pending",
+          "path": null,
+          "mimeType": null,
+          "width": null,
+          "height": null,
+          "sizeBytes": null,
+          "sha256": null,
+          "altText": null,
+          "derivedFrom": null,
+          "origin": null,
+          "reason": "Ilustracja nie została jeszcze przygotowana."
+        },
+        "muscles": {
+          "status": "pending",
+          "path": null,
+          "mimeType": null,
+          "width": null,
+          "height": null,
+          "sizeBytes": null,
+          "sha256": null,
+          "altText": null,
+          "derivedFrom": "technique",
+          "origin": null,
+          "reason": "Mapa mięśni nie została jeszcze przygotowana."
+        },
+        "thumbnail": {
+          "status": "pending",
+          "path": null,
+          "mimeType": null,
+          "width": null,
+          "height": null,
+          "sizeBytes": null,
+          "sha256": null,
+          "altText": null,
+          "derivedFrom": "technique",
+          "origin": null,
+          "reason": "Miniatura nie została jeszcze przygotowana."
+        }
+      }
+    },
+    {
+      "exerciseId": "pec_deck",
+      "variantId": "default",
+      "revision": 1,
+      "status": "pending",
+      "provenance": {
+        "masterVersion": "2.8",
+        "references": [
+          "§3.4:pec_deck",
+          "§4.1:pec_deck"
+        ],
+        "ownerClarificationIds": []
+      },
+      "imageReadiness": {
+        "status": "pending",
+        "catalogFingerprint": null,
+        "reviewer": null,
+        "reviewedAt": null,
+        "reviewedFields": []
+      },
+      "ownerApproval": {
+        "status": "pending",
+        "revision": 1,
+        "reviewer": null,
+        "decidedAt": null,
+        "decisionId": null,
+        "reason": null
+      },
+      "views": {
+        "technique": {
+          "status": "pending",
+          "path": null,
+          "mimeType": null,
+          "width": null,
+          "height": null,
+          "sizeBytes": null,
+          "sha256": null,
+          "altText": null,
+          "derivedFrom": null,
+          "origin": null,
+          "reason": "Ilustracja nie została jeszcze przygotowana."
+        },
+        "muscles": {
+          "status": "pending",
+          "path": null,
+          "mimeType": null,
+          "width": null,
+          "height": null,
+          "sizeBytes": null,
+          "sha256": null,
+          "altText": null,
+          "derivedFrom": "technique",
+          "origin": null,
+          "reason": "Mapa mięśni nie została jeszcze przygotowana."
+        },
+        "thumbnail": {
+          "status": "pending",
+          "path": null,
+          "mimeType": null,
+          "width": null,
+          "height": null,
+          "sizeBytes": null,
+          "sha256": null,
+          "altText": null,
+          "derivedFrom": "technique",
+          "origin": null,
+          "reason": "Miniatura nie została jeszcze przygotowana."
+        }
+      }
+    },
+    {
+      "exerciseId": "shoulder_press",
+      "variantId": "default",
+      "revision": 1,
+      "status": "pending",
+      "provenance": {
+        "masterVersion": "2.8",
+        "references": [
+          "§3.4:shoulder_press",
+          "§4.3:shoulder_press"
+        ],
+        "ownerClarificationIds": []
+      },
+      "imageReadiness": {
+        "status": "pending",
+        "catalogFingerprint": null,
+        "reviewer": null,
+        "reviewedAt": null,
+        "reviewedFields": []
+      },
+      "ownerApproval": {
+        "status": "pending",
+        "revision": 1,
+        "reviewer": null,
+        "decidedAt": null,
+        "decisionId": null,
+        "reason": null
+      },
+      "views": {
+        "technique": {
+          "status": "pending",
+          "path": null,
+          "mimeType": null,
+          "width": null,
+          "height": null,
+          "sizeBytes": null,
+          "sha256": null,
+          "altText": null,
+          "derivedFrom": null,
+          "origin": null,
+          "reason": "Ilustracja nie została jeszcze przygotowana."
+        },
+        "muscles": {
+          "status": "pending",
+          "path": null,
+          "mimeType": null,
+          "width": null,
+          "height": null,
+          "sizeBytes": null,
+          "sha256": null,
+          "altText": null,
+          "derivedFrom": "technique",
+          "origin": null,
+          "reason": "Mapa mięśni nie została jeszcze przygotowana."
+        },
+        "thumbnail": {
+          "status": "pending",
+          "path": null,
+          "mimeType": null,
+          "width": null,
+          "height": null,
+          "sizeBytes": null,
+          "sha256": null,
+          "altText": null,
+          "derivedFrom": "technique",
+          "origin": null,
+          "reason": "Miniatura nie została jeszcze przygotowana."
+        }
+      }
+    },
+    {
+      "exerciseId": "lat_raise_cable",
+      "variantId": "default",
+      "revision": 1,
+      "status": "pending",
+      "provenance": {
+        "masterVersion": "2.8",
+        "references": [
+          "§3.4:lat_raise_cable",
+          "§4.3:lat_raise_cable"
+        ],
+        "ownerClarificationIds": []
+      },
+      "imageReadiness": {
+        "status": "pending",
+        "catalogFingerprint": null,
+        "reviewer": null,
+        "reviewedAt": null,
+        "reviewedFields": []
+      },
+      "ownerApproval": {
+        "status": "pending",
+        "revision": 1,
+        "reviewer": null,
+        "decidedAt": null,
+        "decisionId": null,
+        "reason": null
+      },
+      "views": {
+        "technique": {
+          "status": "pending",
+          "path": null,
+          "mimeType": null,
+          "width": null,
+          "height": null,
+          "sizeBytes": null,
+          "sha256": null,
+          "altText": null,
+          "derivedFrom": null,
+          "origin": null,
+          "reason": "Ilustracja nie została jeszcze przygotowana."
+        },
+        "muscles": {
+          "status": "pending",
+          "path": null,
+          "mimeType": null,
+          "width": null,
+          "height": null,
+          "sizeBytes": null,
+          "sha256": null,
+          "altText": null,
+          "derivedFrom": "technique",
+          "origin": null,
+          "reason": "Mapa mięśni nie została jeszcze przygotowana."
+        },
+        "thumbnail": {
+          "status": "pending",
+          "path": null,
+          "mimeType": null,
+          "width": null,
+          "height": null,
+          "sizeBytes": null,
+          "sha256": null,
+          "altText": null,
+          "derivedFrom": "technique",
+          "origin": null,
+          "reason": "Miniatura nie została jeszcze przygotowana."
+        }
+      }
+    },
+    {
+      "exerciseId": "face_pull",
+      "variantId": "default",
+      "revision": 1,
+      "status": "pending",
+      "provenance": {
+        "masterVersion": "2.8",
+        "references": [
+          "§3.4:face_pull",
+          "§4.3:face_pull"
+        ],
+        "ownerClarificationIds": []
+      },
+      "imageReadiness": {
+        "status": "pending",
+        "catalogFingerprint": null,
+        "reviewer": null,
+        "reviewedAt": null,
+        "reviewedFields": []
+      },
+      "ownerApproval": {
+        "status": "pending",
+        "revision": 1,
+        "reviewer": null,
+        "decidedAt": null,
+        "decisionId": null,
+        "reason": null
+      },
+      "views": {
+        "technique": {
+          "status": "pending",
+          "path": null,
+          "mimeType": null,
+          "width": null,
+          "height": null,
+          "sizeBytes": null,
+          "sha256": null,
+          "altText": null,
+          "derivedFrom": null,
+          "origin": null,
+          "reason": "Ilustracja nie została jeszcze przygotowana."
+        },
+        "muscles": {
+          "status": "pending",
+          "path": null,
+          "mimeType": null,
+          "width": null,
+          "height": null,
+          "sizeBytes": null,
+          "sha256": null,
+          "altText": null,
+          "derivedFrom": "technique",
+          "origin": null,
+          "reason": "Mapa mięśni nie została jeszcze przygotowana."
+        },
+        "thumbnail": {
+          "status": "pending",
+          "path": null,
+          "mimeType": null,
+          "width": null,
+          "height": null,
+          "sizeBytes": null,
+          "sha256": null,
+          "altText": null,
+          "derivedFrom": "technique",
+          "origin": null,
+          "reason": "Miniatura nie została jeszcze przygotowana."
+        }
+      }
+    },
+    {
+      "exerciseId": "row_machine",
+      "variantId": "default",
+      "revision": 1,
+      "status": "pending",
+      "provenance": {
+        "masterVersion": "2.8",
+        "references": [
+          "§3.4:row_machine",
+          "§4.2:row_machine"
+        ],
+        "ownerClarificationIds": []
+      },
+      "imageReadiness": {
+        "status": "pending",
+        "catalogFingerprint": null,
+        "reviewer": null,
+        "reviewedAt": null,
+        "reviewedFields": []
+      },
+      "ownerApproval": {
+        "status": "pending",
+        "revision": 1,
+        "reviewer": null,
+        "decidedAt": null,
+        "decisionId": null,
+        "reason": null
+      },
+      "views": {
+        "technique": {
+          "status": "pending",
+          "path": null,
+          "mimeType": null,
+          "width": null,
+          "height": null,
+          "sizeBytes": null,
+          "sha256": null,
+          "altText": null,
+          "derivedFrom": null,
+          "origin": null,
+          "reason": "Ilustracja nie została jeszcze przygotowana."
+        },
+        "muscles": {
+          "status": "pending",
+          "path": null,
+          "mimeType": null,
+          "width": null,
+          "height": null,
+          "sizeBytes": null,
+          "sha256": null,
+          "altText": null,
+          "derivedFrom": "technique",
+          "origin": null,
+          "reason": "Mapa mięśni nie została jeszcze przygotowana."
+        },
+        "thumbnail": {
+          "status": "pending",
+          "path": null,
+          "mimeType": null,
+          "width": null,
+          "height": null,
+          "sizeBytes": null,
+          "sha256": null,
+          "altText": null,
+          "derivedFrom": "technique",
+          "origin": null,
+          "reason": "Miniatura nie została jeszcze przygotowana."
+        }
+      }
+    },
+    {
+      "exerciseId": "hammer_curl",
+      "variantId": "default",
+      "revision": 1,
+      "status": "pending",
+      "provenance": {
+        "masterVersion": "2.8",
+        "references": [
+          "§3.4:hammer_curl",
+          "§4.4:hammer_curl"
+        ],
+        "ownerClarificationIds": []
+      },
+      "imageReadiness": {
+        "status": "pending",
+        "catalogFingerprint": null,
+        "reviewer": null,
+        "reviewedAt": null,
+        "reviewedFields": []
+      },
+      "ownerApproval": {
+        "status": "pending",
+        "revision": 1,
+        "reviewer": null,
+        "decidedAt": null,
+        "decisionId": null,
+        "reason": null
+      },
+      "views": {
+        "technique": {
+          "status": "pending",
+          "path": null,
+          "mimeType": null,
+          "width": null,
+          "height": null,
+          "sizeBytes": null,
+          "sha256": null,
+          "altText": null,
+          "derivedFrom": null,
+          "origin": null,
+          "reason": "Ilustracja nie została jeszcze przygotowana."
+        },
+        "muscles": {
+          "status": "pending",
+          "path": null,
+          "mimeType": null,
+          "width": null,
+          "height": null,
+          "sizeBytes": null,
+          "sha256": null,
+          "altText": null,
+          "derivedFrom": "technique",
+          "origin": null,
+          "reason": "Mapa mięśni nie została jeszcze przygotowana."
+        },
+        "thumbnail": {
+          "status": "pending",
+          "path": null,
+          "mimeType": null,
+          "width": null,
+          "height": null,
+          "sizeBytes": null,
+          "sha256": null,
+          "altText": null,
+          "derivedFrom": "technique",
+          "origin": null,
+          "reason": "Miniatura nie została jeszcze przygotowana."
+        }
+      }
+    },
+    {
+      "exerciseId": "cable_curl",
+      "variantId": "default",
+      "revision": 1,
+      "status": "pending",
+      "provenance": {
+        "masterVersion": "2.8",
+        "references": [
+          "§3.4:cable_curl",
+          "§4.4:cable_curl"
+        ],
+        "ownerClarificationIds": []
+      },
+      "imageReadiness": {
+        "status": "pending",
+        "catalogFingerprint": null,
+        "reviewer": null,
+        "reviewedAt": null,
+        "reviewedFields": []
+      },
+      "ownerApproval": {
+        "status": "pending",
+        "revision": 1,
+        "reviewer": null,
+        "decidedAt": null,
+        "decisionId": null,
+        "reason": null
+      },
+      "views": {
+        "technique": {
+          "status": "pending",
+          "path": null,
+          "mimeType": null,
+          "width": null,
+          "height": null,
+          "sizeBytes": null,
+          "sha256": null,
+          "altText": null,
+          "derivedFrom": null,
+          "origin": null,
+          "reason": "Ilustracja nie została jeszcze przygotowana."
+        },
+        "muscles": {
+          "status": "pending",
+          "path": null,
+          "mimeType": null,
+          "width": null,
+          "height": null,
+          "sizeBytes": null,
+          "sha256": null,
+          "altText": null,
+          "derivedFrom": "technique",
+          "origin": null,
+          "reason": "Mapa mięśni nie została jeszcze przygotowana."
+        },
+        "thumbnail": {
+          "status": "pending",
+          "path": null,
+          "mimeType": null,
+          "width": null,
+          "height": null,
+          "sizeBytes": null,
+          "sha256": null,
+          "altText": null,
+          "derivedFrom": "technique",
+          "origin": null,
+          "reason": "Miniatura nie została jeszcze przygotowana."
+        }
+      }
+    },
+    {
+      "exerciseId": "tri_overhead",
+      "variantId": "default",
+      "revision": 1,
+      "status": "pending",
+      "provenance": {
+        "masterVersion": "2.8",
+        "references": [
+          "§3.4:tri_overhead",
+          "§4.5:tri_overhead"
+        ],
+        "ownerClarificationIds": []
+      },
+      "imageReadiness": {
+        "status": "pending",
+        "catalogFingerprint": null,
+        "reviewer": null,
+        "reviewedAt": null,
+        "reviewedFields": []
+      },
+      "ownerApproval": {
+        "status": "pending",
+        "revision": 1,
+        "reviewer": null,
+        "decidedAt": null,
+        "decisionId": null,
+        "reason": null
+      },
+      "views": {
+        "technique": {
+          "status": "pending",
+          "path": null,
+          "mimeType": null,
+          "width": null,
+          "height": null,
+          "sizeBytes": null,
+          "sha256": null,
+          "altText": null,
+          "derivedFrom": null,
+          "origin": null,
+          "reason": "Ilustracja nie została jeszcze przygotowana."
+        },
+        "muscles": {
+          "status": "pending",
+          "path": null,
+          "mimeType": null,
+          "width": null,
+          "height": null,
+          "sizeBytes": null,
+          "sha256": null,
+          "altText": null,
+          "derivedFrom": "technique",
+          "origin": null,
+          "reason": "Mapa mięśni nie została jeszcze przygotowana."
+        },
+        "thumbnail": {
+          "status": "pending",
+          "path": null,
+          "mimeType": null,
+          "width": null,
+          "height": null,
+          "sizeBytes": null,
+          "sha256": null,
+          "altText": null,
+          "derivedFrom": "technique",
+          "origin": null,
+          "reason": "Miniatura nie została jeszcze przygotowana."
+        }
+      }
+    },
+    {
+      "exerciseId": "leg_extension",
+      "variantId": "default",
+      "revision": 1,
+      "status": "pending",
+      "provenance": {
+        "masterVersion": "2.8",
+        "references": [
+          "§3.4:leg_extension",
+          "§4.6:leg_extension"
+        ],
+        "ownerClarificationIds": []
+      },
+      "imageReadiness": {
+        "status": "pending",
+        "catalogFingerprint": null,
+        "reviewer": null,
+        "reviewedAt": null,
+        "reviewedFields": []
+      },
+      "ownerApproval": {
+        "status": "pending",
+        "revision": 1,
+        "reviewer": null,
+        "decidedAt": null,
+        "decisionId": null,
+        "reason": null
+      },
+      "views": {
+        "technique": {
+          "status": "pending",
+          "path": null,
+          "mimeType": null,
+          "width": null,
+          "height": null,
+          "sizeBytes": null,
+          "sha256": null,
+          "altText": null,
+          "derivedFrom": null,
+          "origin": null,
+          "reason": "Ilustracja nie została jeszcze przygotowana."
+        },
+        "muscles": {
+          "status": "pending",
+          "path": null,
+          "mimeType": null,
+          "width": null,
+          "height": null,
+          "sizeBytes": null,
+          "sha256": null,
+          "altText": null,
+          "derivedFrom": "technique",
+          "origin": null,
+          "reason": "Mapa mięśni nie została jeszcze przygotowana."
+        },
+        "thumbnail": {
+          "status": "pending",
+          "path": null,
+          "mimeType": null,
+          "width": null,
+          "height": null,
+          "sizeBytes": null,
+          "sha256": null,
+          "altText": null,
+          "derivedFrom": "technique",
+          "origin": null,
+          "reason": "Miniatura nie została jeszcze przygotowana."
+        }
+      }
+    },
+    {
+      "exerciseId": "smith_squat",
+      "variantId": "default",
+      "revision": 1,
+      "status": "pending",
+      "provenance": {
+        "masterVersion": "2.8",
+        "references": [
+          "§3.4:smith_squat",
+          "§4.6:smith_squat"
+        ],
+        "ownerClarificationIds": []
+      },
+      "imageReadiness": {
+        "status": "pending",
+        "catalogFingerprint": null,
+        "reviewer": null,
+        "reviewedAt": null,
+        "reviewedFields": []
+      },
+      "ownerApproval": {
+        "status": "pending",
+        "revision": 1,
+        "reviewer": null,
+        "decidedAt": null,
+        "decisionId": null,
+        "reason": null
+      },
+      "views": {
+        "technique": {
+          "status": "pending",
+          "path": null,
+          "mimeType": null,
+          "width": null,
+          "height": null,
+          "sizeBytes": null,
+          "sha256": null,
+          "altText": null,
+          "derivedFrom": null,
+          "origin": null,
+          "reason": "Ilustracja nie została jeszcze przygotowana."
+        },
+        "muscles": {
+          "status": "pending",
+          "path": null,
+          "mimeType": null,
+          "width": null,
+          "height": null,
+          "sizeBytes": null,
+          "sha256": null,
+          "altText": null,
+          "derivedFrom": "technique",
+          "origin": null,
+          "reason": "Mapa mięśni nie została jeszcze przygotowana."
+        },
+        "thumbnail": {
+          "status": "pending",
+          "path": null,
+          "mimeType": null,
+          "width": null,
+          "height": null,
+          "sizeBytes": null,
+          "sha256": null,
+          "altText": null,
+          "derivedFrom": "technique",
+          "origin": null,
+          "reason": "Miniatura nie została jeszcze przygotowana."
+        }
+      }
+    },
+    {
+      "exerciseId": "pullup",
+      "variantId": "default",
+      "revision": 1,
+      "status": "pending",
+      "provenance": {
+        "masterVersion": "2.8",
+        "references": [
+          "§3.4:pullup",
+          "§4.2:pullup"
+        ],
+        "ownerClarificationIds": []
+      },
+      "imageReadiness": {
+        "status": "pending",
+        "catalogFingerprint": null,
+        "reviewer": null,
+        "reviewedAt": null,
+        "reviewedFields": []
+      },
+      "ownerApproval": {
+        "status": "pending",
+        "revision": 1,
+        "reviewer": null,
+        "decidedAt": null,
+        "decisionId": null,
+        "reason": null
+      },
+      "views": {
+        "technique": {
+          "status": "pending",
+          "path": null,
+          "mimeType": null,
+          "width": null,
+          "height": null,
+          "sizeBytes": null,
+          "sha256": null,
+          "altText": null,
+          "derivedFrom": null,
+          "origin": null,
+          "reason": "Ilustracja nie została jeszcze przygotowana."
+        },
+        "muscles": {
+          "status": "pending",
+          "path": null,
+          "mimeType": null,
+          "width": null,
+          "height": null,
+          "sizeBytes": null,
+          "sha256": null,
+          "altText": null,
+          "derivedFrom": "technique",
+          "origin": null,
+          "reason": "Mapa mięśni nie została jeszcze przygotowana."
+        },
+        "thumbnail": {
+          "status": "pending",
+          "path": null,
+          "mimeType": null,
+          "width": null,
+          "height": null,
+          "sizeBytes": null,
+          "sha256": null,
+          "altText": null,
+          "derivedFrom": "technique",
+          "origin": null,
+          "reason": "Miniatura nie została jeszcze przygotowana."
+        }
+      }
+    },
+    {
+      "exerciseId": "dips",
+      "variantId": "default",
+      "revision": 1,
+      "status": "pending",
+      "provenance": {
+        "masterVersion": "2.8",
+        "references": [
+          "§3.4:dips",
+          "§4.1:dips"
+        ],
+        "ownerClarificationIds": []
+      },
+      "imageReadiness": {
+        "status": "pending",
+        "catalogFingerprint": null,
+        "reviewer": null,
+        "reviewedAt": null,
+        "reviewedFields": []
+      },
+      "ownerApproval": {
+        "status": "pending",
+        "revision": 1,
+        "reviewer": null,
+        "decidedAt": null,
+        "decisionId": null,
+        "reason": null
+      },
+      "views": {
+        "technique": {
+          "status": "pending",
+          "path": null,
+          "mimeType": null,
+          "width": null,
+          "height": null,
+          "sizeBytes": null,
+          "sha256": null,
+          "altText": null,
+          "derivedFrom": null,
+          "origin": null,
+          "reason": "Ilustracja nie została jeszcze przygotowana."
+        },
+        "muscles": {
+          "status": "pending",
+          "path": null,
+          "mimeType": null,
+          "width": null,
+          "height": null,
+          "sizeBytes": null,
+          "sha256": null,
+          "altText": null,
+          "derivedFrom": "technique",
+          "origin": null,
+          "reason": "Mapa mięśni nie została jeszcze przygotowana."
+        },
+        "thumbnail": {
+          "status": "pending",
+          "path": null,
+          "mimeType": null,
+          "width": null,
+          "height": null,
+          "sizeBytes": null,
+          "sha256": null,
+          "altText": null,
+          "derivedFrom": "technique",
+          "origin": null,
+          "reason": "Miniatura nie została jeszcze przygotowana."
+        }
+      }
+    },
+    {
+      "exerciseId": "pushup",
+      "variantId": "default",
+      "revision": 1,
+      "status": "pending",
+      "provenance": {
+        "masterVersion": "2.8",
+        "references": [
+          "§3.4:pushup",
+          "§4.1:pushup"
+        ],
+        "ownerClarificationIds": []
+      },
+      "imageReadiness": {
+        "status": "pending",
+        "catalogFingerprint": null,
+        "reviewer": null,
+        "reviewedAt": null,
+        "reviewedFields": []
+      },
+      "ownerApproval": {
+        "status": "pending",
+        "revision": 1,
+        "reviewer": null,
+        "decidedAt": null,
+        "decisionId": null,
+        "reason": null
+      },
+      "views": {
+        "technique": {
+          "status": "pending",
+          "path": null,
+          "mimeType": null,
+          "width": null,
+          "height": null,
+          "sizeBytes": null,
+          "sha256": null,
+          "altText": null,
+          "derivedFrom": null,
+          "origin": null,
+          "reason": "Ilustracja nie została jeszcze przygotowana."
+        },
+        "muscles": {
+          "status": "pending",
+          "path": null,
+          "mimeType": null,
+          "width": null,
+          "height": null,
+          "sizeBytes": null,
+          "sha256": null,
+          "altText": null,
+          "derivedFrom": "technique",
+          "origin": null,
+          "reason": "Mapa mięśni nie została jeszcze przygotowana."
+        },
+        "thumbnail": {
+          "status": "pending",
+          "path": null,
+          "mimeType": null,
+          "width": null,
+          "height": null,
+          "sizeBytes": null,
+          "sha256": null,
+          "altText": null,
+          "derivedFrom": "technique",
+          "origin": null,
+          "reason": "Miniatura nie została jeszcze przygotowana."
+        }
+      }
+    },
+    {
+      "exerciseId": "leg_press",
+      "variantId": "high_feet",
+      "revision": 1,
+      "status": "pending",
+      "provenance": {
+        "masterVersion": "2.8",
+        "references": [
+          "§3.4:leg_press/high_feet",
+          "§4.7:leg_press/high_feet"
+        ],
+        "ownerClarificationIds": []
+      },
+      "imageReadiness": {
+        "status": "pending",
+        "catalogFingerprint": null,
+        "reviewer": null,
+        "reviewedAt": null,
+        "reviewedFields": []
+      },
+      "ownerApproval": {
+        "status": "pending",
+        "revision": 1,
+        "reviewer": null,
+        "decidedAt": null,
+        "decisionId": null,
+        "reason": null
+      },
+      "views": {
+        "technique": {
+          "status": "pending",
+          "path": null,
+          "mimeType": null,
+          "width": null,
+          "height": null,
+          "sizeBytes": null,
+          "sha256": null,
+          "altText": null,
+          "derivedFrom": null,
+          "origin": null,
+          "reason": "Ilustracja nie została jeszcze przygotowana."
+        },
+        "muscles": {
+          "status": "pending",
+          "path": null,
+          "mimeType": null,
+          "width": null,
+          "height": null,
+          "sizeBytes": null,
+          "sha256": null,
+          "altText": null,
+          "derivedFrom": "technique",
+          "origin": null,
+          "reason": "Mapa mięśni nie została jeszcze przygotowana."
+        },
+        "thumbnail": {
+          "status": "pending",
+          "path": null,
+          "mimeType": null,
+          "width": null,
+          "height": null,
+          "sizeBytes": null,
+          "sha256": null,
+          "altText": null,
+          "derivedFrom": "technique",
+          "origin": null,
+          "reason": "Miniatura nie została jeszcze przygotowana."
+        }
+      }
+    },
+    {
+      "exerciseId": "db_fly",
+      "variantId": "incline",
+      "revision": 1,
+      "status": "pending",
+      "provenance": {
+        "masterVersion": "2.8",
+        "references": [
+          "§3.4:db_fly/incline",
+          "§4.7:db_fly/incline"
+        ],
+        "ownerClarificationIds": []
+      },
+      "imageReadiness": {
+        "status": "pending",
+        "catalogFingerprint": null,
+        "reviewer": null,
+        "reviewedAt": null,
+        "reviewedFields": []
+      },
+      "ownerApproval": {
+        "status": "pending",
+        "revision": 1,
+        "reviewer": null,
+        "decidedAt": null,
+        "decisionId": null,
+        "reason": null
+      },
+      "views": {
+        "technique": {
+          "status": "pending",
+          "path": null,
+          "mimeType": null,
+          "width": null,
+          "height": null,
+          "sizeBytes": null,
+          "sha256": null,
+          "altText": null,
+          "derivedFrom": null,
+          "origin": null,
+          "reason": "Ilustracja nie została jeszcze przygotowana."
+        },
+        "muscles": {
+          "status": "pending",
+          "path": null,
+          "mimeType": null,
+          "width": null,
+          "height": null,
+          "sizeBytes": null,
+          "sha256": null,
+          "altText": null,
+          "derivedFrom": "technique",
+          "origin": null,
+          "reason": "Mapa mięśni nie została jeszcze przygotowana."
+        },
+        "thumbnail": {
+          "status": "pending",
+          "path": null,
+          "mimeType": null,
+          "width": null,
+          "height": null,
+          "sizeBytes": null,
+          "sha256": null,
+          "altText": null,
+          "derivedFrom": "technique",
+          "origin": null,
+          "reason": "Miniatura nie została jeszcze przygotowana."
+        }
+      }
+    },
+    {
+      "exerciseId": "shoulder_press",
+      "variantId": "dumbbells",
+      "revision": 1,
+      "status": "pending",
+      "provenance": {
+        "masterVersion": "2.8",
+        "references": [
+          "§3.4:shoulder_press/dumbbells",
+          "§4.7:shoulder_press/dumbbells"
+        ],
+        "ownerClarificationIds": []
+      },
+      "imageReadiness": {
+        "status": "pending",
+        "catalogFingerprint": null,
+        "reviewer": null,
+        "reviewedAt": null,
+        "reviewedFields": []
+      },
+      "ownerApproval": {
+        "status": "pending",
+        "revision": 1,
+        "reviewer": null,
+        "decidedAt": null,
+        "decisionId": null,
+        "reason": null
+      },
+      "views": {
+        "technique": {
+          "status": "pending",
+          "path": null,
+          "mimeType": null,
+          "width": null,
+          "height": null,
+          "sizeBytes": null,
+          "sha256": null,
+          "altText": null,
+          "derivedFrom": null,
+          "origin": null,
+          "reason": "Ilustracja nie została jeszcze przygotowana."
+        },
+        "muscles": {
+          "status": "pending",
+          "path": null,
+          "mimeType": null,
+          "width": null,
+          "height": null,
+          "sizeBytes": null,
+          "sha256": null,
+          "altText": null,
+          "derivedFrom": "technique",
+          "origin": null,
+          "reason": "Mapa mięśni nie została jeszcze przygotowana."
+        },
+        "thumbnail": {
+          "status": "pending",
+          "path": null,
+          "mimeType": null,
+          "width": null,
+          "height": null,
+          "sizeBytes": null,
+          "sha256": null,
+          "altText": null,
+          "derivedFrom": "technique",
+          "origin": null,
+          "reason": "Miniatura nie została jeszcze przygotowana."
+        }
+      }
+    },
+    {
+      "exerciseId": "tri_overhead",
+      "variantId": "rope",
+      "revision": 1,
+      "status": "pending",
+      "provenance": {
+        "masterVersion": "2.8",
+        "references": [
+          "§3.4:tri_overhead/rope",
+          "§4.7:tri_overhead/rope"
+        ],
+        "ownerClarificationIds": []
+      },
+      "imageReadiness": {
+        "status": "pending",
+        "catalogFingerprint": null,
+        "reviewer": null,
+        "reviewedAt": null,
+        "reviewedFields": []
+      },
+      "ownerApproval": {
+        "status": "pending",
+        "revision": 1,
+        "reviewer": null,
+        "decidedAt": null,
+        "decisionId": null,
+        "reason": null
+      },
+      "views": {
+        "technique": {
+          "status": "pending",
+          "path": null,
+          "mimeType": null,
+          "width": null,
+          "height": null,
+          "sizeBytes": null,
+          "sha256": null,
+          "altText": null,
+          "derivedFrom": null,
+          "origin": null,
+          "reason": "Ilustracja nie została jeszcze przygotowana."
+        },
+        "muscles": {
+          "status": "pending",
+          "path": null,
+          "mimeType": null,
+          "width": null,
+          "height": null,
+          "sizeBytes": null,
+          "sha256": null,
+          "altText": null,
+          "derivedFrom": "technique",
+          "origin": null,
+          "reason": "Mapa mięśni nie została jeszcze przygotowana."
+        },
+        "thumbnail": {
+          "status": "pending",
+          "path": null,
+          "mimeType": null,
+          "width": null,
+          "height": null,
+          "sizeBytes": null,
+          "sha256": null,
+          "altText": null,
+          "derivedFrom": "technique",
+          "origin": null,
+          "reason": "Miniatura nie została jeszcze przygotowana."
+        }
+      }
+    }
+  ]
+}

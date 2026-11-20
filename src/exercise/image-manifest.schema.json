@@ -1,0 +1,299 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://gymverse.invalid/schemas/exercise-image-manifest-v1.schema.json",
+  "title": "GymVerse exercise image manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["exerciseAssetsVersion", "manifestSchemaVersion", "records"],
+  "properties": {
+    "exerciseAssetsVersion": { "const": 1 },
+    "manifestSchemaVersion": { "const": 1 },
+    "records": {
+      "type": "array",
+      "minItems": 35,
+      "maxItems": 35,
+      "items": { "$ref": "#/$defs/composition" }
+    }
+  },
+  "$defs": {
+    "status": { "enum": ["pending", "draft", "review", "approved", "rejected"] },
+    "nullableString": { "type": ["string", "null"] },
+    "nullableInteger": { "type": ["integer", "null"], "minimum": 1 },
+    "nullableSha256": {
+      "type": ["string", "null"],
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "origin": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "required": ["kind", "reference", "tool", "createdAt"],
+      "properties": {
+        "kind": { "enum": ["generated", "derived", "legacy"] },
+        "reference": { "type": "string", "minLength": 1 },
+        "tool": { "type": ["string", "null"] },
+        "createdAt": { "type": ["string", "null"], "format": "date-time" }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "kind": { "enum": ["generated", "derived"] } } },
+          "then": {
+            "properties": {
+              "tool": { "type": "string", "minLength": 1 },
+              "createdAt": { "type": "string", "format": "date-time" }
+            }
+          }
+        }
+      ]
+    },
+    "view": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status", "path", "mimeType", "width", "height", "sizeBytes",
+        "sha256", "altText", "derivedFrom", "origin", "reason"
+      ],
+      "properties": {
+        "status": { "$ref": "#/$defs/status" },
+        "path": { "$ref": "#/$defs/nullableString" },
+        "mimeType": { "enum": ["image/webp", null] },
+        "width": { "$ref": "#/$defs/nullableInteger" },
+        "height": { "$ref": "#/$defs/nullableInteger" },
+        "sizeBytes": { "$ref": "#/$defs/nullableInteger" },
+        "sha256": { "$ref": "#/$defs/nullableSha256" },
+        "altText": { "$ref": "#/$defs/nullableString" },
+        "derivedFrom": { "enum": ["technique", null] },
+        "origin": { "$ref": "#/$defs/origin" },
+        "reason": { "$ref": "#/$defs/nullableString" }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "status": { "const": "pending" } } },
+          "then": {
+            "properties": {
+              "path": { "type": "null" },
+              "mimeType": { "type": "null" },
+              "width": { "type": "null" },
+              "height": { "type": "null" },
+              "sizeBytes": { "type": "null" },
+              "sha256": { "type": "null" },
+              "altText": { "type": "null" },
+              "origin": { "type": "null" }
+            }
+          },
+          "else": {
+            "properties": {
+              "path": { "type": "string", "minLength": 1 },
+              "mimeType": { "const": "image/webp" },
+              "width": { "type": "integer", "minimum": 1 },
+              "height": { "type": "integer", "minimum": 1 },
+              "sizeBytes": { "type": "integer", "minimum": 1 },
+              "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+              "altText": { "type": "string", "minLength": 1 },
+              "origin": { "$ref": "#/$defs/origin", "type": "object" }
+            }
+          }
+        },
+        {
+          "if": { "properties": { "status": { "enum": ["pending", "rejected"] } } },
+          "then": {
+            "properties": {
+              "reason": { "type": "string", "minLength": 1 }
+            }
+          },
+          "else": {
+            "properties": {
+              "reason": { "type": "null" }
+            }
+          }
+        }
+      ]
+    },
+    "imageReadiness": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "reviewedFields", "catalogFingerprint", "reviewer", "reviewedAt"],
+      "properties": {
+        "status": { "enum": ["pending", "approved"] },
+        "reviewedFields": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "enum": ["exerciseIdentity", "equipmentAndPosition", "executionMetadata", "primaryMuscles", "secondaryMuscles"] }
+        },
+        "catalogFingerprint": { "$ref": "#/$defs/nullableSha256" },
+        "reviewer": { "$ref": "#/$defs/nullableString" },
+        "reviewedAt": { "type": ["string", "null"], "format": "date-time" }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "status": { "const": "pending" } } },
+          "then": {
+            "properties": {
+              "reviewedFields": { "maxItems": 0 },
+              "catalogFingerprint": { "type": "null" },
+              "reviewer": { "type": "null" },
+              "reviewedAt": { "type": "null" }
+            }
+          },
+          "else": {
+            "properties": {
+              "reviewedFields": { "minItems": 5, "maxItems": 5 },
+              "catalogFingerprint": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+              "reviewer": { "type": "string", "minLength": 1 },
+              "reviewedAt": { "type": "string", "format": "date-time" }
+            }
+          }
+        }
+      ]
+    },
+    "ownerApproval": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "revision", "reviewer", "decidedAt", "decisionId", "reason"],
+      "properties": {
+        "status": { "enum": ["pending", "approved", "rejected"] },
+        "revision": { "type": "integer", "minimum": 1 },
+        "reviewer": { "$ref": "#/$defs/nullableString" },
+        "decidedAt": { "type": ["string", "null"], "format": "date-time" },
+        "decisionId": { "$ref": "#/$defs/nullableString" },
+        "reason": { "$ref": "#/$defs/nullableString" }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "status": { "const": "pending" } } },
+          "then": {
+            "properties": {
+              "reviewer": { "type": "null" },
+              "decidedAt": { "type": "null" },
+              "decisionId": { "type": "null" },
+              "reason": { "type": "null" }
+            }
+          }
+        },
+        {
+          "if": { "properties": { "status": { "const": "approved" } } },
+          "then": {
+            "properties": {
+              "reviewer": { "type": "string", "minLength": 1 },
+              "decidedAt": { "type": "string", "format": "date-time" },
+              "decisionId": { "type": "string", "minLength": 1 },
+              "reason": { "type": "null" }
+            }
+          }
+        },
+        {
+          "if": { "properties": { "status": { "const": "rejected" } } },
+          "then": {
+            "properties": {
+              "reviewer": { "type": "string", "minLength": 1 },
+              "decidedAt": { "type": "string", "format": "date-time" },
+              "decisionId": { "type": "string", "minLength": 1 },
+              "reason": { "type": "string", "minLength": 1 }
+            }
+          }
+        }
+      ]
+    },
+    "composition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "exerciseId", "variantId", "revision", "status", "provenance",
+        "imageReadiness", "ownerApproval", "views"
+      ],
+      "properties": {
+        "exerciseId": { "type": "string", "pattern": "^[a-z0-9_]+$" },
+        "variantId": { "type": "string", "pattern": "^[a-z0-9_]+$" },
+        "revision": { "type": "integer", "minimum": 1 },
+        "status": { "$ref": "#/$defs/status" },
+        "provenance": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["masterVersion", "references", "ownerClarificationIds"],
+          "properties": {
+            "masterVersion": { "const": "2.8" },
+            "references": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
+            "ownerClarificationIds": { "type": "array", "uniqueItems": true, "items": { "type": "string", "minLength": 1 } }
+          }
+        },
+        "imageReadiness": { "$ref": "#/$defs/imageReadiness" },
+        "ownerApproval": { "$ref": "#/$defs/ownerApproval" },
+        "views": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["technique", "muscles", "thumbnail"],
+          "properties": {
+            "technique": { "$ref": "#/$defs/view" },
+            "muscles": { "$ref": "#/$defs/view" },
+            "thumbnail": { "$ref": "#/$defs/view" }
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "status": { "const": "pending" } } },
+          "then": {
+            "properties": {
+              "imageReadiness": { "properties": { "status": { "const": "pending" } } },
+              "ownerApproval": { "properties": { "status": { "const": "pending" } } },
+              "views": {
+                "properties": {
+                  "technique": { "properties": { "status": { "const": "pending" } } },
+                  "muscles": { "properties": { "status": { "const": "pending" } } },
+                  "thumbnail": { "properties": { "status": { "const": "pending" } } }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": { "properties": { "status": { "const": "draft" } } },
+          "then": {
+            "properties": {
+              "ownerApproval": { "properties": { "status": { "const": "pending" } } }
+            }
+          }
+        },
+        {
+          "if": { "properties": { "status": { "const": "review" } } },
+          "then": {
+            "properties": {
+              "imageReadiness": { "properties": { "status": { "const": "approved" } } },
+              "ownerApproval": { "properties": { "status": { "const": "pending" } } },
+              "views": {
+                "properties": {
+                  "technique": { "properties": { "status": { "enum": ["review", "approved"] } } },
+                  "muscles": { "properties": { "status": { "enum": ["review", "approved"] } } },
+                  "thumbnail": { "properties": { "status": { "enum": ["review", "approved"] } } }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": { "properties": { "status": { "const": "approved" } } },
+          "then": {
+            "properties": {
+              "imageReadiness": { "properties": { "status": { "const": "approved" } } },
+              "ownerApproval": { "properties": { "status": { "const": "approved" } } },
+              "views": {
+                "properties": {
+                  "technique": { "properties": { "status": { "const": "approved" } } },
+                  "muscles": { "properties": { "status": { "const": "approved" } } },
+                  "thumbnail": { "properties": { "status": { "const": "approved" } } }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": { "properties": { "status": { "const": "rejected" } } },
+          "then": {
+            "properties": {
+              "ownerApproval": { "properties": { "status": { "const": "rejected" } } }
+            }
+          }
+        }
+      ]
+    }
+  }
+}
