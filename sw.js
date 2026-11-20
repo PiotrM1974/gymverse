@@ -1,20 +1,18 @@
 /* GymVerse – service worker: aplikacja działa offline po pierwszym wejściu. */
-const CACHE = 'gymverse-v4';
-const SHELL = ['./', 'index.html', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png', 'apple-touch-icon.png'];
+const CACHE = 'gymverse-v5';
+const SHELL = ['./', 'index.html', 'src/gv-base-b.js', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png', 'apple-touch-icon.png'];
 
 self.addEventListener('install', e => {
   e.waitUntil(
     caches.open(CACHE)
       .then(c => Promise.allSettled(SHELL.map(u => c.add(u))))
-      .then(() => self.skipWaiting())
   );
 });
 
 self.addEventListener('activate', e => {
   e.waitUntil(
     caches.keys()
-      .then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k))))
-      .then(() => self.clients.claim())
+      .then(keys => Promise.all(keys.filter(k => k.startsWith('gymverse-') && k !== CACHE).map(k => caches.delete(k))))
   );
 });
 
@@ -33,21 +31,21 @@ self.addEventListener('fetch', e => {
           caches.open(CACHE).then(c => c.put('index.html', copy));
           return res;
         })
-        .catch(() => caches.match('index.html').then(r => r || caches.match('./')))
+        .catch(() => caches.open(CACHE).then(c => c.match('index.html').then(r => r || c.match('./'))))
     );
     return;
   }
 
   // Obrazki i reszta: z cache, a w tle odświeżenie.
   e.respondWith(
-    caches.match(req).then(cached => {
+    caches.open(CACHE).then(cache => cache.match(req).then(cached => {
       const net = fetch(req)
         .then(res => {
-          if (res && res.ok) { const copy = res.clone(); caches.open(CACHE).then(c => c.put(req, copy)); }
+          if (res && res.ok) { const copy = res.clone(); cache.put(req, copy); }
           return res;
         })
         .catch(() => cached);
       return cached || net;
-    })
+    }))
   );
 });

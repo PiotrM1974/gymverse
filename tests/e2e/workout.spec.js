@@ -14,6 +14,7 @@ test('starts the first plan, records a set, finishes, survives reload and import
   await page.locator('#btnDone_0').click();
   await page.getByRole('button', { name: /zakończ i zapisz trening/i }).click();
   await expect(page.getByText('Trening zaliczony!')).toBeVisible();
+  expect(await page.evaluate(() => localStorage.getItem('gymverse_active'))).toBeNull();
   await page.reload();
   await page.getByRole('button', { name: 'Historia' }).click();
   await expect(page.locator('#historyList').getByText('Push A1')).toBeVisible();

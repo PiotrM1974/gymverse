@@ -265,7 +265,9 @@ select.select-custom, input.select-custom { width: 100%; background: var(--card-
     <div class="exercise-meta">
       <span id="metaWorkoutName">Push A1</span>
       <span id="metaExerciseStep">Ćwiczenie 1 z 5</span>
+      <span id="metaExerciseProgress" aria-live="polite">Serie 0/17</span>
     </div>
+    <div id="draftStatus" class="hero-hint" hidden>Wpis niezatwierdzony</div>
     <div class="exercise-hero">
       <div class="hero-img-box"><img id="currentExImg" src="" alt="Ćwiczenie"></div>
       <div class="hero-title-box">
@@ -419,12 +421,14 @@ select.select-custom, input.select-custom { width: 100%; background: var(--card-
 
 <div id="toast" role="status" aria-live="polite"></div>
 
+<script src="src/gv-base-b.js"></script>
 <script>
 (() => {
 'use strict';
 
 /* ================== NARZĘDZIA ================== */
 const $ = id => document.getElementById(id);
+const BASE_B = globalThis.GymVerseBaseB;
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const fmt = n => Number(n).toLocaleString('pl-PL', { maximumFractionDigits: 2 });
 const num = v => { const t = String(v).trim().replace(',', '.'); return /^\d+(\.\d+)?$/.test(t) ? parseFloat(t) : NaN; };
@@ -436,6 +440,7 @@ const dkey = d => `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate
 const DAY = 864e5;
 
 let toastTimer = null;
+let draftSaveTimer = null;
 function toast(msg) {
   const t = $('toast');
   t.textContent = msg;
@@ -456,11 +461,19 @@ const LS = {
     }
   },
   set(key, value) {
-    try { localStorage.setItem(key, JSON.stringify(value)); return true; }
-    catch (e) { toast('Nie udało się zapisać danych (brak miejsca lub tryb prywatny)'); return false; }
+    try { return BASE_B.persistJsonTransaction(localStorage, { [key]: value }); }
+    catch (e) { toast(storageFailureMessage(e)); return false; }
   },
-  del(key) { try { localStorage.removeItem(key); } catch (e) {} }
+  del(key) {
+    try { return BASE_B.persistJsonTransaction(localStorage, { [key]: null }); }
+    catch (e) { toast(storageFailureMessage(e)); return false; }
+  }
 };
+function storageFailureMessage(error) {
+  return error && error.name === 'QuotaExceededError'
+    ? 'Brak miejsca w pamięci aplikacji. Dane nie zostały uznane za zapisane.'
+    : 'Nie udało się potwierdzić zapisu danych. Dane nie zostały uznane za zapisane.';
+}
 
 /* ================== KATALOG ĆWICZEŃ ================== */
 const CATALOG_BASE = {
@@ -587,10 +600,10 @@ const exName = e => e.name || nameOf(e.key);
 const imgFor = e => safeImg(e.img) || IMG_BY_KEY[e.key] || safeImg(e.key) || 'none';
 const startable = () => PLANS.filter(p => p.exercises.length > 0);
 
-function cleanPlan(p) {
+function cleanPlan(p, catalog = CATALOG) {
   if (!p || typeof p.id !== 'string' || !Array.isArray(p.exercises)) return null;
   const exs = p.exercises.map(e => {
-    if (!e || !CATALOG[e.key]) return null;
+    if (!e || !catalog[e.key]) return null;
     const o = {
       key: e.key,
       sets: Math.min(12, Math.max(1, parseInt(e.sets, 10) || 3)),
@@ -602,7 +615,7 @@ function cleanPlan(p) {
   }).filter(Boolean);
   return { id: p.id.replace(/[^\w-]/g, '').slice(0, 40) || ('p_' + Date.now().toString(36)), title: String(p.title || 'Plan').slice(0, 40), exercises: exs };
 }
-function cleanPlans(arr) { return (Array.isArray(arr) ? arr : []).map(cleanPlan).filter(Boolean); }
+function cleanPlans(arr, catalog = CATALOG) { return (Array.isArray(arr) ? arr : []).map(p => cleanPlan(p, catalog)).filter(Boolean); }
 function loadPlans() {
   const cleaned = cleanPlans(LS.get('gymverse_plans', null));
   PLANS = cleaned.length ? cleaned : defaultPlans();
@@ -702,11 +715,36 @@ function rebuildLastSets() {
   });
 }
 function saveAll() {
-  LS.set('gymverse_history', history);
-  LS.set('gymverse_last_weights', lastSets);
+  try {
+    BASE_B.persistJsonTransaction(localStorage, { gymverse_history: history, gymverse_last_weights: lastSets });
+    return true;
+  } catch (e) { toast(storageFailureMessage(e)); return false; }
 }
 function rebuildAll() { lastSets = {}; rebuildLastSets(); saveAll(); }
-function saveActive() { if (active) LS.set('gymverse_active', active); }
+function saveActive() { return active ? LS.set('gymverse_active', active) : true; }
+function commitActiveState(nextActive, extraUpdates = {}) {
+  try {
+    BASE_B.persistJsonTransaction(localStorage, Object.assign({ gymverse_active: nextActive }, extraUpdates));
+    active = nextActive;
+    return true;
+  } catch (error) {
+    toast(storageFailureMessage(error));
+    offerEmergencyExport(history, lastSets, nextActive);
+    return false;
+  }
+}
+
+function lastWeightsFor(sessions) {
+  const result = {};
+  sessions.slice().sort(byDate).forEach(session => {
+    const grouped = {};
+    (session.details || []).forEach(detail => { (grouped[detail.exerciseId] = grouped[detail.exerciseId] || []).push(detail); });
+    Object.keys(grouped).forEach(key => {
+      result[key] = grouped[key].sort((a, b) => a.setNumber - b.setNumber).map(detail => ({ weight: detail.weight, reps: detail.reps }));
+    });
+  });
+  return result;
+}
 
 function loadState() {
   CUSTOM = cleanCustom(LS.get('gymverse_custom', {}));
@@ -919,9 +957,9 @@ function startWorkout(planId) {
   if (!plan || !plan.exercises.length) { toast('Ten plan nie ma ćwiczeń'); return; }
   if (active && active.planId !== planId && !confirm('Masz niedokończony trening. Porzucić go i zacząć nowy?')) return;
   if (active && active.planId === planId) { openWorkout(); return; }
-  if (active) discardActive();
+  if (active && !discardActive()) return;
   active = { planId, step: 0, sets: [], startedAt: Date.now(), timerEndAt: 0, swaps: {}, setCount: {}, rir: {} };
-  saveActive();
+  if (!saveActive()) { active = null; return; }
   openWorkout();
 }
 function openWorkout() {
@@ -933,14 +971,19 @@ function openWorkout() {
   if (active.timerEndAt && active.timerEndAt > Date.now()) startTimerAt(active.timerEndAt);
 }
 function discardActive() {
-  stopTimer();
+  const sessionId = active ? String(active.startedAt) : '';
+  const drafts = BASE_B.draftPayloadWithout(localStorage, item => item.sessionId === sessionId);
+  try {
+    BASE_B.persistJsonTransaction(localStorage, { gymverse_active: null, [BASE_B.DRAFT_KEY]: drafts });
+  } catch (e) { toast(storageFailureMessage(e)); return false; }
   active = null;
-  LS.del('gymverse_active');
+  stopTimer();
   unlockScreen();
+  return true;
 }
 function discardWorkout() {
   if (!confirm('Porzucić trening? Wykonane serie NIE zostaną zapisane.')) return;
-  discardActive();
+  if (!discardActive()) return;
   switchView('view-plans');
 }
 
@@ -993,6 +1036,8 @@ function renderStep() {
 
   $('metaWorkoutName').textContent = plan.title;
   $('metaExerciseStep').textContent = `Ćwiczenie ${active.step + 1} z ${total}`;
+  const progress = BASE_B.calculateWorkoutProgress(plan, active);
+  $('metaExerciseProgress').textContent = `Serie ${progress.completed}/${progress.required}${progress.excess ? ` · +${progress.excess} ponad plan` : ''}`;
   $('progressBar').style.width = Math.min(100, Math.round(active.sets.length / plannedSets() * 100)) + '%';
   $('currentExName').textContent = e.name;
   $('swappedTag').hidden = !e.swapped;
@@ -1017,19 +1062,24 @@ function renderStep() {
 
   const last = lastSets[e.key] || [];
   let html = '';
+  let hasDraft = false;
   for (let i = 0; i < n; i++) {
     const logged = active.sets.find(s => s.step === active.step && s.setNumber === i + 1);
+    const draft = !logged && BASE_B.getDraft(localStorage, draftQuery(active.step, i + 1));
+    if (draft) hasDraft = true;
     const p = last[i];
     const prev = p ? setStr(e.key, p.weight, p.reps) : '—';
     html += `<tr class="set-row">
       <td>${i + 1}</td>
       <td class="prev-val" data-act="fillprev" data-i="${i}">${prev}</td>
-      <td><input class="input-cell" inputmode="decimal" enterkeyhint="next" autocomplete="off" id="weight_${i}" data-i="${i}" placeholder="0" value="${logged ? logged.weight : ''}" ${logged ? 'disabled' : ''} aria-label="${bw ? 'Dodatkowe kg' : 'Ciężar'}, seria ${i + 1}"></td>
-      <td><input class="input-cell" inputmode="numeric" enterkeyhint="done" autocomplete="off" id="reps_${i}" data-i="${i}" placeholder="0" value="${logged ? logged.reps : ''}" ${logged ? 'disabled' : ''} aria-label="Powtórzenia, seria ${i + 1}"></td>
+      <td><input class="input-cell" inputmode="decimal" enterkeyhint="next" autocomplete="off" id="weight_${i}" data-i="${i}" placeholder="0" value="${logged ? logged.weight : draft ? esc(draft.weight) : ''}" ${logged ? 'disabled' : ''} aria-label="${bw ? 'Dodatkowe kg' : 'Ciężar'}, seria ${i + 1}"></td>
+      <td><input class="input-cell" inputmode="numeric" enterkeyhint="done" autocomplete="off" id="reps_${i}" data-i="${i}" placeholder="0" value="${logged ? logged.reps : draft ? esc(draft.reps) : ''}" ${logged ? 'disabled' : ''} aria-label="Powtórzenia, seria ${i + 1}"></td>
       <td><button class="btn-done ${logged ? 'completed' : ''}" id="btnDone_${i}" data-act="done" data-i="${i}">${logged ? '✓' : 'Zrobione'}</button></td>
     </tr>`;
   }
   $('setsBody').innerHTML = html;
+  $('draftStatus').hidden = !hasDraft;
+  for (let i = 0; i < n; i += 1) validateRow(i);
   $('btnAddSet').disabled = n >= 12;
   $('btnRemoveSet').disabled = n <= 1;
 
@@ -1045,6 +1095,38 @@ function renderStep() {
 }
 
 /* Odczyt serii z pól: dla ćwiczeń z masą ciała puste „dodatkowe kg” = 0. */
+function draftQuery(step, setNumber) {
+  return { planId: active.planId, sessionId: String(active.startedAt || active.planId), step, setNumber };
+}
+function flushDraftsForStep(step) {
+  if (!active || step !== active.step) return true;
+  clearTimeout(draftSaveTimer);
+  const sessionId = String(active.startedAt || active.planId);
+  const payload = BASE_B.readDraftPayload(localStorage);
+  payload.items = payload.items.filter(item => !(item.planId === active.planId && item.sessionId === sessionId && item.step === step));
+  const count = setsFor(step);
+  for (let i = 0; i < count; i += 1) {
+    if (active.sets.some(set => set.step === step && set.setNumber === i + 1)) continue;
+    const weight = $('weight_' + i).value;
+    const reps = $('reps_' + i).value;
+    if (!weight && !reps) continue;
+    payload.items.push({ planId: active.planId, sessionId, step, setNumber: i + 1, weight, reps, updatedAt: Date.now() });
+  }
+  try {
+    BASE_B.persistJsonTransaction(localStorage, { [BASE_B.DRAFT_KEY]: payload.items.length ? payload : null });
+    $('draftStatus').hidden = !payload.items.some(item => item.planId === active.planId && item.sessionId === sessionId && item.step === step);
+    return true;
+  } catch (error) {
+    toast(storageFailureMessage(error));
+    return false;
+  }
+}
+function scheduleDraftSave(step) {
+  clearTimeout(draftSaveTimer);
+  if ($('draftStatus')) $('draftStatus').hidden = false;
+  draftSaveTimer = setTimeout(() => flushDraftsForStep(step), 300);
+}
+
 function readRow(i) {
   const e = exAt(active.step);
   const rawW = $('weight_' + i).value.trim();
@@ -1158,13 +1240,23 @@ function onDone(i) {
 
   const { w, r } = readRow(i);
   const e = exAt(active.step);
-  const existing = active.sets.find(s => s.step === active.step && s.setNumber === i + 1);
+  const nextActive = JSON.parse(JSON.stringify(active));
+  const existing = nextActive.sets.find(s => s.step === nextActive.step && s.setNumber === i + 1);
   if (existing) {
     existing.weight = w; existing.reps = r;
   } else {
-    active.sets.push({ step: active.step, key: e.key, name: e.name, setNumber: i + 1, weight: w, reps: r, date: new Date().toISOString() });
+    nextActive.sets.push({ step: nextActive.step, key: e.key, name: e.name, setNumber: i + 1, weight: w, reps: r, date: new Date().toISOString() });
   }
-  saveActive();
+  const query = draftQuery(active.step, i + 1);
+  const nextDrafts = BASE_B.draftPayloadWithout(localStorage, item => item.planId === query.planId && item.sessionId === query.sessionId && item.step === query.step && item.setNumber === query.setNumber);
+  try {
+    BASE_B.persistJsonTransaction(localStorage, { gymverse_active: nextActive, [BASE_B.DRAFT_KEY]: nextDrafts });
+  } catch (error) {
+    toast(storageFailureMessage(error));
+    offerEmergencyExport(history, lastSets, nextActive);
+    return false;
+  }
+  active = nextActive;
   if (!existing) startRest(restFor(e));
   renderStep();
   return true;
@@ -1181,8 +1273,9 @@ function focusNextRow() {
 function addSet() {
   const n = setsFor(active.step);
   if (n >= 12) return;
-  active.setCount[active.step] = n + 1;
-  saveActive();
+  const nextActive = JSON.parse(JSON.stringify(active));
+  nextActive.setCount[active.step] = n + 1;
+  if (!commitActiveState(nextActive)) return;
   renderStep();
 }
 function removeSet() {
@@ -1190,9 +1283,12 @@ function removeSet() {
   if (n <= 1) return;
   const loggedLast = active.sets.find(s => s.step === active.step && s.setNumber === n);
   if (loggedLast && !confirm('Ostatnia seria jest zapisana. Usunąć ją?')) return;
-  active.sets = active.sets.filter(s => !(s.step === active.step && s.setNumber === n));
-  active.setCount[active.step] = n - 1;
-  saveActive();
+  const nextActive = JSON.parse(JSON.stringify(active));
+  nextActive.sets = nextActive.sets.filter(s => !(s.step === nextActive.step && s.setNumber === n));
+  nextActive.setCount[nextActive.step] = n - 1;
+  const query = { planId: active.planId, sessionId: String(active.startedAt || active.planId), step: active.step, setNumber: n };
+  const nextDrafts = BASE_B.draftPayloadWithout(localStorage, item => item.planId === query.planId && item.sessionId === query.sessionId && item.step === query.step && item.setNumber === query.setNumber);
+  if (!commitActiveState(nextActive, { [BASE_B.DRAFT_KEY]: nextDrafts })) return;
   renderStep();
 }
 
@@ -1216,17 +1312,21 @@ function applySwap(val) {
   if (!val) return;
   const hasSets = active.sets.some(s => s.step === active.step);
   if (hasSets && !confirm('Zamiana usunie zapisane serie tego ćwiczenia. Kontynuować?')) { $('swapSelect').value = ''; return; }
-  active.sets = active.sets.filter(s => s.step !== active.step);
-  delete active.rir[active.step];
-  if (val === '__base__') delete active.swaps[active.step]; else active.swaps[active.step] = val;
-  saveActive();
+  const nextActive = JSON.parse(JSON.stringify(active));
+  nextActive.sets = nextActive.sets.filter(s => s.step !== nextActive.step);
+  delete nextActive.rir[nextActive.step];
+  if (val === '__base__') delete nextActive.swaps[nextActive.step]; else nextActive.swaps[nextActive.step] = val;
+  const query = { planId: active.planId, sessionId: String(active.startedAt || active.planId), step: active.step };
+  const nextDrafts = BASE_B.draftPayloadWithout(localStorage, item => item.planId === query.planId && item.sessionId === query.sessionId && item.step === query.step);
+  if (!commitActiveState(nextActive, { [BASE_B.DRAFT_KEY]: nextDrafts })) return;
   $('swapBox').hidden = true;
   renderStep();
 }
 
 function setRir(v) {
-  if (active.rir[active.step] === v) delete active.rir[active.step]; else active.rir[active.step] = v;
-  saveActive();
+  const nextActive = JSON.parse(JSON.stringify(active));
+  if (nextActive.rir[nextActive.step] === v) delete nextActive.rir[nextActive.step]; else nextActive.rir[nextActive.step] = v;
+  if (!commitActiveState(nextActive)) return;
   renderStep();
 }
 
@@ -1234,8 +1334,10 @@ function nextStep() {
   const plan = getPlan(active.planId);
   $('swapBox').hidden = true;
   if (active.step < plan.exercises.length - 1) {
-    active.step++;
-    saveActive();
+    if (!flushDraftsForStep(active.step)) return;
+    const nextActive = JSON.parse(JSON.stringify(active));
+    nextActive.step++;
+    if (!commitActiveState(nextActive)) return;
     renderStep();
     window.scrollTo(0, 0);
   } else {
@@ -1243,7 +1345,13 @@ function nextStep() {
   }
 }
 function prevStep() {
-  if (active.step > 0) { $('swapBox').hidden = true; active.step--; saveActive(); renderStep(); window.scrollTo(0, 0); }
+  if (active.step > 0) {
+    if (!flushDraftsForStep(active.step)) return;
+    const nextActive = JSON.parse(JSON.stringify(active));
+    nextActive.step--;
+    if (!commitActiveState(nextActive)) return;
+    $('swapBox').hidden = true; renderStep(); window.scrollTo(0, 0);
+  }
 }
 
 function findRecords(sets) {
@@ -1263,15 +1371,17 @@ function findRecords(sets) {
 
 function finishWorkout(fromNext) {
   const plan = getPlan(active.planId);
-  const totalSets = plannedSets();
-  if (active.sets.length === 0) {
-    discardActive();
+  if (!flushDraftsForStep(active.step)) return;
+  const progress = BASE_B.calculateWorkoutProgress(plan, active);
+  if (progress.completed === 0) {
+    if (!confirm(`Wykonano ${progress.completed}/${progress.required} serii. Porzucić pusty trening? Historia nie zostanie zmieniona.`)) return;
+    if (!discardActive()) return;
     toast('Brak zapisanych serii – nic nie dodano do historii');
     switchView('view-plans');
     return;
   }
-  if (!fromNext && active.sets.length < totalSets &&
-      !confirm(`Zakończyć trening? Zapisanych serii: ${active.sets.length} z ${totalSets}.`)) return;
+  if (progress.missing > 0 &&
+      !confirm(`Zakończyć niekompletny trening? Wykonano ${progress.completed}/${progress.required} serii. Brakuje ${progress.missing}.`)) return;
 
   const records = findRecords(active.sets);
   const nowIso = new Date().toISOString();
@@ -1291,10 +1401,29 @@ function finishWorkout(fromNext) {
   const prevSame = history.filter(h => h.planId === plan.id).sort(byDate).pop();
   const entry = { date: nowIso, planId: plan.id, planTitle: plan.title, totalVolume, totalReps, durationMin, details };
   if (Object.keys(rir).length) entry.rir = rir;
-  history.push(entry);
+  const nextHistory = history.concat(entry);
+  const nextLastSets = lastWeightsFor(nextHistory);
+  const sessionId = String(active.startedAt || active.planId);
+  const nextDrafts = BASE_B.draftPayloadWithout(localStorage, item => item.planId === active.planId && item.sessionId === sessionId);
+  try {
+    BASE_B.persistJsonTransaction(localStorage, {
+      gymverse_history: nextHistory,
+      gymverse_last_weights: nextLastSets,
+      gymverse_active: null,
+      [BASE_B.DRAFT_KEY]: nextDrafts
+    });
+  } catch (error) {
+    toast(storageFailureMessage(error));
+    if (error.rollbackErrors && error.rollbackErrors.length) toast('Nie udało się w pełni odtworzyć poprzedniego zapisu. Pobierz awaryjny JSON przed zamknięciem aplikacji.');
+    offerEmergencyExport(nextHistory, nextLastSets);
+    return;
+  }
+  history = nextHistory;
+  lastSets = nextLastSets;
   rebuildLastSets();
-  saveAll();
-  discardActive();
+  active = null;
+  stopTimer();
+  unlockScreen();
 
   const dateStr = new Date().toLocaleDateString('pl-PL', { weekday: 'long', day: 'numeric', month: 'long' });
   $('sumVolume').textContent = `${fmt(totalVolume)} kg`;
@@ -1330,6 +1459,21 @@ function finishWorkout(fromNext) {
 
   lastSummary = { title: plan.title, dateStr, vol: totalVolume, reps: totalReps, min: durationMin, records, cmpPlain, weekLine, humor: humorText };
   switchView('view-summary');
+}
+
+async function offerEmergencyExport(pendingHistory, pendingLastWeights, activeSnapshot = active) {
+  if (!confirm('Trening pozostał aktywny, ale zapis do pamięci nie powiódł się. Pobrać awaryjny JSON z bieżącymi danymi i treningiem?')) return;
+  const payload = {
+    app: 'gymverse', version: 4, exportedAt: new Date().toISOString(),
+    history: pendingHistory, lastWeights: pendingLastWeights, body, plans: PLANS, custom: CUSTOM,
+    activeWorkout: activeSnapshot, drafts: BASE_B.readDraftPayload(localStorage)
+  };
+  try {
+    const ok = await deliverFile(`gymverse_awaryjna_${dkey(new Date())}.json`, 'application/json', JSON.stringify(payload, null, 2));
+    toast(ok ? 'Awaryjny JSON przygotowany. Trening nadal pozostaje aktywny.' : 'Eksport awaryjny anulowany. Trening nadal pozostaje aktywny.');
+  } catch (error) {
+    toast(`Nie udało się pobrać awaryjnego JSON: ${storageFailureMessage(error)}`);
+  }
 }
 
 function humor(v) {
@@ -2018,35 +2162,59 @@ function importData(ev) {
   reader.onload = () => {
     try {
       const parsed = JSON.parse(reader.result);
-      if (!parsed || !Array.isArray(parsed.history)) throw new Error('format');
-      const inCustom = cleanCustom(parsed.custom);
+      if (!parsed || typeof parsed !== 'object' || !Array.isArray(parsed.history) || (parsed.version != null && Number(parsed.version) > 4)) throw new Error('format');
+      if (parsed.custom != null && (typeof parsed.custom !== 'object' || Array.isArray(parsed.custom))) throw new Error('format');
+      const inCustom = cleanCustom(parsed.custom || {});
+      if (Object.keys(inCustom).length !== Object.keys(parsed.custom || {}).length) throw new Error('format');
+      const nextCustom = Object.assign({}, CUSTOM, inCustom);
       const newCustom = Object.keys(inCustom).filter(k => !CUSTOM[k]);
-      newCustom.forEach(k => { CUSTOM[k] = inCustom[k]; });
-      if (newCustom.length) { LS.set('gymverse_custom', CUSTOM); applyCustom(); }
+      const nextCatalog = Object.assign({}, CATALOG_BASE);
+      Object.keys(nextCustom).forEach(k => { nextCatalog[k] = nextCustom[k].name; });
 
-      const incoming = parsed.history.map(normalizeSession).filter(Boolean);
+      const incoming = parsed.history.map(normalizeSession);
+      if (incoming.some(session => !session)) throw new Error('format');
       const have = new Set(history.map(s => s.date));
       const fresh = incoming.filter(s => !have.has(s.date));
       const haveBody = new Set(body.map(b => b.date));
-      const freshBody = normalizeBody(parsed.body).filter(b => !haveBody.has(b.date));
-      const inPlans = cleanPlans(parsed.plans);
-      const plansDiffer = inPlans.length && JSON.stringify(inPlans) !== JSON.stringify(PLANS);
-      if (!incoming.length && !freshBody.length && !plansDiffer) { toast('Plik nie zawiera nowych danych'); return; }
-      if ((fresh.length || freshBody.length) &&
-          !confirm(`Dołączyć do istniejących danych: treningi – ${fresh.length}, pomiary wagi – ${freshBody.length}? (Duplikaty są pomijane, nic nie zostanie usunięte.)`)) return;
-      history = history.concat(fresh);
-      body = body.concat(freshBody).sort((a, b) => a.date.localeCompare(b.date));
-      history.forEach(recalcSession2);
-      rebuildAll();
-      LS.set('gymverse_body', body);
+      if (parsed.body != null && !Array.isArray(parsed.body)) throw new Error('format');
+      const normalizedBody = normalizeBody(parsed.body || []);
+      if (normalizedBody.length !== (parsed.body || []).length) throw new Error('format');
+      const freshBody = normalizedBody.filter(b => !haveBody.has(b.date));
+      if (parsed.plans != null && !Array.isArray(parsed.plans)) throw new Error('format');
+      const inPlans = parsed.plans == null ? [] : cleanPlans(parsed.plans, nextCatalog);
+      if (parsed.plans != null && inPlans.length !== parsed.plans.length) throw new Error('format');
+      const plansDiffer = inPlans.length > 0 && JSON.stringify(inPlans) !== JSON.stringify(PLANS);
+      const replacePlans = !!(plansDiffer && !active);
+      if (!fresh.length && !freshBody.length && !newCustom.length && !replacePlans) { toast('Plik nie zawiera nowych danych'); return; }
+      const customInfo = newCustom.length ? `, ćwiczenia własne – ${newCustom.length}` : '';
+      const planInfo = replacePlans ? ', plany zostaną zastąpione' : (plansDiffer ? ', plany pozostaną bez zmian podczas treningu' : '');
+      if (!confirm(`Zaimportować dane: treningi – ${fresh.length}, pomiary wagi – ${freshBody.length}${customInfo}${planInfo}? Duplikaty zostaną pominięte; niczego nie usunę.`)) return;
+
+      const nextHistory = JSON.parse(JSON.stringify(history.concat(fresh)));
+      const nextBody = body.concat(freshBody).sort((a, b) => a.date.localeCompare(b.date));
+      nextHistory.forEach(recalcSession2);
+      const nextPlans = replacePlans ? inPlans : PLANS;
+      const nextLastWeights = fresh.length ? lastWeightsFor(nextHistory) : lastSets;
+      const updates = {};
+      if (fresh.length) { updates.gymverse_history = nextHistory; updates.gymverse_last_weights = nextLastWeights; }
+      if (freshBody.length) updates.gymverse_body = nextBody;
+      if (newCustom.length) updates.gymverse_custom = nextCustom;
+      if (replacePlans) updates.gymverse_plans = nextPlans;
+      BASE_B.persistJsonTransaction(localStorage, updates);
+
+      history = nextHistory;
+      body = nextBody;
+      lastSets = nextLastWeights;
+      if (newCustom.length) { CUSTOM = nextCustom; applyCustom(); }
+      if (replacePlans) PLANS = nextPlans;
+      rebuildLastSets();
       let msg = `Dołączono: ${fresh.length} treningów, ${freshBody.length} pomiarów wagi`;
-      if (plansDiffer && !active && confirm('Plik zawiera inne plany treningowe. Zastąpić nimi obecne plany?')) {
-        PLANS = inPlans; savePlans(); msg += ', plany zastąpione';
-      }
+      if (newCustom.length) msg += `, ${newCustom.length} ćwiczeń własnych`;
+      if (replacePlans) msg += ', plany zastąpione';
       renderPlans();
       toast(msg);
     } catch (e) {
-      toast('Błąd odczytu pliku kopii zapasowej');
+      toast(e && e.name === 'QuotaExceededError' ? storageFailureMessage(e) : 'Błąd odczytu lub zapisu kopii zapasowej. Dane nie zostały zmienione.');
     }
   };
   reader.onerror = () => toast('Nie udało się wczytać pliku');
@@ -2125,8 +2293,13 @@ document.addEventListener('input', e => {
   const t = e.target;
   if (t.classList && t.classList.contains('input-cell')) {
     validateRow(Number(t.dataset.i));
+    if (active) scheduleDraftSave(active.step);
     if (t.id.startsWith('weight_')) { lastRow = Number(t.dataset.i); updatePlates(); }
   }
+});
+document.addEventListener('focusout', e => {
+  const t = e.target;
+  if (t.classList && t.classList.contains('input-cell') && active) flushDraftsForStep(active.step);
 });
 document.addEventListener('change', e => {
   const t = e.target;
@@ -2170,11 +2343,13 @@ $('swapSelect').addEventListener('change', e => applySwap(e.target.value));
 $('importFile').addEventListener('change', importData);
 
 document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'hidden' && active) flushDraftsForStep(active.step);
   if (document.visibilityState === 'visible') {
     if (active && $('view-workout').classList.contains('active')) lockScreen();
     if (timerInt) tick();
   }
 });
+window.addEventListener('pagehide', () => { if (active) flushDraftsForStep(active.step); });
 let resizeT = null;
 window.addEventListener('resize', () => {
   clearTimeout(resizeT);
