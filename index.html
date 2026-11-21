@@ -6,12 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="GymVerse">
+<meta name="apple-mobile-web-app-title" content="GymNastika">
 <meta name="theme-color" content="#0d0f12">
 <meta name="color-scheme" content="dark">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<title>GymVerse Tracker</title>
+<title>GymNastika</title>
 <style>
 :root {
   --bg: #0d0f12;
@@ -227,7 +227,7 @@ select.select-custom, input.select-custom { width: 100%; background: var(--card-
 <body>
 
 <header>
-  <div class="logo" data-act="view" data-view="view-plans">GYM<span>VERSE</span></div>
+  <div class="logo" data-act="view" data-view="view-plans">GYM<span>NASTIKA</span></div>
   <div class="header-actions">
     <button class="btn-icon" data-act="view" data-view="view-stats" aria-label="Statystyki" title="Statystyki">📊</button>
     <button class="btn-icon" data-act="view" data-view="view-charts" aria-label="Progres" title="Progres ćwiczeń">📈</button>
@@ -2411,9 +2411,9 @@ async function prepareDataMigration() {
           : error.message === 'SERVICE_WORKER_CLIENT_CHECK_FAILED'
             ? 'Nie udało się sprawdzić innych okien aplikacji. Migracja nie została uruchomiona.'
         : error.message === 'MIGRATION_LOCK_BUSY'
-          ? 'Inna karta lub okno wykonuje teraz migrację. Zamknij pozostałe okna GymVerse i spróbuj ponownie.'
+          ? 'Inna karta lub okno wykonuje teraz migrację. Zamknij pozostałe okna GymNastika i spróbuj ponownie.'
           : error.message === 'OTHER_TABS_OPEN'
-            ? 'Wykryto inne otwarte okno GymVerse. Zamknij je, aby zablokować równoczesne zmiany, i spróbuj ponownie.'
+            ? 'Wykryto inne otwarte okno GymNastika. Zamknij je, aby zablokować równoczesne zmiany, i spróbuj ponownie.'
           : 'Nie udało się zweryfikować migracji. Aktywny magazyn pozostał bez zmian; zachowaj kopię źródłową.' );
   }
 }
@@ -2443,11 +2443,11 @@ async function importData(ev) {
       const { previewBackupV5, restoreBackupV5 } = await import('./src/gv-data.js');
       const validationOptions = { strictExerciseCatalog: true, catalog: CATALOG, bodyweightExerciseIds: Array.from(BW), exerciseIdMap: ID_MAP };
       const preview = await previewBackupV5(file, validationOptions);
-      const overview = `Kopia v5: ${preview.counts.sessions} treningów, ${preview.counts.sets} serii, ${preview.counts.plans} planów, ${preview.counts.customExercises} ćwiczeń własnych, ${preview.counts.drafts} roboczych wpisów, ${preview.counts.legacyInterpretations} potwierdzonych reguł historii i ${preview.media.length} plików graficznych. Pełne odtworzenie zastąpi obecne dane GymVerse.`;
+      const overview = `Kopia v5: ${preview.counts.sessions} treningów, ${preview.counts.sets} serii, ${preview.counts.plans} planów, ${preview.counts.customExercises} ćwiczeń własnych, ${preview.counts.drafts} roboczych wpisów, ${preview.counts.legacyInterpretations} potwierdzonych reguł historii i ${preview.media.length} plików graficznych. Pełne odtworzenie zastąpi obecne dane GymNastika.`;
       if (!confirm(`${overview}\n\nCzy kontynuować do wyboru aktywnego treningu i draftów?`)) return;
       const restoreActive = confirm('Czy odtworzyć aktywny trening z kopii?');
       const restoreDrafts = confirm('Czy odtworzyć niezapisane drafty z kopii?');
-      if (!confirm('Ostatnie potwierdzenie: zastąpić dane GymVerse zawartością tej kopii?')) return;
+      if (!confirm('Ostatnie potwierdzenie: zastąpić dane GymNastika zawartością tej kopii?')) return;
       await restoreBackupV5(STORE.storage, preview, { confirmed: true, restoreActive, restoreDrafts, validationOptions });
       await STORE.flush();
       toast('Dane odtworzono. Aplikacja uruchomi się ponownie.');
@@ -2524,7 +2524,7 @@ async function importData(ev) {
         if (confirm(`OK = pełne odtworzenie JSON v4, które zastąpi treningi, plany, ćwiczenia własne, pomiary i ciężary z kopii. Anuluj = przejdź do importu łączeniowego. Liczba treningów w kopii: ${preview.counts.sessions}. Ustawienia aplikacji pozostaną bez zmian.`)) {
           const restoreActive = confirm('Czy kopia awaryjna zawiera aktywny trening do odtworzenia? Wybierz OK, aby go przywrócić.');
           const restoreDrafts = confirm('Czy przywrócić niezapisane drafty, jeśli znajdują się w kopii?');
-          if (!confirm('Ostatnie potwierdzenie: pełne odtworzenie zastąpi obecny stan danych GymVerse. Kontynuować?')) return;
+          if (!confirm('Ostatnie potwierdzenie: pełne odtworzenie zastąpi obecny stan danych GymNastika. Kontynuować?')) return;
           await restoreLegacyV4(STORE.storage, parsed, { confirmed: true, restoreActive, restoreDrafts, validationOptions });
           await STORE.flush();
           toast('Dane JSON v4 odtworzono. Aplikacja uruchomi się ponownie.');

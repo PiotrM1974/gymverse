@@ -1,4 +1,4 @@
-/* GymVerse – service worker: aplikacja działa offline po pierwszym wejściu. */
+/* GymNastika – aktualizacja powłoki odświeża metadane PWA bez zmiany cache ani danych. */
 const CACHE = 'gymverse-v6';
 const SHELL = ['./', 'index.html', 'src/gv-base-b.js', 'src/gv-data.js', 'src/vendor/zip.min.js', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png', 'apple-touch-icon.png'];
 
