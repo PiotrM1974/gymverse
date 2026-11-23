@@ -42,7 +42,7 @@ test('renders the exercise atlas and switches sex and view without touching work
   await expect(atlas.locator('svg [data-muscle-id="undefined"]')).toHaveCount(0);
   await page.evaluate(() => window.GymNastikaMuscleAtlas.update('bench_flat'));
   await expect(atlas).toBeVisible();
-  await expect(atlas.locator('.anatomy-atlas')).toHaveAttribute('aria-label', /Wyciskanie sztangi na ławce płaskiej/);
+  await expect(atlas.locator('.anatomy-atlas')).toHaveAttribute('aria-label', /Barbell Bench Press/);
   expect(await page.evaluate(() => JSON.parse(localStorage.getItem('gymverse_history') || '[]'))).toEqual([]);
   expect(await page.evaluate(() => JSON.parse(localStorage.getItem('gymverse_active') || 'null')?.sets || [])).toEqual([]);
 });

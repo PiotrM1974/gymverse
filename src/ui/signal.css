@@ -80,7 +80,7 @@ select.select-custom, input.select-custom, .pe-target { min-height: 49px; }.pill
 @media(max-width:360px) { .data-box .row button { white-space:nowrap; font-size:12px; padding:9px 4px; } }
 #view-workout > .hero-title-box { padding: 5px 0 17px; }
 #view-workout > .hero-title-box::before { content: 'Aktywny trening'; display: block; color: var(--lime); font-size: 12px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; margin-bottom: 10px; }
-#view-workout > .hero-title-box h2 { font: 800 clamp(35px,8vw,52px)/.98 'Barlow Condensed','Arial Narrow',sans-serif; margin: 0 0 9px; }
+#view-workout > .hero-title-box h2 { font: 800 clamp(35px,8vw,52px)/1.16 'Barlow Condensed','Arial Narrow',sans-serif; margin: 0 0 9px; }
 #view-workout > .hero-title-box .hero-target { color: var(--text-muted); font-size: 16px; }
 .workout-control-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 21px; padding: 15px; margin: 18px 0 14px; }
 .workout-control-card::before { content: 'Serie treningowe'; display: block; font: 800 25px 'Barlow Condensed','Arial Narrow',sans-serif; margin: 0 0 11px; }

@@ -615,6 +615,41 @@ const CATALOG_BASE = {
   dips: 'Dipy na poręczach',
   pushup: 'Pompki'
 };
+const EXERCISE_NAMES_EN = Object.freeze({
+  bench_flat: 'Barbell Bench Press',
+  db_incline: 'Incline Dumbbell Press',
+  lat_raise_stand: 'Standing Dumbbell Lateral Raise',
+  tri_rope: 'Rope Triceps Pushdown',
+  leg_press: 'Leg Press',
+  lat_pulldown_wide: 'Wide-Grip Lat Pulldown',
+  row_v: 'Seated Cable Row (V-Grip)',
+  rear_delt: 'Bent-Over Dumbbell Reverse Fly',
+  biceps_preacher: 'Machine Preacher Curl',
+  leg_curl: 'Lying Leg Curl',
+  db_bench: 'Flat Dumbbell Bench Press',
+  db_fly: 'Dumbbell Chest Fly',
+  front_raise: 'Dumbbell Front Raise',
+  lat_raise_seated: 'Seated Dumbbell Lateral Raise',
+  tri_machine: 'Machine Triceps Extension',
+  lat_pulldown_neutral: 'Close-Grip Neutral Lat Pulldown',
+  row_straight: 'Seated Cable Row (Straight Bar)',
+  chest_machine: 'Chest Press Machine',
+  pec_deck: 'Pec Deck Fly',
+  shoulder_press: 'Machine Shoulder Press',
+  lat_raise_cable: 'Cable Lateral Raise',
+  face_pull: 'Cable Face Pull',
+  row_machine: 'Seated Row Machine',
+  hammer_curl: 'Dumbbell Hammer Curl',
+  cable_curl: 'Cable Biceps Curl',
+  tri_overhead: 'Overhead Dumbbell Triceps Extension',
+  leg_extension: 'Seated Leg Extension',
+  smith_squat: 'Smith Machine Squat',
+  pullup: 'Pull-Up',
+  dips: 'Parallel Bar Dip',
+  pushup: 'Push-Up',
+  'leg_press/high_feet': 'Leg Press — High Foot Placement'
+});
+window.GymNastikaExerciseNames = EXERCISE_NAMES_EN;
 const GROUP_BASE = {
   bench_flat: 'Klatka', db_incline: 'Klatka', db_bench: 'Klatka', db_fly: 'Klatka', chest_machine: 'Klatka', pec_deck: 'Klatka', dips: 'Klatka', pushup: 'Klatka',
   lat_raise_stand: 'Barki', lat_raise_seated: 'Barki', front_raise: 'Barki', rear_delt: 'Barki', shoulder_press: 'Barki', lat_raise_cable: 'Barki', face_pull: 'Barki',
@@ -657,7 +692,7 @@ let BW = new Set(BW_BASE);
 let CUSTOM = {};           // własne ćwiczenia: key -> {name, group, bw}
 const NAMES = {};          // key -> ostatnia znana nazwa (z historii)
 const isBW = k => BW.has(k);
-const nameOf = k => CATALOG[k] || NAMES[k] || k;
+const nameOf = k => EXERCISE_NAMES_EN[k] || CATALOG[k] || NAMES[k] || k;
 const safeImg = s => (/^[\w-]{1,40}$/.test(String(s || '')) ? String(s) : null);
 
 function applyCustom() {
@@ -710,7 +745,7 @@ function defaultPlans() {
 }
 let PLANS = [];
 const getPlan = id => PLANS.find(p => p.id === id);
-const exName = e => e.name || nameOf(e.key);
+const exName = e => EXERCISE_NAMES_EN[e.key] || e.name || nameOf(e.key);
 const imgFor = e => e.key === SHARED_LEG_PRESS_MEDIA.exerciseId && ['default', SHARED_LEG_PRESS_MEDIA.variantId].includes(e.variantId)
   ? SHARED_LEG_PRESS_MEDIA.technique : safeImg(e.img) || IMG_BY_KEY[e.key] || safeImg(e.key) || 'none';
 const startable = () => PLANS.filter(p => p.exercises.length > 0);
@@ -1147,7 +1182,7 @@ function renderPlans() {
 function exAt(step) {
   const base = activePlan().exercises[step];
   const sw = active.swaps && active.swaps[step];
-  if (sw && CATALOG[sw]) return { ...base, key: sw, variantId: 'default', name: CATALOG[sw], img: IMG_BY_KEY[sw] || safeImg(sw) || 'none', swapped: true, baseKey: base.key };
+  if (sw && CATALOG[sw]) return { ...base, key: sw, variantId: 'default', name: nameOf(sw), img: IMG_BY_KEY[sw] || safeImg(sw) || 'none', swapped: true, baseKey: base.key };
   return Object.assign({}, base, { name: exName(base), img: imgFor(base), swapped: false });
 }
 function activePlan() {
@@ -1766,7 +1801,7 @@ function swapOpen() {
   let html = '<option value="">— wybierz zamiennik —</option>';
   if (cur.swapped && !used.has(base.key)) html += `<option value="__base__">↩ Wróć do: ${esc(exName(base))}</option>`;
   Object.keys(CATALOG).forEach(k => {
-    if (GROUP[k] === group && k !== cur.key && k !== base.key && !used.has(k)) html += `<option value="${esc(k)}">${esc(CATALOG[k])}</option>`;
+    if (GROUP[k] === group && k !== cur.key && k !== base.key && !used.has(k)) html += `<option value="${esc(k)}">${esc(nameOf(k))}</option>`;
   });
   $('swapSelect').innerHTML = html;
   box.hidden = false;
@@ -2388,7 +2423,7 @@ function renderHistory() {
     const order = [];
     (s.details || []).forEach((d, idx) => {
       const key = `${d.exerciseId}/${Object.hasOwn(d, 'variantId') ? d.variantId : '__missing__'}`;
-      if (!groups[key]) { groups[key] = { name: d.exerciseName, variant: variantName({ key: d.exerciseId, ...(Object.hasOwn(d, 'variantId') ? { variantId: d.variantId } : {}) }), exerciseId: d.exerciseId, variantId: d.variantId, items: [] }; order.push(key); }
+      if (!groups[key]) { groups[key] = { name: EXERCISE_NAMES_EN[d.exerciseId] || d.exerciseName, variant: variantName({ key: d.exerciseId, ...(Object.hasOwn(d, 'variantId') ? { variantId: d.variantId } : {}) }), exerciseId: d.exerciseId, variantId: d.variantId, items: [] }; order.push(key); }
       groups[key].items.push({ d, idx });
     });
     const det = order.map(k => {
@@ -2416,7 +2451,7 @@ async function histEditSet(i, dIdx) {
   const s = history[i];
   const d = s && s.details[dIdx];
   if (!d) return;
-  const txt = prompt(`${d.exerciseName}\nCiężar × powtórzenia (np. 80x8${isBW(d.exerciseId) ? ' lub samo 8' : ''}).\nWpisz „usuń", aby skasować serię.`, `${d.weight}x${d.reps}`);
+  const txt = prompt(`${EXERCISE_NAMES_EN[d.exerciseId] || d.exerciseName}\nCiężar × powtórzenia (np. 80x8${isBW(d.exerciseId) ? ' lub samo 8' : ''}).\nWpisz „usuń", aby skasować serię.`, `${d.weight}x${d.reps}`);
   if (txt === null) return;
   const nextHistory = JSON.parse(JSON.stringify(history));
   const nextSession = nextHistory[i];
@@ -2431,8 +2466,8 @@ async function histEditSet(i, dIdx) {
   }
   recalcSession(nextSession);
   const message = /^\s*(usu[nń]|del|delete)\s*$/i.test(txt)
-    ? `Usunięcie serii ${d.exerciseName}`
-    : `Zmiana serii ${d.exerciseName} na ${parseSetInput(txt, d.exerciseId).w}×${parseSetInput(txt, d.exerciseId).r}`;
+    ? `Usunięcie serii ${EXERCISE_NAMES_EN[d.exerciseId] || d.exerciseName}`
+    : `Zmiana serii ${EXERCISE_NAMES_EN[d.exerciseId] || d.exerciseName} na ${parseSetInput(txt, d.exerciseId).w}×${parseSetInput(txt, d.exerciseId).r}`;
   if (!await commitHistoryChanges(nextHistory, message)) return;
   histOpen.add(i);
   renderHistory();
@@ -2500,7 +2535,7 @@ function renderPlanEditor() {
   let sel = '<option value="">— wybierz ćwiczenie —</option>';
   GROUPS_LIST.forEach(g => {
     const ks = Object.keys(CATALOG).filter(k => GROUP[k] === g);
-    if (ks.length) sel += `<optgroup label="${esc(g)}">${ks.map(k => `<option value="${esc(k)}">${esc(CATALOG[k])}</option>`).join('')}</optgroup>`;
+    if (ks.length) sel += `<optgroup label="${esc(g)}">${ks.map(k => `<option value="${esc(k)}">${esc(nameOf(k))}</option>`).join('')}</optgroup>`;
   });
   sel += '<option value="__custom__">➕ Własne ćwiczenie…</option>';
   const last = p.exercises.length - 1;
@@ -2801,7 +2836,7 @@ function csvExport() {
   const rows = [['Data', 'Trening', 'Ćwiczenie', 'Wariant ID', 'Wariant', 'Seria', 'Ciężar (kg)', 'Powtórzenia', 'Szac. 1RM (kg)']];
   history.slice().sort(byDate).forEach(s => {
     const dt = dkey(new Date(s.date));
-    (s.details || []).forEach(d => rows.push([dt, s.planTitle, d.exerciseName, d.variantId || '', variantName({ key: d.exerciseId, ...(Object.hasOwn(d, 'variantId') ? { variantId: d.variantId } : {}) }), d.setNumber, d.weight, d.reps, isBW(d.exerciseId) ? '' : e1rm(d.weight, d.reps)]));
+    (s.details || []).forEach(d => rows.push([dt, s.planTitle, EXERCISE_NAMES_EN[d.exerciseId] || d.exerciseName, d.variantId || '', variantName({ key: d.exerciseId, ...(Object.hasOwn(d, 'variantId') ? { variantId: d.variantId } : {}) }), d.setNumber, d.weight, d.reps, isBW(d.exerciseId) ? '' : e1rm(d.weight, d.reps)]));
   });
   const cell = v => {
     let t = typeof v === 'number' ? String(v).replace('.', ',') : String(v);

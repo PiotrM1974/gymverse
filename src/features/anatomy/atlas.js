@@ -74,7 +74,8 @@ export function renderAnatomyAtlas(container, exerciseId, sex = 'male', view = '
         <button type="button" data-atlas-sex="male" aria-pressed="${sex === 'male'}">Mężczyzna</button>
         <button type="button" data-atlas-sex="female" aria-pressed="${sex === 'female'}">Kobieta</button>
       </div>`;
-  const title = `Atlas mięśni — ${esc(entry.title)}`;
+  const displayName = window.GymNastikaExerciseNames?.[exerciseId] || entry.title;
+  const title = `Atlas mięśni — ${esc(displayName)}`;
   const wrapperTag = options.showDisclosure === false ? 'section' : 'details';
   const wrapperAttributes = options.showDisclosure === false ? `aria-label="${title}"` : 'open';
   const summary = options.showDisclosure === false ? '' : `<summary>${title}</summary>`;

@@ -95,7 +95,7 @@ test('failed IndexedDB custom exercise creation preserves both the prior custom 
   const stored = await page.evaluate(() => ({ custom: window.__gymverseTestHarness.getStore().get('gymverse_custom'), plans: window.__gymverseTestHarness.getStore().get('gymverse_plans') }));
   expect(stored.custom).toEqual({});
   expect(stored.plans[0].exercises).toEqual([{ key: 'bench_flat', sets: 2, target: '8-10' }]);
-  await expect(page.locator('#planEditBody')).toContainText('Wyciskanie sztangi');
+  await expect(page.locator('#planEditBody')).toContainText('Barbell Bench Press');
 });
 
 test('stages, verifies and activates a synthetic snapshot idempotently without changing the source', async ({ page }) => {
@@ -642,7 +642,7 @@ test('service worker installs and serves the backup module and ZIP codec offline
   await page.reload();
   await page.waitForFunction(() => !!navigator.serviceWorker.controller);
   const cached = await page.evaluate(async () => {
-    const cache = await caches.open('gymverse-v16');
+    const cache = await caches.open('gymverse-v17');
     return {
       module: !!await cache.match(new URL('src/gv-data.js', location.href).href),
       codec: !!await cache.match(new URL('src/vendor/zip.min.js', location.href).href)
