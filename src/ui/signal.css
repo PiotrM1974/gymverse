@@ -1,0 +1,120 @@
+/* Zatwierdzony wygląd Mineral Track / Signal. Funkcje i dane pozostają w index.html. */
+body { padding-top: calc(136px + env(safe-area-inset-top, 0px)); }
+#appHeader { position: fixed; inset: 0 0 auto; display: block; height: calc(128px + env(safe-area-inset-top, 0px)); padding: env(safe-area-inset-top, 0px) max(16px, calc((100vw - 960px)/2)) 0; z-index: 100; transition: height .18s ease; }
+#appHeader.compact { height: calc(84px + env(safe-area-inset-top, 0px)); padding: env(safe-area-inset-top, 0px) max(16px, calc((100vw - 960px)/2)) 0; }
+.header-top { height: 59px; display: flex; align-items: center; justify-content: space-between; overflow: hidden; transition: height .18s ease; }
+#appHeader.compact .header-top { height: 29px; }
+.logo { background: none; border: 0; color: var(--text); padding: 0; min-height: 44px; cursor: pointer; font-size: 28px; }
+#appHeader.compact .logo { font-size: 22px; min-height: 29px; }
+.header-mark { width: 40px; height: 40px; display: grid; place-items: center; border: 1px solid var(--border); border-radius: 12px; color: #B88F00; font-size: 24px; }
+#appHeader.compact .header-mark { width: 27px; height: 27px; font-size: 17px; }
+.header-nav { display: grid; grid-template-columns: repeat(4, 1fr); width: min(100%, 680px); height: 66px; border-bottom: 1px solid var(--border); }
+.header-nav button { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; border: 0; border-bottom: 3px solid transparent; background: none; color: var(--text-muted); font-size: 12px; font-weight: 700; min-width: 0; cursor: pointer; }
+.header-nav button[aria-current="page"] { color: var(--lime); border-bottom-color: var(--lime); }
+.header-nav svg { width: 21px; height: 21px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+#appHeader.compact .header-nav { height: 52px; }
+#appHeader.compact .header-nav svg { width: 17px; height: 17px; }
+.container { min-height: calc(100vh - 140px); }
+.screen-eyebrow { font-size: 12px; font-weight: 800; letter-spacing: .13em; text-transform: uppercase; color: var(--lime); margin: 9px 0 6px; }
+.screen-title { font: 800 clamp(42px, 8vw, 56px)/.95 'Barlow Condensed', 'Arial Narrow', sans-serif; margin: 0 0 17px; }
+.view-head h2, #view-summary>h2 { font: 800 36px/.98 'Barlow Condensed', 'Arial Narrow', sans-serif !important; }
+.view-head { align-items: start; margin-bottom: 18px; }
+.view-head .btn-icon { background: var(--card-bg); }
+.plan-grid { margin-top: 17px; }
+.plan-card { display: block; width: 100%; position: relative; min-height: 215px; padding: 18px; }
+.plan-card.next { padding: 17px; }
+.plan-card-top { display: flex; align-items: center; justify-content: space-between; }
+.plan-type { min-width: 61px; height: 51px; display: grid; place-items: center; border-radius: 15px; background: var(--lime-dim); color: var(--lime); font: 800 16px 'Barlow Condensed', 'Arial Narrow', sans-serif; }
+.plan-card.push .plan-type { background: var(--push-soft); color: var(--push); }
+.plan-card.pull .plan-type { background: var(--pull-soft); color: var(--pull); }
+.plan-card h3 { display: block; margin: 13px 0 3px; font: 800 31px/.95 'Barlow Condensed', 'Arial Narrow', sans-serif; }
+.plan-card p { font-size: 14px; margin: 0 0 13px; }
+.plan-start { display: grid; place-items: center; min-height: 51px; border-radius: 14px; background: var(--lime); color: #fff; font-weight: 800; font-size: 16px; }
+.plan-card.push:not(.next) .plan-start { background: var(--push-soft); color: var(--push); }
+.plan-card.pull:not(.next) .plan-start { background: var(--pull-soft); color: var(--pull); }
+.plan-card:focus-visible { outline: 3px solid var(--lime); outline-offset: 3px; }
+.data-box { padding: 18px; border: 1px solid var(--border); margin-top: 12px; }
+.data-box::before { content: 'Twoje dane'; display: block; font: 800 25px 'Barlow Condensed', 'Arial Narrow', sans-serif; margin-bottom: 8px; }
+.data-box .small { line-height: 1.45; margin-bottom: 7px; }
+.exercise-meta { display: flex; flex-wrap: wrap; gap: 4px 16px; font: 700 17px 'Source Sans 3', sans-serif; }
+.progress-bar-container { height: 8px; background: var(--card-sub); }
+.exercise-hero { border-radius: 22px; }
+.hero-title-box h2 { font: 800 clamp(25px, 6vw, 36px)/1 'Barlow Condensed', 'Arial Narrow', sans-serif; }
+.exercise-presentation__figure { width: min(100%, 245px); }
+.exercise-presentation__group button, .legacy-image-controls button { min-height: 44px; border-radius: 12px; }
+.exercise-presentation__details summary { min-height: 44px; display: flex; align-items: center; }
+.training-atlas-disclosure>summary { font-weight: 800; padding: 0 16px; }
+.training-atlas-disclosure>summary::after { content: '+'; margin-left: auto; font-size: 23px; color: var(--lime); }
+.training-atlas-disclosure[open]>summary::after { content: '−'; }
+.sets-table { table-layout: fixed; }
+.sets-table th:nth-child(1) { width: 10%; }.sets-table th:nth-child(2) { width: 21%; }.sets-table th:nth-child(3), .sets-table th:nth-child(4) { width: 22%; }.sets-table th:nth-child(5) { width: 25%; }
+.set-row td { padding: 8px 3px; }.set-row td:first-child { padding-left: 7px; }
+.input-cell { width: min(100%, 74px); min-height: 51px; font-size: 18px; background: var(--card-bg); }
+.btn-done { min-width: 0; width: 100%; min-height: 51px; padding: 6px 3px; border-radius: 13px; font-size: 13px; }
+.btn-done.completed { font-size: 21px; }
+.step-strip { margin: 10px 0; }.step-strip .rp { min-height: 45px; }
+.nav-row { margin-top: 12px; }.nav-row .btn-prev { flex-basis: 55px; }
+.timer-digits { font: 800 39px/.95 'Barlow Condensed', 'Arial Narrow', sans-serif; font-variant-numeric: tabular-nums; }
+.timer-label { font-size: 12px; font-weight: 800; }.btn-timer { border-radius: 11px; font-size: 13px; font-weight: 700; }.btn-timer:last-child { color: var(--lime); }
+.stat-card .val { font: 800 27px 'Barlow Condensed', 'Arial Narrow', sans-serif; }.stat-card .lbl { font-size: 11px; font-weight: 700; }
+.hist-head { min-height: 72px; }.hist-card,.chart-container,.stat-card,.pe-ex { border-radius: 18px; }
+.pe-btns .rp { min-width: 49px; }.pe-top { flex-wrap: wrap; }.pe-name { min-width: 0; overflow-wrap: anywhere; }
+select.select-custom, input.select-custom, .pe-target { min-height: 49px; }.pill { min-height: 44px; border-radius: 12px; }
+@media(max-width:420px) { .container { padding: 17px 12px; }.screen-title { font-size: 44px; }.plan-card { min-height: 207px; }.sets-table th { font-size: 10px; }.sets-table th:nth-child(2) { width: 19%; }.sets-table th:nth-child(3),.sets-table th:nth-child(4) { width: 23%; }.set-row td { padding: 6px 2px; }.input-cell { width: min(100%, 61px); }.btn-done { font-size: 11px; }.timer-digits { font-size: 34px; }.btn-timer { padding: 6px; } }
+@media(max-width:360px) { .container { padding: 14px 8px; }.header-nav button { font-size: 11px; }.sets-table th:nth-child(2) { width: 18%; }.sets-table th:nth-child(3),.sets-table th:nth-child(4) { width: 24%; }.prev-val { font-size: 10px; }.input-cell { font-size: 16px; } }
+@media(min-width:760px) { .plan-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }.container { padding-top: 32px; }.stat-cards { gap: 16px; }.stat-card { padding: 20px; }.chart-container { padding: 21px; } }
+
+.logo { font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-weight: 800; }
+:root { --push:#F35B16; --push-text:#AA3E00; --pull:#00979E; --pull-text:#00666B; }
+@media(prefers-color-scheme:dark) { :root:not([data-theme="light"]) { --push:#FF7A32; --push-text:#FF7A32; --pull:#35D6D0; --pull-text:#35D6D0; } }
+:root[data-theme="dark"] { --push:#FF7A32; --push-text:#FF7A32; --pull:#35D6D0; --pull-text:#35D6D0; }
+.header-brand { display:flex; flex-direction:column; justify-content:center; }
+.brand-kicker { color:var(--text-muted); font-size:10px; font-weight:800; letter-spacing:.16em; line-height:1; }
+#appHeader.compact .brand-kicker { display:none; }
+.logo span { color:var(--push); }
+.plan-card.push .plan-type,.plan-card.push:not(.next) .plan-start { color:var(--push-text); }
+.plan-card.pull .plan-type,.plan-card.pull:not(.next) .plan-start { color:var(--pull-text); }
+.plan-start svg { width:28px; height:28px; fill:currentColor; }
+.icon-action { display:grid; place-items:center; min-height:52px; }
+.icon-action svg { width:25px; height:25px; fill:none; stroke:var(--lime); stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+@media(max-width:360px) { .data-box .row button { white-space:nowrap; font-size:12px; padding:9px 4px; } }
+#view-workout > .hero-title-box { padding: 5px 0 17px; }
+#view-workout > .hero-title-box::before { content: 'Aktywny trening'; display: block; color: var(--lime); font-size: 12px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; margin-bottom: 10px; }
+#view-workout > .hero-title-box h2 { font: 800 clamp(35px,8vw,52px)/.98 'Barlow Condensed','Arial Narrow',sans-serif; margin: 0 0 9px; }
+#view-workout > .hero-title-box .hero-target { color: var(--text-muted); font-size: 16px; }
+.workout-control-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 21px; padding: 15px; margin: 18px 0 14px; }
+.workout-control-card::before { content: 'Serie treningowe'; display: block; font: 800 25px 'Barlow Condensed','Arial Narrow',sans-serif; margin: 0 0 11px; }
+.workout-control-card .step-strip { margin-top: 14px; }
+.exercise-hero { margin-bottom: 13px; }
+.exercise-hero::before { content: 'Technika ruchu'; display: block; padding: 16px 16px 0; font: 800 25px 'Barlow Condensed','Arial Narrow',sans-serif; }
+.btn-done { color: var(--text-muted); }
+#view-planedit .plan-card { display: flex; flex-direction: row; align-items: center; justify-content: flex-start; gap: 13px; min-height: 104px; }
+#view-planedit .plan-card .plan-arrow { margin-left: auto; }
+#view-planedit .plan-card h3 { margin: 0 0 5px; font-size: 27px; }
+#view-planedit .plan-card p { margin: 0; }
+#view-planedit .plan-arrow { font-size: 24px; }
+.pe-btns { flex-wrap: wrap; justify-content: flex-end; }.pe-btns .rp { font-size: 12px; }
+#view-planedit [data-act="peNew"] { background: var(--lime); color: #fff; font-weight: 800; }
+@media(max-width:560px) {
+  .sets-table, .sets-table tbody { display: block; width: 100%; }
+  .sets-table thead { display: none; }
+  .set-row { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 9px; margin-bottom: 11px; padding: 12px; border: 1px solid var(--border); border-radius: 18px; background: var(--card-bg); }
+  .set-row td { display: block; min-width: 0; padding: 0; border: 0 !important; border-radius: 0 !important; background: transparent; text-align: left; }
+  .set-row td:first-child { grid-column: 1; padding: 0; font-size: 16px; color: var(--lime); }
+  .set-row td:first-child::before { content: 'Seria '; color: var(--text-muted); font-size: 13px; font-weight: 600; }
+  .set-row td:nth-child(2) { grid-column: 2 / 4; justify-self: end; font-size: 13px; }
+  .set-row td:nth-child(2)::before { content: 'Poprzednio: '; color: var(--text-muted); }
+  .set-row td:nth-child(3), .set-row td:nth-child(4) { display: flex; flex-direction: column; gap: 5px; }
+  .set-row td:nth-child(3)::before { content: 'Ciężar'; }.set-row td:nth-child(4)::before { content: 'Powt.'; }
+  #view-workout[data-bodyweight="true"] .set-row td:nth-child(3)::before { content: 'Dodatk. kg'; }
+  .set-row td:nth-child(3)::before, .set-row td:nth-child(4)::before { color: var(--text-muted); text-transform: uppercase; font-size: 10px; font-weight: 800; letter-spacing: .04em; }
+  .set-row:first-child { border-color: var(--lime); }
+  .set-row:first-child td:nth-child(3) .input-cell { border-color: var(--lime); }
+  .input-cell { width: 100%; min-height: 54px; font-size: 20px; }
+  .set-row:first-child td:last-child { grid-column: 1 / -1; }
+  .btn-done { min-height: 54px; margin-top: 20px; font-size: 13px; border-radius: 13px; }
+  .set-row:first-child .btn-done { margin-top: 2px; font-size: 17px; }
+  .bottom-bar { flex-direction: column; align-items: stretch; gap: 6px; padding: 9px 16px calc(10px + env(safe-area-inset-bottom,0px)); }
+  .timer-digits { text-align: center; font-size: 42px; }.timer-label { text-align: center; }
+  .timer-ctrls { display: grid; grid-template-columns: 1fr 1fr 1.25fr; }.btn-timer { min-height: 46px; }
+}
