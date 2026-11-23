@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url';
 
 const root = await realpath(resolve(fileURLToPath(new URL('..', import.meta.url))));
 const port = Number(process.env.PORT || 41739);
-const types = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.json': 'application/json; charset=utf-8', '.webmanifest': 'application/manifest+json', '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg' };
+const types = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.json': 'application/json; charset=utf-8', '.md': 'text/markdown; charset=utf-8', '.webmanifest': 'application/manifest+json', '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp' };
 const server = createServer(async (req, res) => {
   try {
     const url = new URL(req.url, 'http://127.0.0.1');

@@ -1,7 +1,7 @@
 {
-  "name": "GymVerse Tracker",
-  "short_name": "GymVerse",
-  "description": "Tracker treningów Push / Pull",
+  "name": "GymNastika",
+  "short_name": "GymNastika",
+  "description": "Dziennik treningowy — plany, treningi, historia i postępy",
   "lang": "pl",
   "start_url": "./",
   "scope": "./",

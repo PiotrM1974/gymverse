@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://gymverse.invalid/schemas/exercise-presentation-release-v2.schema.json",
+  "title": "Exercise presentation release v2",
+  "description": "Owner-authorized public presentation release. Visual approval and publication authorization are separate from technical review and asset rights metadata.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["presentationContractVersion", "status", "publicationApproval", "records"],
+  "properties": {
+    "presentationContractVersion": { "const": 2 },
+    "status": { "const": "released" },
+    "publicationApproval": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["record", "recordSha256", "approvedOn", "scope", "ownerVisualReview", "ownerVisualReviewSha256", "rightsAndTechnicalReview"],
+      "properties": {
+        "record": { "type": "string", "pattern": "^[a-zA-Z0-9_./-]+$" },
+        "recordSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "approvedOn": { "type": "string", "format": "date" },
+        "scope": { "type": "string", "minLength": 1 },
+        "ownerVisualReview": { "type": "string", "pattern": "^[a-zA-Z0-9_./-]+$" },
+        "ownerVisualReviewSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "rightsAndTechnicalReview": { "type": "string", "minLength": 1 }
+      }
+    },
+    "records": { "type": "array", "minItems": 1, "maxItems": 34, "items": { "$ref": "#/$defs/record" } }
+  },
+  "$defs": {
+    "asset": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "mimeType", "width", "height", "sizeBytes", "sha256", "altText", "status"],
+      "properties": {
+        "path": { "type": "string", "pattern": "^src/data/exercise-images/selected/(technique|thumbnails)/[a-z0-9_]+__[a-z0-9_]+-(male|female)\\.webp$" },
+        "mimeType": { "const": "image/webp" },
+        "width": { "type": "integer", "minimum": 1 },
+        "height": { "type": "integer", "minimum": 1 },
+        "sizeBytes": { "type": "integer", "minimum": 1 },
+        "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "altText": { "type": "string", "minLength": 1 },
+        "status": { "const": "local-candidate" }
+      }
+    },
+    "views": { "type": "object", "additionalProperties": false, "required": ["technique", "thumbnail"], "properties": { "technique": { "$ref": "#/$defs/asset" }, "thumbnail": { "$ref": "#/$defs/asset" } } },
+    "record": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["exerciseId", "variantId", "status", "positions", "bySex", "musclePresentation", "ownerSelection"],
+      "properties": {
+        "exerciseId": { "type": "string", "pattern": "^[a-z0-9_]+$" },
+        "variantId": { "type": "string", "pattern": "^[a-z0-9_]+$" },
+        "status": { "const": "released" },
+        "positions": { "type": "object", "additionalProperties": false, "required": ["lower", "raised"], "properties": { "lower": { "const": "left" }, "raised": { "const": "right" } } },
+        "labels": { "type": "object", "additionalProperties": false, "required": ["lower", "raised"], "properties": { "lower": { "type": "string", "minLength": 1 }, "raised": { "type": "string", "minLength": 1 } } },
+        "copy": { "type": "object", "additionalProperties": false, "required": ["lower", "raised", "details", "thumbnail"], "properties": { "lower": { "type": "string", "minLength": 1 }, "raised": { "type": "string", "minLength": 1 }, "details": { "type": "string", "minLength": 1 }, "thumbnail": { "type": "string", "minLength": 1 } } },
+        "ownerSelection": {
+          "type": "object", "additionalProperties": false, "required": ["approvalRecord", "exerciseId", "variantId", "sourceSha256BySex", "panelReordered"],
+          "properties": {
+            "approvalRecord": { "type": "string", "pattern": "^[a-zA-Z0-9_./-]+$" },
+            "exerciseId": { "type": "string", "pattern": "^[a-z0-9_]+$" },
+            "variantId": { "type": "string", "pattern": "^[a-z0-9_]+$" },
+            "panelReordered": { "type": "boolean" },
+            "sourceSha256BySex": { "type": "object", "additionalProperties": false, "required": ["male", "female"], "properties": { "male": { "type": "string", "pattern": "^[a-f0-9]{64}$" }, "female": { "type": "string", "pattern": "^[a-f0-9]{64}$" } } }
+          }
+        },
+        "bySex": { "type": "object", "additionalProperties": false, "required": ["male", "female"], "properties": { "male": { "$ref": "#/$defs/views" }, "female": { "$ref": "#/$defs/views" } } },
+        "musclePresentation": { "type": "object", "additionalProperties": false, "required": ["kind", "exerciseId"], "properties": { "kind": { "const": "atlas" }, "exerciseId": { "type": "string", "pattern": "^[a-z0-9_]+$" } } }
+      }
+    }
+  }
+}

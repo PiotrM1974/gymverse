@@ -6,12 +6,13 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="GymVerse">
+<meta name="apple-mobile-web-app-title" content="GymNastika">
 <meta name="theme-color" content="#0d0f12">
 <meta name="color-scheme" content="dark">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<title>GymVerse Tracker</title>
+<link rel="stylesheet" href="src/features/anatomy/atlas.css">
+<title>GymNastika</title>
 <style>
 :root {
   --bg: #0d0f12;
@@ -85,8 +86,40 @@ header {
 .progress-bar { height: 100%; background: var(--lime); width: 0%; transition: width 0.3s; }
 .exercise-meta { display: flex; justify-content: space-between; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 6px; }
 .exercise-hero { background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin-bottom: 10px; }
+.exercise-presentation { padding: 12px 14px 14px; border-bottom: 1px solid var(--border); }
+.exercise-presentation[hidden], #legacyExerciseImageBox[hidden] { display: none !important; }
+.exercise-presentation__group { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 10px; }
+.exercise-presentation__group[hidden] { display: none !important; }
+.exercise-presentation__group button { min-height: 38px; border: 1px solid var(--border); border-radius: 999px; padding: 8px 13px; background: var(--card-sub); color: var(--text); font-size: .82rem; font-weight: 700; cursor: pointer; }
+.exercise-presentation__group button[aria-pressed="true"] { border-color: #81d9b1; background: #18372e; color: #a7f3d0; }
+.exercise-presentation__group button:focus-visible { outline: 2px solid #a7f3d0; outline-offset: 2px; }
+.exercise-presentation__figure { width: min(100%, 270px); aspect-ratio: 3 / 4; margin: 0 auto; overflow: hidden; border: 1px solid var(--border); border-radius: 12px; background: #090b0e; }
+.exercise-presentation__figure[hidden] { display: none !important; }
+.exercise-presentation__figure img { display: block; width: 200%; height: 100%; max-width: none; object-fit: fill; object-position: left center; transform: none; }
+.exercise-presentation__figure[data-position="raised"] img { transform: translateX(-50%); }
+.exercise-presentation__figure[data-mode="thumbnail"] { width: min(100%, 256px); aspect-ratio: 1; }
+.exercise-presentation__figure[data-mode="thumbnail"] img { width: 100%; height: 100%; object-fit: contain; transform: none; }
+.exercise-presentation__caption { margin: 8px 0 0; text-align: center; color: var(--text); font-size: .86rem; line-height: 1.4; }
+.exercise-presentation__alert { margin: 8px 0 0; color: var(--orange); font-size: .86rem; line-height: 1.45; }
+.exercise-presentation__status { margin: 8px 0 0; color: var(--text-muted); font-size: .72rem; text-align: center; }
+.exercise-presentation__details { margin-top: 9px; color: var(--text-muted); font-size: .78rem; line-height: 1.45; }
+.exercise-presentation__details summary { cursor: pointer; }
+.exercise-presentation__details p { margin-top: 6px; }
+.training-atlas-disclosure { margin: 0 0 8px; }
+.training-atlas-disclosure[hidden] { display: none !important; }
+.training-atlas-disclosure > summary { display: flex; align-items: center; min-height: 44px; padding: 0 12px; border: 1px solid var(--border); border-radius: 10px; background: var(--card); color: var(--text); font-size: .88rem; font-weight: 700; cursor: pointer; list-style: none; }
+.training-atlas-disclosure > summary::-webkit-details-marker { display: none; }
+.training-atlas-disclosure > summary:focus-visible { outline: 2px solid #a7f3d0; outline-offset: 2px; }
+.training-atlas-disclosure[open] > summary { margin-bottom: 4px; }
+.training-atlas-disclosure:not([open]) [data-atlas-disclosure-close], .training-atlas-disclosure[open] [data-atlas-disclosure-open] { display: none; }
 .hero-img-box { width: 100%; height: 280px; background: #090b0e; display: flex; align-items: center; justify-content: center; border-bottom: 1px solid var(--border); padding: 8px; }
 .hero-img-box img { width: 100%; height: 100%; object-fit: contain; object-position: center; display: block; }
+.hero-img-box[data-mode="thumbnail"] { height: 160px; }
+.legacy-image-controls { display: flex; gap: 8px; padding: 8px 12px 0; }
+.legacy-image-controls[hidden] { display: none !important; }
+.legacy-image-controls button { min-height: 38px; border: 1px solid var(--border); border-radius: 10px; background: var(--card-sub); color: var(--text); padding: 0 12px; cursor: pointer; }
+.legacy-image-controls button[aria-pressed="true"] { border-color: #81d9b1; color: #a7f3d0; }
+.legacy-image-controls button:focus-visible { outline: 2px solid #a7f3d0; outline-offset: 2px; }
 .hero-title-box { padding: 14px 16px; }
 .hero-title-box h2 { font-size: 1.25rem; font-weight: 700; margin-bottom: 4px; line-height: 1.3; }
 .swapped-tag { font-size: 0.7rem; font-weight: 800; color: #000; background: var(--orange); border-radius: 6px; padding: 2px 6px; vertical-align: middle; margin-left: 6px; }
@@ -227,7 +260,7 @@ select.select-custom, input.select-custom { width: 100%; background: var(--card-
 <body>
 
 <header>
-  <div class="logo" data-act="view" data-view="view-plans">GYM<span>VERSE</span></div>
+  <div class="logo" data-act="view" data-view="view-plans">GYM<span>NASTIKA</span></div>
   <div class="header-actions">
     <button class="btn-icon" data-act="view" data-view="view-stats" aria-label="Statystyki" title="Statystyki">📊</button>
     <button class="btn-icon" data-act="view" data-view="view-charts" aria-label="Progres" title="Progres ćwiczeń">📈</button>
@@ -248,6 +281,7 @@ select.select-custom, input.select-custom { width: 100%; background: var(--card-
     <button class="btn-link" data-act="editPlans">✎ Edytuj plany i ćwiczenia</button>
     <div class="data-box">
       <div class="small muted" id="backupInfo"></div>
+      <div class="small muted">Kopia ZIP v5 obejmuje także aktywny trening i robocze wpisy; import JSON v4 pozostaje obsługiwany.</div>
       <div class="row">
         <button class="btn-secondary" data-act="export">💾 Zapisz kopię</button>
         <button class="btn-secondary" data-act="importBtn">📂 Wczytaj kopię</button>
@@ -255,7 +289,9 @@ select.select-custom, input.select-custom { width: 100%; background: var(--card-
       <div class="row">
         <button class="btn-secondary" data-act="csv">📄 Eksport do CSV (Excel)</button>
       </div>
-      <input type="file" id="importFile" accept=".json,application/json" style="display:none">
+      <div class="small muted">Przeniesienie danych do IndexedDB jest ręczne. Wymaga sprawdzonej kopii źródłowej i sprawdzonego eksportu ZIP v5.</div>
+      <button class="btn-secondary" data-act="migrateData" id="migrateDataButton" hidden>Przygotuj bezpieczne przeniesienie danych</button>
+      <input type="file" id="importFile" accept=".zip,.json,application/zip,application/json" style="display:none">
     </div>
   </div>
 
@@ -269,15 +305,51 @@ select.select-custom, input.select-custom { width: 100%; background: var(--card-
     </div>
     <div id="draftStatus" class="hero-hint" hidden>Wpis niezatwierdzony</div>
     <div class="exercise-hero">
-      <div class="hero-img-box"><img id="currentExImg" src="" alt="Ćwiczenie"></div>
+      <section id="exercisePresentation" class="exercise-presentation" aria-label="Ilustracja techniki ćwiczenia" hidden>
+        <div class="exercise-presentation__group" role="group" aria-label="Sylwetka ćwiczącej osoby">
+          <button type="button" data-presentation-sex="male" aria-pressed="true">Mężczyzna</button>
+          <button type="button" data-presentation-sex="female" aria-pressed="false">Kobieta</button>
+        </div>
+        <div class="exercise-presentation__group" role="group" aria-label="Widok ilustracji">
+          <button type="button" data-presentation-mode="technique" aria-pressed="true">Technika</button>
+          <button type="button" data-presentation-mode="thumbnail" aria-pressed="false">Miniatura</button>
+        </div>
+        <div class="exercise-presentation__group" data-presentation-positions role="group" aria-label="Pozycja ruchu">
+          <button type="button" data-presentation-position="lower" aria-pressed="true">DÓŁ</button>
+          <button type="button" data-presentation-position="raised" aria-pressed="false">GÓRA</button>
+        </div>
+        <div id="exercisePresentationFigure" class="exercise-presentation__figure" data-mode="technique" data-position="lower" role="img" aria-label="Męska ilustracja techniki — pozycja DÓŁ">
+          <img id="exercisePresentationImage" src="" alt="" decoding="async">
+        </div>
+        <p id="exercisePresentationCaption" class="exercise-presentation__caption" aria-live="polite">Pozycja DÓŁ: hantle przy bokach ud.</p>
+        <p id="exercisePresentationAlert" class="exercise-presentation__alert" role="alert" hidden></p>
+        <p class="exercise-presentation__status">Ilustracja wybrana do GymNastiki jest dostępna w aplikacji. Nie stanowi niezależnej oceny eksperckiej techniki.</p>
+        <details class="exercise-presentation__details">
+          <summary>O ilustracji i pozycji</summary>
+          <p id="exercisePresentationDetailsText">Ilustracja przedstawia dwie pozycje ruchu. Przy opuszczaniu hantli wróć kontrolowanie do pozycji DÓŁ.</p>
+        </details>
+      </section>
+      <div id="legacyExerciseImageBox" class="hero-img-box"><img id="currentExImg" src="" alt="Ćwiczenie"></div>
+      <div id="legacyImageControls" class="legacy-image-controls" role="group" aria-label="Widok ilustracji suwnicy" hidden>
+        <button type="button" data-legacy-image-mode="technique" aria-pressed="true">Technika</button>
+        <button type="button" data-legacy-image-mode="thumbnail" aria-pressed="false">Miniatura</button>
+      </div>
+      <p id="variantImageShared" class="hero-hint" hidden>Ilustracja wariantu podstawowego</p>
+      <p id="variantImageMissing" class="hero-hint" hidden>Brak ilustracji tego wariantu.</p>
       <div class="hero-title-box">
         <h2><span id="currentExName"></span><span id="swappedTag" class="swapped-tag" hidden>zamiennik</span></h2>
+        <div class="hero-hint" id="currentExVariant"></div>
         <div class="hero-target" id="currentExTarget"></div>
         <div class="hero-hint" id="currentExHint"></div>
         <div class="hero-hint hero-warm" id="currentExWarm"></div>
         <div class="hero-hint hero-alert" id="currentExAlert"></div>
       </div>
     </div>
+    <details id="trainingAtlasDisclosure" class="training-atlas-disclosure" hidden>
+      <summary><span data-atlas-disclosure-open>Pokaż mięśnie</span><span data-atlas-disclosure-close>Ukryj mięśnie</span></summary>
+      <div id="anatomyAtlas" data-exercise-id="" hidden></div>
+    </details>
+    <p id="variantAtlasNotice" class="hero-hint" hidden>Brak odpowiedniej mapy mięśni dla nierozpoznanego wariantu.</p>
 
     <div class="link-row">
       <button class="btn-link" data-act="swapOpen">⇄ Zamień ćwiczenie</button>
@@ -420,6 +492,10 @@ select.select-custom, input.select-custom { width: 100%; background: var(--card-
 </div>
 
 <div id="toast" role="status" aria-live="polite"></div>
+<div class="banner soft" id="fileDeliveryPrompt" hidden style="position:fixed;left:12px;right:12px;bottom:calc(env(safe-area-inset-bottom, 0px) + 14px);z-index:500;box-shadow:0 8px 32px #0009">
+  <p id="fileDeliveryInstructions"></p>
+  <button class="btn-secondary" style="margin-top:0;padding:10px" data-act="deliverPreparedFile">Udostępnij / zapisz plik</button>
+</div>
 
 <script src="src/gv-base-b.js"></script>
 <script>
@@ -438,9 +514,34 @@ const byDate = (a, b) => new Date(a.date) - new Date(b.date);
 const pad2 = n => String(n).padStart(2, '0');
 const dkey = d => `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
 const DAY = 864e5;
+let STORE = null;
+let DATA_IDS = null;
+let suppressNextStoreFlushError = false;
+let pendingFileDelivery = null;
+
+function createUuid() {
+  if (globalThis.crypto && typeof globalThis.crypto.randomUUID === 'function') return globalThis.crypto.randomUUID();
+  if (!globalThis.crypto || typeof globalThis.crypto.getRandomValues !== 'function') throw new Error('SECURE_UUID_UNAVAILABLE');
+  const bytes = globalThis.crypto.getRandomValues(new Uint8Array(16));
+  bytes[6] = (bytes[6] & 0x0f) | 0x40;
+  bytes[8] = (bytes[8] & 0x3f) | 0x80;
+  const hex = Array.from(bytes, byte => byte.toString(16).padStart(2, '0')).join('');
+  return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
+}
 
 let toastTimer = null;
 let draftSaveTimer = null;
+let pendingDraftSnapshot = null;
+const exercisePresentationPilot = {
+  active: false, pilotMode: false, ready: false, module: null, registry: null, error: '', sex: 'male', position: 'lower', mode: 'technique',
+  currentExerciseId: '', currentExercise: null, requestId: 0, loadingPath: '', loadedPath: '', currentAsset: null
+};
+const PRESENTATION_CAPTIONS = Object.freeze({
+  lat_raise_stand: { lower: 'Pozycja DÓŁ: hantle przy bokach ud.', raised: 'Pozycja GÓRA: unieś ramiona bokiem do wysokości barków; opuść je kontrolowanie do pozycji DÓŁ.', details: 'Ilustracja przedstawia dwie pozycje ruchu. Przy opuszczaniu hantli wróć kontrolowanie do pozycji DÓŁ.' },
+  db_bench: { lower: 'Pozycja DÓŁ: hantle przy klatce piersiowej, łokcie zgięte.', raised: 'Pozycja GÓRA: hantle nad klatką piersiową, ramiona wyprostowane.', details: 'Ciało pozostaje podparte na płaskiej ławce, a stopy na podłożu w obu pozycjach.' },
+  lat_pulldown_wide: { lower: 'Pozycja DÓŁ: drążek przy górnej części klatki piersiowej.', raised: 'Pozycja GÓRA: drążek nad głową, ramiona uniesione.', details: 'DÓŁ i GÓRA oznaczają położenie drążka. Uda pozostają podparte pod wałkami.' },
+  leg_press: { lower: 'Pozycja DÓŁ: kolana zgięte, platforma bliżej tułowia.', raised: 'Pozycja GÓRA: platforma odsunięta, kolana bez blokady.', details: 'Plecy i miednica pozostają podparte, a całe stopy spoczywają na platformie.' }
+});
 function toast(msg) {
   const t = $('toast');
   t.textContent = msg;
@@ -451,22 +552,19 @@ function toast(msg) {
 
 const LS = {
   get(key, fallback) {
-    let raw = null;
     try {
-      raw = localStorage.getItem(key);
-      return raw == null ? fallback : JSON.parse(raw);
+      return STORE.get(key, fallback);
     } catch (e) {
-      try { if (raw != null) localStorage.setItem(key + '__corrupt', raw); } catch (e2) {}
+      const raw = STORE.storage.getItem(key);
+      if (raw != null) STORE.storage.setItem(key + '__corrupt', raw);
       return fallback;
     }
   },
   set(key, value) {
-    try { return BASE_B.persistJsonTransaction(localStorage, { [key]: value }); }
-    catch (e) { toast(storageFailureMessage(e)); return false; }
+    return STORE.set(key, value);
   },
   del(key) {
-    try { return BASE_B.persistJsonTransaction(localStorage, { [key]: null }); }
-    catch (e) { toast(storageFailureMessage(e)); return false; }
+    return STORE.delete(key).then(() => true).catch(e => { toast(storageFailureMessage(e)); return false; });
   }
 };
 function storageFailureMessage(error) {
@@ -491,7 +589,7 @@ const CATALOG_BASE = {
   db_fly: 'Rozpiętki hantlami na ławce płaskiej lub lekkim skosie',
   front_raise: 'Unoszenie hantli przodem',
   lat_raise_seated: 'Unoszenie hantli bokiem siedząc',
-  tri_machine: 'Triceps na maszynie modlitewnik',
+  tri_machine: 'Prostowanie przedramion na maszynie do tricepsa',
   lat_pulldown_neutral: 'Ściąganie drążka wyciągu górnego do klatki - chwyt neutralny/wąski',
   row_straight: 'Przyciąganie prostego drążka wyciągu dolnego do brzucha',
   chest_machine: 'Wyciskanie na maszynie (klatka)',
@@ -530,6 +628,7 @@ const IMG_BY_KEY = {
   db_bench: 'p2_1', db_fly: 'p2_2', front_raise: 'p2_3', lat_raise_seated: 'p2_4', tri_machine: 'p2_5',
   lat_pulldown_neutral: 'pl2_1', row_straight: 'pl2_2'
 };
+const SHARED_LEG_PRESS_MEDIA = Object.freeze({ exerciseId: 'leg_press', variantId: 'high_feet', technique: IMG_BY_KEY.leg_press, thumbnail: IMG_BY_KEY.leg_press });
 const ID_MAP = {
   p1_1: 'bench_flat', p1_2: 'db_incline', p1_3: 'lat_raise_stand', p1_4: 'tri_rope', p1_5: 'leg_press',
   pl1_1: 'lat_pulldown_wide', pl1_2: 'row_v', pl1_3: 'rear_delt', pl1_4: 'biceps_preacher', pl1_5: 'leg_curl',
@@ -538,6 +637,13 @@ const ID_MAP = {
 };
 
 let CATALOG = Object.assign({}, CATALOG_BASE);
+let VARIANTS = [];
+const variantFor = (key, variantId) => VARIANTS.find(v => v.exerciseId === key && v.variantId === variantId);
+const variantDisplayName = variant => variant.exerciseId === 'leg_press' && variant.variantId === 'high_feet'
+  ? 'Stopy wyżej na platformie' : variant.variantDescription;
+const variantName = e => !Object.hasOwn(e, 'variantId') ? 'Wariant nie został zapisany' : e.variantId === 'default' ? 'Wersja podstawowa' : variantFor(e.key, e.variantId) ? variantDisplayName(variantFor(e.key, e.variantId)) : 'Wariant nierozpoznany';
+const validVariant = (key, variantId) => variantId === 'default' && !!CATALOG[key] || !!variantFor(key, variantId);
+const variantKey = e => e.variantId && e.variantId !== 'default' ? `${e.key}/${e.variantId}` : e.key;
 let GROUP = Object.assign({}, GROUP_BASE);
 let BW = new Set(BW_BASE);
 let CUSTOM = {};           // własne ćwiczenia: key -> {name, group, bw}
@@ -570,7 +676,7 @@ function cleanCustom(obj) {
 }
 
 /* ================== PLANY (edytowalne) ================== */
-const exd = (key, sets, target, name, img) => { const o = { key, sets, target }; if (name) o.name = name; if (img) o.img = img; return o; };
+const exd = (key, sets, target, name, img) => { const o = { key, variantId: 'default', sets, target }; if (name) o.name = name; if (img) o.img = img; return o; };
 function defaultPlans() {
   return [
     { id: 'push_a1', title: 'Push A1', exercises: [
@@ -585,7 +691,7 @@ function defaultPlans() {
     { id: 'push_a2', title: 'Push A2', exercises: [
       exd('db_bench', 3, '8-10'), exd('db_fly', 3, '10-12'), exd('front_raise', 2, '12-15'),
       exd('lat_raise_seated', 3, '12-15'), exd('tri_machine', 3, '10-12'),
-      exd('leg_press', 3, '12-15', 'Wypychanie nóg na suwnicy - stopy wyżej', 'p2_6')
+      { ...exd('leg_press', 3, '12-15', 'Wypychanie nóg na suwnicy - stopy wyżej', 'p2_6'), variantId: 'high_feet' }
     ]},
     { id: 'pull_a2', title: 'Pull A2', exercises: [
       exd('lat_pulldown_neutral', 3, '10-12'), exd('row_straight', 3, '10-12'),
@@ -597,7 +703,8 @@ function defaultPlans() {
 let PLANS = [];
 const getPlan = id => PLANS.find(p => p.id === id);
 const exName = e => e.name || nameOf(e.key);
-const imgFor = e => safeImg(e.img) || IMG_BY_KEY[e.key] || safeImg(e.key) || 'none';
+const imgFor = e => e.key === SHARED_LEG_PRESS_MEDIA.exerciseId && ['default', SHARED_LEG_PRESS_MEDIA.variantId].includes(e.variantId)
+  ? SHARED_LEG_PRESS_MEDIA.technique : safeImg(e.img) || IMG_BY_KEY[e.key] || safeImg(e.key) || 'none';
 const startable = () => PLANS.filter(p => p.exercises.length > 0);
 
 function cleanPlan(p, catalog = CATALOG) {
@@ -611,6 +718,10 @@ function cleanPlan(p, catalog = CATALOG) {
     };
     if (e.name) o.name = String(e.name).slice(0, 120);
     if (e.img && safeImg(e.img)) o.img = String(e.img);
+    if (Object.hasOwn(e, 'variantId')) {
+      if (typeof e.variantId !== 'string' || !e.variantId.trim()) return null;
+      o.variantId = e.variantId;
+    }
     return o;
   }).filter(Boolean);
   return { id: p.id.replace(/[^\w-]/g, '').slice(0, 40) || ('p_' + Date.now().toString(36)), title: String(p.title || 'Plan').slice(0, 40), exercises: exs };
@@ -620,7 +731,20 @@ function loadPlans() {
   const cleaned = cleanPlans(LS.get('gymverse_plans', null));
   PLANS = cleaned.length ? cleaned : defaultPlans();
 }
-const savePlans = () => LS.set('gymverse_plans', PLANS);
+function clonePlans(plans = PLANS) { return JSON.parse(JSON.stringify(plans)); }
+async function savePlanChanges(nextPlans, options = {}) {
+  const updates = { gymverse_plans: nextPlans };
+  if (Object.hasOwn(options, 'custom')) updates.gymverse_custom = options.custom;
+  try { await STORE.transact(updates); }
+  catch (_) {
+    suppressNextStoreFlushError = true;
+    toast(`Nie zapisano: ${options.failureMessage || 'zmiana planu'}. Zachowano poprzedni plan i katalog ćwiczeń.`);
+    return false;
+  }
+  PLANS = nextPlans;
+  if (Object.hasOwn(options, 'custom')) { CUSTOM = options.custom; applyCustom(); }
+  return true;
+}
 
 const PLACEHOLDER = 'data:image/svg+xml,' + encodeURIComponent(
   '<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300"><rect width="400" height="300" fill="#090b0e"/>' +
@@ -641,6 +765,7 @@ let histFilterDay = null;
 let histPrefillDate = null;
 let lastRow = 0;
 let barKg = 20;
+let legPressImageMode = 'technique';
 let lastSummary = null;
 
 /* Obciążenie serii do tonażu: dla ćwiczeń z masą ciała dolicza wagę ciała. */
@@ -671,12 +796,18 @@ function normalizeSession(s, catalog = CATALOG, bwSet, strict = false) {
     if (!x) { if (strict) throw importSeriesError(); return; }
     const w = Number(x.weight), r = Number(x.reps);
     const id = ID_MAP[x.exerciseId] || String(x.exerciseId || '');
+    if (Object.hasOwn(x, 'variantId') && (typeof x.variantId !== 'string' || !x.variantId.trim())) {
+      if (strict) throw importSeriesError();
+      return;
+    }
     if (!isFinite(w) || !isFinite(r) || w < 0 || (w === 0 && !(bwSet ? bwSet.has(id) : isBW(id))) || r <= 0 || (strict && (!catalog[id] || x.weight == null || x.weight === '' || x.reps == null || x.reps === ''))) {
       if (strict) throw importSeriesError();
       return;
     }
     details.push({
+      ...(typeof x.id === 'string' && x.id ? { id: x.id } : {}),
       exerciseId: id,
+      ...(Object.hasOwn(x, 'variantId') ? { variantId: x.variantId } : {}),
       exerciseName: String(x.exerciseName || catalog[id] || id).slice(0, 120),
       setNumber: Number(x.setNumber) || 1,
       weight: w, reps: Math.round(r),
@@ -685,7 +816,7 @@ function normalizeSession(s, catalog = CATALOG, bwSet, strict = false) {
   });
   const planTitle = String(s.planTitle || 'Trening').slice(0, 60);
   const plan = getPlan(s.planId) || PLANS.find(p => p.title === planTitle);
-  const out = { date: d.toISOString(), planId: plan ? plan.id : (typeof s.planId === 'string' ? s.planId.slice(0, 40) : null), planTitle, totalVolume: 0, totalReps: 0, details };
+  const out = { ...(typeof s.id === 'string' && s.id ? { id: s.id } : {}), date: d.toISOString(), planId: plan ? plan.id : (typeof s.planId === 'string' ? s.planId.slice(0, 40) : null), planTitle, totalVolume: 0, totalReps: 0, details };
   if (details.length) recalcSession(out, bwSet);
   else { out.totalVolume = Number(s.totalVolume) || 0; out.totalReps = Number(s.totalReps) || 0; }
   if (Number(s.durationMin) > 0) out.durationMin = Math.round(Number(s.durationMin));
@@ -724,22 +855,60 @@ function rebuildLastSets(preserveSaved = false) {
     if (s.rir) Object.keys(s.rir).forEach(k => { lastRir[k] = s.rir[k]; });
   });
 }
-function saveAll() {
-  try {
-    BASE_B.persistJsonTransaction(localStorage, { gymverse_history: history, gymverse_last_weights: lastSets });
-    return true;
-  } catch (e) { toast(storageFailureMessage(e)); return false; }
+async function saveAll(nextHistory = history, nextLastSets = lastSets) {
+  await STORE.transact({ gymverse_history: nextHistory, gymverse_last_weights: nextLastSets });
+  return true;
 }
-function rebuildAll() { lastSets = {}; rebuildLastSets(); saveAll(); }
-function saveActive() { return active ? LS.set('gymverse_active', active) : true; }
-function commitActiveState(nextActive, extraUpdates = {}) {
+function deriveHistoryIndexes(sessions, savedLastSets = lastSets) {
+  const nextLastSets = JSON.parse(JSON.stringify(savedLastSets || {}));
+  const nextLastRir = {};
+  const names = {};
+  sessions.slice().sort(byDate).forEach(session => {
+    const grouped = {};
+    (session.details || []).forEach(detail => {
+      (grouped[detail.exerciseId] = grouped[detail.exerciseId] || []).push(detail);
+      names[detail.exerciseId] = detail.exerciseName;
+    });
+    Object.keys(grouped).forEach(key => {
+      nextLastSets[key] = grouped[key].sort((a, b) => a.setNumber - b.setNumber).map(detail => ({ weight: detail.weight, reps: detail.reps }));
+    });
+    if (session.rir) Object.keys(session.rir).forEach(key => { nextLastRir[key] = session.rir[key]; });
+  });
+  return { lastSets: nextLastSets, lastRir: nextLastRir, names };
+}
+async function commitHistoryChanges(nextHistory, failureMessage) {
+  const candidate = JSON.parse(JSON.stringify(nextHistory));
+  const indexes = deriveHistoryIndexes(candidate);
   try {
-    BASE_B.persistJsonTransaction(localStorage, Object.assign({ gymverse_active: nextActive }, extraUpdates));
+    await STORE.transact({ gymverse_history: candidate, gymverse_last_weights: indexes.lastSets });
+  } catch (_) {
+    suppressNextStoreFlushError = true;
+    toast(`Nie zapisano: ${failureMessage}. W historii i ciężarach zachowano poprzednie dane.`);
+    return false;
+  }
+  history = candidate;
+  lastSets = indexes.lastSets;
+  lastRir = indexes.lastRir;
+  Object.assign(NAMES, indexes.names);
+  return true;
+}
+async function saveActive() {
+  if (!active) return true;
+  try { await LS.set('gymverse_active', active); return true; }
+  catch (error) {
+    toast(storageFailureMessage(error));
+    await offerEmergencyExport(history, lastSets, active, true);
+    return false;
+  }
+}
+async function commitActiveState(nextActive, extraUpdates = {}) {
+  try {
+    await STORE.transact(Object.assign({ gymverse_active: nextActive }, extraUpdates));
     active = nextActive;
     return true;
   } catch (error) {
     toast(storageFailureMessage(error));
-    offerEmergencyExport(history, lastSets, nextActive);
+    await offerEmergencyExport(history, lastSets, nextActive);
     return false;
   }
 }
@@ -748,7 +917,7 @@ function lastWeightsFor(sessions) {
   return BASE_B.deriveLastWeights(sessions, lastSets);
 }
 
-function loadState() {
+async function loadState() {
   CUSTOM = cleanCustom(LS.get('gymverse_custom', {}));
   applyCustom();
   loadPlans();
@@ -758,7 +927,7 @@ function loadState() {
   if (!Array.isArray(raw)) raw = [];
   const schema = LS.get('gymverse_schema', 1);
   if (schema < 2) {
-    LS.set('gymverse_history_backup_v1', raw);
+    await LS.set('gymverse_history_backup_v1', raw);
     lastSets = {};
     const legacy = LS.get('gymverse_last_weights', {});
     Object.keys(legacy || {}).forEach(id => {
@@ -769,9 +938,9 @@ function loadState() {
     lastSets = LS.get('gymverse_last_weights', {});
     if (!lastSets || typeof lastSets !== 'object') lastSets = {};
   }
-  history = raw.map(session => normalizeSession(session)).filter(Boolean);
+  history = DATA_IDS.ensureStableHistoryIds(raw.map(session => normalizeSession(session)).filter(Boolean));
   rebuildLastSets(true);
-  if (schema < 2) { saveAll(); LS.set('gymverse_schema', 2); }
+  if (schema < 2) { await saveAll(); await LS.set('gymverse_schema', 2); }
 
   const r = Number(LS.get('gymverse_rest', 0));
   restSetting = [0, 90, 120, 180, 240].includes(r) ? r : 0;
@@ -781,13 +950,17 @@ function loadState() {
   const a = LS.get('gymverse_active', null);
   const plan = a && getPlan(a.planId);
   if (a && plan && plan.exercises.length && Array.isArray(a.sets)) {
-    a.step = Math.min(Math.max(Number(a.step) || 0, 0), plan.exercises.length - 1);
+    const sessionExercises = Array.isArray(a.exercises) && a.exercises.length ? a.exercises : plan.exercises;
+    const identifiedActive = DATA_IDS.addStableIdentifiers({ gymverse_active: a }).gymverse_active;
+    a.id = identifiedActive.id;
+    a.sets = identifiedActive.sets;
+    a.step = Math.min(Math.max(Number(a.step) || 0, 0), sessionExercises.length - 1);
     a.swaps = a.swaps && typeof a.swaps === 'object' ? a.swaps : {};
     a.setCount = a.setCount && typeof a.setCount === 'object' ? a.setCount : {};
     a.rir = a.rir && typeof a.rir === 'object' ? a.rir : {};
     a.sets = a.sets.filter(s => s && isFinite(s.weight) && isFinite(s.reps)).map(s => {
       if (!Number.isInteger(s.step)) {
-        const idx = plan.exercises.findIndex(x => x.key === s.key);
+        const idx = sessionExercises.findIndex(x => x.key === s.key);
         s.step = idx >= 0 ? idx : 0;
       }
       return s;
@@ -941,27 +1114,211 @@ function renderPlans() {
 
 /* ================== TRENING ================== */
 function exAt(step) {
-  const base = getPlan(active.planId).exercises[step];
+  const base = activePlan().exercises[step];
   const sw = active.swaps && active.swaps[step];
-  if (sw && CATALOG[sw]) return Object.assign({}, base, { key: sw, name: CATALOG[sw], img: IMG_BY_KEY[sw] || safeImg(sw) || 'none', swapped: true, baseKey: base.key });
+  if (sw && CATALOG[sw]) return { ...base, key: sw, variantId: 'default', name: CATALOG[sw], img: IMG_BY_KEY[sw] || safeImg(sw) || 'none', swapped: true, baseKey: base.key };
   return Object.assign({}, base, { name: exName(base), img: imgFor(base), swapped: false });
 }
+function activePlan() {
+  const plan = getPlan(active.planId);
+  return active.exercises ? { ...plan, exercises: active.exercises } : plan;
+}
 function setsFor(step) {
-  return (active.setCount && active.setCount[step]) || getPlan(active.planId).exercises[step].sets;
+  return (active.setCount && active.setCount[step]) || activePlan().exercises[step].sets;
 }
 function plannedSets() {
-  return getPlan(active.planId).exercises.reduce((a, _, i) => a + setsFor(i), 0);
+  return activePlan().exercises.reduce((a, _, i) => a + setsFor(i), 0);
 }
 const restFor = e => restSetting ? restSetting : (COMPOUND.has(e.key) ? 180 : 90);
 
-function startWorkout(planId) {
+async function initializeExercisePresentation() {
+  const hostIsLoopback = ['127.0.0.1', 'localhost', '[::1]'].includes(location.hostname.toLowerCase());
+  const explicitlyRequested = new URLSearchParams(location.search).get('local-exercise-presentation-pilot') === '1';
+  exercisePresentationPilot.active = true;
+  exercisePresentationPilot.pilotMode = hostIsLoopback && explicitlyRequested;
+  try {
+    const presentationModule = await import('./src/exercise/presentation-contract.js');
+    if (exercisePresentationPilot.pilotMode && !presentationModule.isLocalPresentationPilotEnabled(location)) throw new Error('PRESENTATION_PILOT_HOST_NOT_ALLOWED');
+    exercisePresentationPilot.module = presentationModule;
+    const registryPath = exercisePresentationPilot.pilotMode
+      ? 'outputs/GV-EXERCISE-PRESENTATION-CONTRACT-AND-PILOT/local-pilot/presentation-registry.json'
+      : 'src/data/exercise-presentations/release-registry.json';
+    const response = await fetch(new URL(registryPath, document.baseURI));
+    if (!response.ok) throw new Error('PRESENTATION_REGISTRY_UNAVAILABLE');
+    const registry = await response.json();
+    const validation = presentationModule.validateExercisePresentationRegistry(registry);
+    if (!validation.valid) throw new Error('PRESENTATION_REGISTRY_INVALID');
+    exercisePresentationPilot.registry = registry;
+    exercisePresentationPilot.ready = true;
+  } catch (error) {
+    exercisePresentationPilot.error = error?.message === 'PRESENTATION_REGISTRY_INVALID'
+      ? 'Rejestr lokalnego pilota ma nieobsługiwaną lub niespójną wersję.'
+      : 'Rejestr ilustracji jest niedostępny. Nie użyto obrazu zastępczego.';
+  }
+  return true;
+}
+
+function showExercisePresentationError(message) {
+  const frame = $('exercisePresentationFigure');
+  const image = $('exercisePresentationImage');
+  const alert = $('exercisePresentationAlert');
+  if (frame) frame.hidden = true;
+  if (image) image.hidden = true;
+  if (alert) { alert.textContent = message; alert.hidden = false; }
+  exercisePresentationPilot.loadedPath = '';
+  exercisePresentationPilot.loadingPath = '';
+  exercisePresentationPilot.currentAsset = null;
+  exercisePresentationPilot.requestId += 1;
+}
+
+function updateExercisePresentationAtlas(exerciseId, presentationContext = null) {
+  const atlas = $('anatomyAtlas');
+  if (!atlas) return;
+  const disclosure = $('trainingAtlasDisclosure');
+  if (disclosure && atlas.dataset.exerciseId !== exerciseId) disclosure.open = false;
+  atlas.dataset.exerciseId = exerciseId;
+  const options = presentationContext?.sharedSexControl
+    ? { sex: presentationContext.sex, showSexControl: false, showDisclosure: false }
+    : { showSexControl: true, showDisclosure: false };
+  if (window.GymNastikaMuscleAtlas) window.GymNastikaMuscleAtlas.update(exerciseId, options);
+  else document.dispatchEvent(new CustomEvent('gymnastika:exercise-step', { detail: { exerciseId, ...options } }));
+  if (disclosure) disclosure.hidden = atlas.hidden;
+}
+
+function renderExercisePresentation(exercise) {
+  const state = exercisePresentationPilot;
+  const panel = $('exercisePresentation');
+  const legacyBox = $('legacyExerciseImageBox');
+  state.currentExerciseId = exercise?.key || '';
+  state.currentExercise = exercise || null;
+  const variantId = exercise?.variantId || 'default';
+  const record = state.registry?.records.find(item => item.exerciseId === exercise?.key && item.variantId ===
+    (exercise?.key === 'leg_press' && variantId === 'high_feet' ? 'default' : variantId));
+  const isPairedExercise = state.active && !!record;
+  if (!isPairedExercise) {
+    if (state.loadedPath || state.loadingPath || state.currentAsset) state.requestId += 1;
+    state.loadedPath = ''; state.loadingPath = ''; state.currentAsset = null;
+    const candidateImage = $('exercisePresentationImage');
+    if (candidateImage) {
+      candidateImage.onload = null;
+      candidateImage.onerror = null;
+      candidateImage.removeAttribute('src');
+      candidateImage.hidden = true;
+    }
+    if (panel) panel.hidden = true;
+    if (legacyBox) legacyBox.hidden = false;
+    return null;
+  }
+
+  panel.hidden = false;
+  panel.dataset.exerciseId = exercise.key;
+  legacyBox.hidden = true;
+  const figure = $('exercisePresentationFigure');
+  const positions = document.querySelector('[data-presentation-positions]');
+  const sexButtons = document.querySelectorAll('#exercisePresentation [data-presentation-sex]');
+  const modeButtons = document.querySelectorAll('#exercisePresentation [data-presentation-mode]');
+  const positionButtons = document.querySelectorAll('#exercisePresentation [data-presentation-position]');
+  const labels = record.labels || { lower: 'DÓŁ', raised: 'GÓRA' };
+  const copy = record.copy || PRESENTATION_CAPTIONS[exercise.key];
+  sexButtons.forEach(button => button.setAttribute('aria-pressed', String(button.dataset.presentationSex === state.sex)));
+  modeButtons.forEach(button => button.setAttribute('aria-pressed', String(button.dataset.presentationMode === state.mode)));
+  positionButtons.forEach(button => {
+    button.setAttribute('aria-pressed', String(button.dataset.presentationPosition === state.position));
+    button.textContent = labels[button.dataset.presentationPosition];
+  });
+  positions.hidden = state.mode === 'thumbnail';
+  figure.dataset.mode = state.mode;
+  figure.dataset.position = state.position;
+  figure.setAttribute('aria-label', `${state.sex === 'male' ? 'Męska' : 'Żeńska'} ilustracja techniki — pozycja ${labels[state.position]}`);
+  $('exercisePresentationDetailsText').textContent = copy.details;
+  $('exercisePresentationCaption').textContent = state.mode === 'thumbnail'
+    ? copy.thumbnail || 'Miniatura pokazuje pozycję DÓŁ.'
+    : state.position === 'lower'
+      ? copy.lower
+      : copy.raised;
+  const presentationContext = { sharedSexControl: true, sex: state.sex };
+  if (!state.ready) {
+    showExercisePresentationError(state.error || 'Rejestr prezentacji jest niedostępny. Nie użyto obrazu zastępczego.');
+    return presentationContext;
+  }
+  const resolved = state.module.resolveExercisePresentation({
+    registry: state.registry, exerciseId: exercise.key, variantId: exercise.variantId || 'default', sex: state.sex, enabled: true
+  });
+  if (resolved.status !== (state.pilotMode ? 'local-candidate' : 'released')) {
+    showExercisePresentationError('Nie można rozwiązać zasobu dla wybranej sylwetki. Nie użyto obrazu zastępczego.');
+    return presentationContext;
+  }
+  const asset = state.mode === 'thumbnail' ? resolved.thumbnail : resolved.technique;
+  const image = $('exercisePresentationImage');
+  const alert = $('exercisePresentationAlert');
+  const altText = state.mode === 'thumbnail' ? resolved.thumbnail.altText :
+    `${resolved.technique.altText} — wybrana pozycja ${labels[state.position]}`;
+  alert.hidden = true;
+  alert.textContent = '';
+  figure.hidden = false;
+  if (state.loadedPath === asset.path && image.complete && image.naturalWidth === asset.width && image.naturalHeight === asset.height) {
+    image.alt = altText;
+    image.hidden = false;
+    return presentationContext;
+  }
+  if (state.loadingPath === asset.path) {
+    image.alt = altText;
+    return presentationContext;
+  }
+
+  const requestId = ++state.requestId;
+  const assetPath = asset.path;
+  state.loadingPath = assetPath;
+  state.currentAsset = asset;
+  const nextImage = image.cloneNode();
+  nextImage.alt = altText;
+  nextImage.hidden = true;
+  nextImage.onload = () => {
+    if (requestId !== state.requestId || !panel.isConnected || panel.hidden || state.currentExerciseId !== exercise.key || state.currentAsset?.path !== assetPath) return;
+    if (nextImage.naturalWidth !== asset.width || nextImage.naturalHeight !== asset.height) {
+      showExercisePresentationError('Plik ilustracji ma niezgodne wymiary. Nie użyto obrazu zastępczego.');
+      return;
+    }
+    state.loadingPath = '';
+    state.loadedPath = assetPath;
+    alert.hidden = true;
+    nextImage.hidden = false;
+  };
+  nextImage.onerror = () => {
+    if (requestId !== state.requestId || !panel.isConnected || panel.hidden || state.currentExerciseId !== exercise.key || state.currentAsset?.path !== assetPath) return;
+    showExercisePresentationError(`Nie udało się załadować ilustracji dla sylwetki ${state.sex === 'male' ? 'Mężczyzna' : 'Kobieta'}. Nie użyto innej sylwetki.`);
+  };
+  image.replaceWith(nextImage);
+  nextImage.src = new URL(assetPath, document.baseURI).href;
+  return presentationContext;
+}
+
+function handleExercisePresentationControl(event) {
+  const target = event.target.closest('[data-presentation-sex], [data-presentation-position], [data-presentation-mode]');
+  if (!target || !exercisePresentationPilot.active || !exercisePresentationPilot.currentExercise) return;
+  const state = exercisePresentationPilot;
+  let synchronizeAtlas = false;
+  if (target.dataset.presentationSex) {
+    state.sex = target.dataset.presentationSex;
+    synchronizeAtlas = true;
+  } else if (target.dataset.presentationPosition) {
+    state.position = target.dataset.presentationPosition;
+  } else if (target.dataset.presentationMode) {
+    state.mode = target.dataset.presentationMode;
+  }
+  renderExercisePresentation(state.currentExercise);
+  if (synchronizeAtlas) updateExercisePresentationAtlas(variantKey(state.currentExercise), { sharedSexControl: true, sex: state.sex });
+}
+
+async function startWorkout(planId) {
   const plan = getPlan(planId);
   if (!plan || !plan.exercises.length) { toast('Ten plan nie ma ćwiczeń'); return; }
+  if (plan.exercises.some(e => e.variantId && !validVariant(e.key, e.variantId))) { toast('Plan zawiera nierozpoznany wariant ćwiczenia. Popraw go w edytorze.'); return; }
   if (active && active.planId !== planId && !confirm('Masz niedokończony trening. Porzucić go i zacząć nowy?')) return;
   if (active && active.planId === planId) { openWorkout(); return; }
-  if (active && !discardActive()) return;
-  active = { planId, step: 0, sets: [], startedAt: Date.now(), timerEndAt: 0, swaps: {}, setCount: {}, rir: {} };
-  if (!saveActive()) { active = null; return; }
+  if (active && !await discardActive()) return;
+  active = { id: createUuid(), planId, exercises: JSON.parse(JSON.stringify(plan.exercises)), step: 0, sets: [], startedAt: Date.now(), timerEndAt: 0, swaps: {}, setCount: {}, rir: {} };
+  if (!await saveActive()) { active = null; return; }
   openWorkout();
 }
 function openWorkout() {
@@ -972,20 +1329,21 @@ function openWorkout() {
   lockScreen();
   if (active.timerEndAt && active.timerEndAt > Date.now()) startTimerAt(active.timerEndAt);
 }
-function discardActive() {
+async function discardActive() {
   const sessionId = active ? String(active.startedAt) : '';
-  const drafts = BASE_B.draftPayloadWithout(localStorage, item => item.sessionId === sessionId);
+  const drafts = BASE_B.draftPayloadWithout(STORE.storage, item => item.sessionId === sessionId);
   try {
-    BASE_B.persistJsonTransaction(localStorage, { gymverse_active: null, [BASE_B.DRAFT_KEY]: drafts });
+    BASE_B.persistJsonTransaction(STORE.storage, { gymverse_active: null, [BASE_B.DRAFT_KEY]: drafts });
+    await STORE.flush();
   } catch (e) { toast(storageFailureMessage(e)); return false; }
   active = null;
   stopTimer();
   unlockScreen();
   return true;
 }
-function discardWorkout() {
+async function discardWorkout() {
   if (!confirm('Porzucić trening? Wykonane serie NIE zostaną zapisane.')) return;
-  if (!discardActive()) return;
+  if (!await discardActive()) return;
   switchView('view-plans');
 }
 
@@ -993,9 +1351,14 @@ function parseRange(t) {
   const p = String(t).split('-').map(Number);
   return p.length === 2 ? [p[0], p[1]] : [p[0], p[0]];
 }
+function previousSetsFor(e) {
+  if (!Object.hasOwn(e, 'variantId') || !validVariant(e.key, e.variantId)) return [];
+  const previous = history.slice().sort(byDate).reverse().find(session => session.details?.some(d => d.exerciseId === e.key && d.variantId === e.variantId));
+  return previous ? previous.details.filter(d => d.exerciseId === e.key && d.variantId === e.variantId).sort((a, b) => a.setNumber - b.setNumber) : [];
+}
 
 function hintFor(e) {
-  const last = lastSets[e.key];
+  const last = previousSetsFor(e);
   if (!last || !last.length) return '';
   const [lo, hi] = parseRange(e.target);
   const w = Math.max(...last.map(s => s.weight));
@@ -1009,7 +1372,7 @@ function hintFor(e) {
     return `Dobij do ${hi} powt. we wszystkich seriach${w > 0 ? ` z +${fmt(w)} kg` : ''}.`;
   }
   const inc = e.key === 'leg_press' ? 5 : 2.5;
-  const rir = lastRir[e.key];
+  const rir = undefined;
   if (last.length >= e.sets && last.every(s => s.reps >= hi)) {
     if (rir === 0) return `Zakres osiągnięty, ale na granicy (zapas 0) – powtórz ${fmt(w)} kg jeszcze raz.`;
     return `Wszystkie serie na górze zakresu${rir >= 2 ? ' i z zapasem' : ''} – spróbuj ${fmt(w + inc)} kg.`;
@@ -1020,7 +1383,7 @@ function hintFor(e) {
 
 function warmupHint(e) {
   if (active.step !== 0 || active.sets.some(s => s.step === 0) || isBW(e.key)) return '';
-  const last = lastSets[e.key];
+  const last = previousSetsFor(e);
   if (!last || !last.length) return '';
   const w = Math.max(...last.map(s => s.weight));
   if (w < 20) return '';
@@ -1029,7 +1392,7 @@ function warmupHint(e) {
 }
 
 function renderStep() {
-  const plan = getPlan(active.planId);
+  const plan = activePlan();
   if (!plan || !plan.exercises.length) { discardActive(); switchView('view-plans'); return; }
   const e = exAt(active.step);
   const total = plan.exercises.length;
@@ -1042,32 +1405,66 @@ function renderStep() {
   $('metaExerciseProgress').textContent = `Serie ${progress.completed}/${progress.required}${progress.excess ? ` · +${progress.excess} ponad plan` : ''}`;
   $('progressBar').style.width = Math.min(100, Math.round(active.sets.length / plannedSets() * 100)) + '%';
   $('currentExName').textContent = e.name;
+  $('currentExVariant').textContent = variantName(e);
   $('swappedTag').hidden = !e.swapped;
   $('currentExTarget').textContent = `${n} ${plSeries(n)} × ${e.target} powt.`;
   $('currentExHint').textContent = hintFor(e);
   $('currentExWarm').textContent = warmupHint(e);
-  $('currentExAlert').textContent = (!deloadActive() && stagnation(e.key))
+  $('currentExAlert').textContent = (!deloadActive() && !Object.hasOwn(e, 'variantId') && stagnation(e.key))
     ? '⚠ Brak progresu od 3 treningów – spróbuj lżejszego ciężaru z większą liczbą powtórzeń albo dodatkowej serii.' : '';
   $('thWeight').textContent = bw ? 'Dodatk. kg' : 'Ciężar';
 
+  const presentationContext = renderExercisePresentation(e);
+  const recognizedVariant = !e.variantId || validVariant(e.key, e.variantId);
+  updateExercisePresentationAtlas(recognizedVariant ? variantKey(e) : `${e.key}/unrecognized`, presentationContext);
+  $('variantAtlasNotice').hidden = recognizedVariant;
+  const sharedLegPressImage = e.key === SHARED_LEG_PRESS_MEDIA.exerciseId && e.variantId === SHARED_LEG_PRESS_MEDIA.variantId;
+  const legPressImage = e.key === SHARED_LEG_PRESS_MEDIA.exerciseId && ['default', SHARED_LEG_PRESS_MEDIA.variantId].includes(e.variantId);
+  const missingVariantImage = !!e.variantId && e.variantId !== 'default' && !sharedLegPressImage;
+  $('legacyImageControls').hidden = !legPressImage || !!presentationContext;
+  $('legacyExerciseImageBox').dataset.mode = legPressImage ? legPressImageMode : 'technique';
+  document.querySelectorAll('[data-legacy-image-mode]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.legacyImageMode === legPressImageMode)));
+  $('variantImageShared').hidden = !sharedLegPressImage;
+  $('variantImageMissing').hidden = !missingVariantImage;
+  if (missingVariantImage) $('legacyExerciseImageBox').hidden = true;
   const img = $('currentExImg');
-  const src = `img/${e.img}.jpg`;
-  if (img.dataset.src !== src) {
-    img.dataset.src = src;
-    img.onerror = () => { img.onerror = null; img.src = PLACEHOLDER; };
-    img.src = src;
+  if (!presentationContext && !missingVariantImage) {
+    img.alt = sharedLegPressImage ? 'Ilustracja suwnicy wariantu podstawowego' : 'Ćwiczenie';
+    const src = `img/${e.img}.jpg`;
+    if (img.dataset.src !== src) {
+      img.dataset.src = src;
+      img.dataset.jpegFallbackTried = '';
+      img.onerror = () => {
+        if (!img.dataset.jpegFallbackTried) {
+          img.dataset.jpegFallbackTried = 'true';
+          img.src = `img/${e.img}.jpeg`;
+          return;
+        }
+        img.onerror = null;
+        if (sharedLegPressImage) {
+          img.dataset.src = '';
+          $('variantImageShared').hidden = true;
+          $('variantImageMissing').hidden = false;
+          $('legacyExerciseImageBox').hidden = true;
+          $('legacyImageControls').hidden = true;
+          return;
+        }
+        img.src = PLACEHOLDER;
+      };
+      img.src = src;
+    }
   }
 
   document.querySelectorAll('[data-act="rest"]').forEach(b => b.classList.toggle('active', Number(b.dataset.sec) === restSetting));
   const rv = active.rir[active.step];
   document.querySelectorAll('[data-act="rir"]').forEach(b => b.classList.toggle('active', rv !== undefined && Number(b.dataset.v) === rv));
 
-  const last = lastSets[e.key] || [];
+  const last = previousSetsFor(e);
   let html = '';
   let hasDraft = false;
   for (let i = 0; i < n; i++) {
     const logged = active.sets.find(s => s.step === active.step && s.setNumber === i + 1);
-    const draft = !logged && BASE_B.getDraft(localStorage, draftQuery(active.step, i + 1));
+    const draft = !logged && BASE_B.getDraft(STORE.storage, draftQuery(active.step, i + 1));
     if (draft) hasDraft = true;
     const p = last[i];
     const prev = p ? setStr(e.key, p.weight, p.reps) : '—';
@@ -1100,23 +1497,36 @@ function renderStep() {
 function draftQuery(step, setNumber) {
   return { planId: active.planId, sessionId: String(active.startedAt || active.planId), step, setNumber };
 }
-function flushDraftsForStep(step) {
+function flushDraftsForStep(step, capturedSnapshot = null) {
   if (!active || step !== active.step) return true;
-  clearTimeout(draftSaveTimer);
   const sessionId = String(active.startedAt || active.planId);
-  const payload = BASE_B.readDraftPayload(localStorage);
-  payload.items = payload.items.filter(item => !(item.planId === active.planId && item.sessionId === sessionId && item.step === step));
   const count = setsFor(step);
+  const inputs = Array.from({ length: count }, (_, i) => ({
+    weight: $('weight_' + i),
+    reps: $('reps_' + i)
+  }));
+  const snapshot = capturedSnapshot || pendingDraftSnapshot;
+  const snapshotMatches = snapshot && snapshot.planId === active.planId && snapshot.sessionId === sessionId && snapshot.step === step;
+  // During pagehide (or while the workout form is between renders), use the
+  // last input event's snapshot when DOM rows have already been unmounted.
+  // If neither inputs nor a matching snapshot exist, leave stored drafts intact.
+  if (inputs.some(row => !row.weight || !row.reps) && !snapshotMatches) return true;
+  clearTimeout(draftSaveTimer);
+  const payload = BASE_B.readDraftPayload(STORE.storage);
+  payload.items = payload.items.filter(item => !(item.planId === active.planId && item.sessionId === sessionId && item.step === step));
   for (let i = 0; i < count; i += 1) {
     if (active.sets.some(set => set.step === step && set.setNumber === i + 1)) continue;
-    const weight = $('weight_' + i).value;
-    const reps = $('reps_' + i).value;
+    const row = inputs[i].weight && inputs[i].reps ? inputs[i] : snapshot.rows[i];
+    const weight = inputs[i].weight && inputs[i].reps ? row.weight.value : (row?.weight || '');
+    const reps = inputs[i].weight && inputs[i].reps ? row.reps.value : (row?.reps || '');
     if (!weight && !reps) continue;
     payload.items.push({ planId: active.planId, sessionId, step, setNumber: i + 1, weight, reps, updatedAt: Date.now() });
   }
   try {
-    BASE_B.persistJsonTransaction(localStorage, { [BASE_B.DRAFT_KEY]: payload.items.length ? payload : null });
-    $('draftStatus').hidden = !payload.items.some(item => item.planId === active.planId && item.sessionId === sessionId && item.step === step);
+    BASE_B.persistJsonTransaction(STORE.storage, { [BASE_B.DRAFT_KEY]: payload.items.length ? payload : null });
+    const status = $('draftStatus');
+    if (status) status.hidden = !payload.items.some(item => item.planId === active.planId && item.sessionId === sessionId && item.step === step);
+    if (snapshotMatches) pendingDraftSnapshot = null;
     return true;
   } catch (error) {
     toast(storageFailureMessage(error));
@@ -1125,8 +1535,24 @@ function flushDraftsForStep(step) {
 }
 function scheduleDraftSave(step) {
   clearTimeout(draftSaveTimer);
+  const count = setsFor(step);
+  pendingDraftSnapshot = {
+    planId: active.planId,
+    sessionId: String(active.startedAt || active.planId),
+    step,
+    rows: Array.from({ length: count }, (_, i) => ({
+      weight: $('weight_' + i)?.value || '',
+      reps: $('reps_' + i)?.value || ''
+    }))
+  };
   if ($('draftStatus')) $('draftStatus').hidden = false;
-  draftSaveTimer = setTimeout(() => flushDraftsForStep(step), 300);
+  draftSaveTimer = setTimeout(() => {
+    flushDraftsForStep(step, pendingDraftSnapshot);
+    STORE.flush().catch(error => {
+      toast(storageFailureMessage(error));
+      offerEmergencyExport(history, lastSets, active, true);
+    });
+  }, 300);
 }
 
 function readRow(i) {
@@ -1162,7 +1588,7 @@ function stepWeight(d) {
   let w = num($('weight_' + i).value);
   if (!isFinite(w)) {
     const prevSet = active.sets.filter(s => s.step === active.step).sort((a, b) => b.setNumber - a.setNumber)[0];
-    const lp = (lastSets[e.key] || [])[i];
+    const lp = previousSetsFor(e)[i];
     w = prevSet ? prevSet.weight : (lp ? lp.weight : 0);
   }
   w = Math.max(0, Math.round((w + d) * 100) / 100);
@@ -1178,7 +1604,7 @@ function copyPrev() {
   if (i < 0) { toast('Wszystkie serie są już zapisane'); return; }
   const done = active.sets.filter(s => s.step === active.step).sort((a, b) => b.setNumber - a.setNumber)[0];
   const e = exAt(active.step);
-  const src = done || (lastSets[e.key] || [])[i];
+  const src = done || previousSetsFor(e)[i];
   if (!src) { toast('Brak poprzedniej serii do skopiowania'); return; }
   $('weight_' + i).value = src.weight;
   $('reps_' + i).value = src.reps;
@@ -1191,7 +1617,7 @@ function copyPrev() {
 function fillPrev(i) {
   const btn = $('btnDone_' + i);
   if (!btn || btn.classList.contains('completed')) return;
-  const p = (lastSets[exAt(active.step).key] || [])[i];
+  const p = previousSetsFor(exAt(active.step))[i];
   if (!p) return;
   $('weight_' + i).value = p.weight;
   $('reps_' + i).value = p.reps;
@@ -1229,7 +1655,7 @@ function togglePlates() {
   updatePlates();
 }
 
-function onDone(i) {
+async function onDone(i) {
   const btn = $('btnDone_' + i);
   if (!btn) return false;
   if (btn.classList.contains('completed')) {
@@ -1250,12 +1676,12 @@ function onDone(i) {
   if (existing) {
     existing.weight = w; existing.reps = r;
   } else {
-    nextActive.sets.push({ step: nextActive.step, key: e.key, name: e.name, setNumber: i + 1, weight: w, reps: r, date: new Date().toISOString() });
+    nextActive.sets.push({ id: createUuid(), step: nextActive.step, key: e.key, ...(e.variantId ? { variantId: e.variantId } : {}), name: e.name, setNumber: i + 1, weight: w, reps: r, date: new Date().toISOString() });
   }
   const query = draftQuery(active.step, i + 1);
-  const nextDrafts = BASE_B.draftPayloadWithout(localStorage, item => item.planId === query.planId && item.sessionId === query.sessionId && item.step === query.step && item.setNumber === query.setNumber);
+  const nextDrafts = BASE_B.draftPayloadWithout(STORE.storage, item => item.planId === query.planId && item.sessionId === query.sessionId && item.step === query.step && item.setNumber === query.setNumber);
   try {
-    BASE_B.persistJsonTransaction(localStorage, { gymverse_active: nextActive, [BASE_B.DRAFT_KEY]: nextDrafts });
+    await STORE.transact({ gymverse_active: nextActive, [BASE_B.DRAFT_KEY]: nextDrafts });
   } catch (error) {
     toast(storageFailureMessage(error));
     offerEmergencyExport(history, lastSets, nextActive);
@@ -1275,15 +1701,15 @@ function focusNextRow() {
   }
 }
 
-function addSet() {
+async function addSet() {
   const n = setsFor(active.step);
   if (n >= 12) return;
   const nextActive = JSON.parse(JSON.stringify(active));
   nextActive.setCount[active.step] = n + 1;
-  if (!commitActiveState(nextActive)) return;
+  if (!await commitActiveState(nextActive)) return;
   renderStep();
 }
-function removeSet() {
+async function removeSet() {
   const n = setsFor(active.step);
   if (n <= 1) return;
   const loggedLast = active.sets.find(s => s.step === active.step && s.setNumber === n);
@@ -1292,19 +1718,19 @@ function removeSet() {
   nextActive.sets = nextActive.sets.filter(s => !(s.step === nextActive.step && s.setNumber === n));
   nextActive.setCount[nextActive.step] = n - 1;
   const query = { planId: active.planId, sessionId: String(active.startedAt || active.planId), step: active.step, setNumber: n };
-  const nextDrafts = BASE_B.draftPayloadWithout(localStorage, item => item.planId === query.planId && item.sessionId === query.sessionId && item.step === query.step && item.setNumber === query.setNumber);
-  if (!commitActiveState(nextActive, { [BASE_B.DRAFT_KEY]: nextDrafts })) return;
+  const nextDrafts = BASE_B.draftPayloadWithout(STORE.storage, item => item.planId === query.planId && item.sessionId === query.sessionId && item.step === query.step && item.setNumber === query.setNumber);
+  if (!await commitActiveState(nextActive, { [BASE_B.DRAFT_KEY]: nextDrafts })) return;
   renderStep();
 }
 
 function swapOpen() {
   const box = $('swapBox');
   if (!box.hidden) { box.hidden = true; return; }
-  const base = getPlan(active.planId).exercises[active.step];
+  const base = activePlan().exercises[active.step];
   const cur = exAt(active.step);
   const group = GROUP[base.key];
   const used = new Set();
-  getPlan(active.planId).exercises.forEach((_, i) => { if (i !== active.step) used.add(exAt(i).key); });
+  activePlan().exercises.forEach((_, i) => { if (i !== active.step) used.add(exAt(i).key); });
   let html = '<option value="">— wybierz zamiennik —</option>';
   if (cur.swapped && !used.has(base.key)) html += `<option value="__base__">↩ Wróć do: ${esc(exName(base))}</option>`;
   Object.keys(CATALOG).forEach(k => {
@@ -1313,7 +1739,7 @@ function swapOpen() {
   $('swapSelect').innerHTML = html;
   box.hidden = false;
 }
-function applySwap(val) {
+async function applySwap(val) {
   if (!val) return;
   const hasSets = active.sets.some(s => s.step === active.step);
   if (hasSets && !confirm('Zamiana usunie zapisane serie tego ćwiczenia. Kontynuować?')) { $('swapSelect').value = ''; return; }
@@ -1322,39 +1748,39 @@ function applySwap(val) {
   delete nextActive.rir[nextActive.step];
   if (val === '__base__') delete nextActive.swaps[nextActive.step]; else nextActive.swaps[nextActive.step] = val;
   const query = { planId: active.planId, sessionId: String(active.startedAt || active.planId), step: active.step };
-  const nextDrafts = BASE_B.draftPayloadWithout(localStorage, item => item.planId === query.planId && item.sessionId === query.sessionId && item.step === query.step);
-  if (!commitActiveState(nextActive, { [BASE_B.DRAFT_KEY]: nextDrafts })) return;
+  const nextDrafts = BASE_B.draftPayloadWithout(STORE.storage, item => item.planId === query.planId && item.sessionId === query.sessionId && item.step === query.step);
+  if (!await commitActiveState(nextActive, { [BASE_B.DRAFT_KEY]: nextDrafts })) return;
   $('swapBox').hidden = true;
   renderStep();
 }
 
-function setRir(v) {
+async function setRir(v) {
   const nextActive = JSON.parse(JSON.stringify(active));
   if (nextActive.rir[nextActive.step] === v) delete nextActive.rir[nextActive.step]; else nextActive.rir[nextActive.step] = v;
-  if (!commitActiveState(nextActive)) return;
+  if (!await commitActiveState(nextActive)) return;
   renderStep();
 }
 
-function nextStep() {
-  const plan = getPlan(active.planId);
+async function nextStep() {
+  const plan = activePlan();
   $('swapBox').hidden = true;
   if (active.step < plan.exercises.length - 1) {
     if (!flushDraftsForStep(active.step)) return;
     const nextActive = JSON.parse(JSON.stringify(active));
     nextActive.step++;
-    if (!commitActiveState(nextActive)) return;
+    if (!await commitActiveState(nextActive)) return;
     renderStep();
     window.scrollTo(0, 0);
   } else {
-    finishWorkout(true);
+    await finishWorkout(true);
   }
 }
-function prevStep() {
+async function prevStep() {
   if (active.step > 0) {
     if (!flushDraftsForStep(active.step)) return;
     const nextActive = JSON.parse(JSON.stringify(active));
     nextActive.step--;
-    if (!commitActiveState(nextActive)) return;
+    if (!await commitActiveState(nextActive)) return;
     $('swapBox').hidden = true; renderStep(); window.scrollTo(0, 0);
   }
 }
@@ -1374,13 +1800,15 @@ function findRecords(sets) {
   return out;
 }
 
-function finishWorkout(fromNext) {
-  const plan = getPlan(active.planId);
+async function finishWorkout(fromNext) {
+  const plan = activePlan();
   if (!flushDraftsForStep(active.step)) return;
+  try { await STORE.flush(); }
+  catch (error) { toast(storageFailureMessage(error)); await offerEmergencyExport(history, lastSets, active, true); return; }
   const progress = BASE_B.calculateWorkoutProgress(plan, active);
   if (progress.completed === 0) {
     if (!confirm(`Wykonano ${progress.completed}/${progress.required} serii. Porzucić pusty trening? Historia nie zostanie zmieniona.`)) return;
-    if (!discardActive()) return;
+    if (!await discardActive()) return;
     toast('Brak zapisanych serii – nic nie dodano do historii');
     switchView('view-plans');
     return;
@@ -1391,7 +1819,8 @@ function finishWorkout(fromNext) {
   const records = findRecords(active.sets);
   const nowIso = new Date().toISOString();
   const details = active.sets.map(s => ({
-    exerciseId: s.key, exerciseName: s.name, setNumber: s.setNumber, weight: s.weight, reps: s.reps, date: s.date
+    id: s.id || createUuid(),
+    exerciseId: s.key, ...(s.variantId ? { variantId: s.variantId } : {}), exerciseName: s.name, setNumber: s.setNumber, weight: s.weight, reps: s.reps, date: s.date
   }));
   const totalVolume = details.reduce((a, d) => a + setLoad(d.exerciseId, d.weight, d.reps, nowIso), 0);
   const totalReps = details.reduce((a, d) => a + d.reps, 0);
@@ -1404,19 +1833,20 @@ function finishWorkout(fromNext) {
   });
 
   const prevSame = history.filter(h => h.planId === plan.id).sort(byDate).pop();
-  const entry = { date: nowIso, planId: plan.id, planTitle: plan.title, totalVolume, totalReps, durationMin, details };
+  const entry = { id: active.id || createUuid(), date: nowIso, planId: plan.id, planTitle: plan.title, totalVolume, totalReps, durationMin, details };
   if (Object.keys(rir).length) entry.rir = rir;
-  const nextHistory = history.concat(entry);
+  const nextHistory = DATA_IDS.ensureStableHistoryIds(history.concat(entry));
   const nextLastSets = lastWeightsFor(nextHistory);
   const sessionId = String(active.startedAt || active.planId);
-  const nextDrafts = BASE_B.draftPayloadWithout(localStorage, item => item.planId === active.planId && item.sessionId === sessionId);
+  const nextDrafts = BASE_B.draftPayloadWithout(STORE.storage, item => item.planId === active.planId && item.sessionId === sessionId);
   try {
-    BASE_B.persistJsonTransaction(localStorage, {
+    BASE_B.persistJsonTransaction(STORE.storage, {
       gymverse_history: nextHistory,
       gymverse_last_weights: nextLastSets,
       gymverse_active: null,
       [BASE_B.DRAFT_KEY]: nextDrafts
     });
+    await STORE.flush();
   } catch (error) {
     toast(storageFailureMessage(error));
     if (error.rollbackErrors && error.rollbackErrors.length) toast('Nie udało się w pełni odtworzyć poprzedniego zapisu. Pobierz awaryjny JSON przed zamknięciem aplikacji.');
@@ -1468,16 +1898,21 @@ function finishWorkout(fromNext) {
 
 async function offerEmergencyExport(pendingHistory, pendingLastWeights, activeSnapshot = active, integrityUncertain = false) {
   const prompt = integrityUncertain
-    ? 'Zapis importu i jego wycofanie nie powiodły się. Integralność lokalnego zapisu jest niepewna. Pobrać awaryjny eksport JSON z danymi dostępnymi obecnie w pamięci aplikacji? Eksport nie gwarantuje odzyskania wszystkich danych.'
+    ? 'Integralność aktywnego zapisu jest niepewna. Pobrać awaryjny eksport JSON z danymi dostępnymi obecnie w pamięci aplikacji? Eksport nie gwarantuje odzyskania wszystkich danych.'
     : 'Trening pozostał aktywny, ale zapis do pamięci nie powiódł się. Pobrać awaryjny JSON z bieżącymi danymi i treningiem?';
   if (!confirm(prompt)) return;
+  let current = {};
+  try { current = await runtimeJsonSnapshot(); } catch (_) {}
   const payload = {
     app: 'gymverse', version: 4, exportedAt: new Date().toISOString(),
-    history: pendingHistory, lastWeights: pendingLastWeights, body, plans: PLANS, custom: CUSTOM,
-    activeWorkout: activeSnapshot, drafts: BASE_B.readDraftPayload(localStorage)
+    history: integrityUncertain ? (current.gymverse_history || pendingHistory) : pendingHistory,
+    lastWeights: integrityUncertain ? (current.gymverse_last_weights || pendingLastWeights) : pendingLastWeights,
+    body: current.gymverse_body || body, plans: current.gymverse_plans || PLANS, custom: current.gymverse_custom || CUSTOM,
+    activeWorkout: integrityUncertain && current.gymverse_active !== undefined ? current.gymverse_active : activeSnapshot,
+    drafts: current.gymverse_draft_v1 || BASE_B.readDraftPayload(STORE.storage)
   };
   try {
-    const ok = await deliverFile(`gymverse_awaryjna_${dkey(new Date())}.json`, 'application/json', JSON.stringify(payload, null, 2));
+    const ok = await stageFileDelivery(`gymverse_awaryjna_${dkey(new Date())}.json`, 'application/json', JSON.stringify(payload, null, 2));
     toast(integrityUncertain
       ? (ok ? 'Awaryjny JSON przygotowany z dostępnego stanu. Integralność zapisu pozostaje niepewna.' : 'Eksport anulowany. Integralność zapisu pozostaje niepewna.')
       : (ok ? 'Awaryjny JSON przygotowany. Trening nadal pozostaje aktywny.' : 'Eksport awaryjny anulowany. Trening nadal pozostaje aktywny.'));
@@ -1583,7 +2018,11 @@ function stopTimer() {
   clearInterval(timerInt);
   timerInt = null; timerEndAt = 0; timerPausedLeft = null;
   $('timerBar').style.display = 'none';
-  if (active) { active.timerEndAt = 0; saveActive(); }
+  if (active) {
+    active.timerEndAt = 0;
+    saveActive();
+    STORE.flush().catch(error => { toast(storageFailureMessage(error)); offerEmergencyExport(history, lastSets, active, true); });
+  }
 }
 function timerPause() {
   if (timerPausedLeft == null) { timerPausedLeft = remaining(); $('btnTimerPause').textContent = '▶'; }
@@ -1594,9 +2033,9 @@ function timerAdd() {
   if (active && timerPausedLeft == null) { active.timerEndAt = timerEndAt; saveActive(); }
   renderTimer();
 }
-function setRest(sec) {
+async function setRest(sec) {
+  await LS.set('gymverse_rest', sec);
   restSetting = sec;
-  LS.set('gymverse_rest', sec);
   document.querySelectorAll('[data-act="rest"]').forEach(b => b.classList.toggle('active', Number(b.dataset.sec) === sec));
 }
 
@@ -1760,13 +2199,13 @@ function getGoal() {
   if (g && Number.isInteger(g.min) && Number.isInteger(g.max) && g.min >= 1 && g.max >= g.min && g.max <= 60) return g;
   return { min: 10, max: 20 };
 }
-function editGoal() {
+async function editGoal() {
   const g = getGoal();
   const txt = prompt('Cel: ile serii tygodniowo na partię mięśniową (format min-max, np. 10-20)', `${g.min}-${g.max}`);
   if (txt === null) return;
   const m = txt.match(/^\s*(\d{1,2})\s*[-–]\s*(\d{1,2})\s*$/);
   if (!m || Number(m[1]) < 1 || Number(m[2]) < Number(m[1]) || Number(m[2]) > 60) { toast('Podaj zakres, np. 10-20'); return; }
-  LS.set('gymverse_goal', { min: Number(m[1]), max: Number(m[2]) });
+  await LS.set('gymverse_goal', { min: Number(m[1]), max: Number(m[2]) });
   renderStats();
 }
 
@@ -1862,21 +2301,23 @@ function calDay(el) {
   }
 }
 
-function saveBody() {
+async function saveBody() {
   const kg = num($('bodyInput').value);
   if (!isFinite(kg) || kg < 20 || kg > 400) { toast('Podaj wagę w kg (20–400)'); return; }
   const date = dkey(new Date());
-  body = body.filter(b => b.date !== date).concat([{ date, kg }]).sort((a, b) => a.date.localeCompare(b.date));
-  LS.set('gymverse_body', body);
+  const nextBody = body.filter(b => b.date !== date).concat([{ date, kg }]).sort((a, b) => a.date.localeCompare(b.date));
+  await LS.set('gymverse_body', nextBody);
+  body = nextBody;
   $('bodyInput').value = '';
   toast(`Zapisano: ${fmt(kg)} kg`);
   renderStats();
 }
-function delLastBody() {
+async function delLastBody() {
   if (!body.length) return;
   if (!confirm('Usunąć ostatni pomiar wagi?')) return;
-  body.pop();
-  LS.set('gymverse_body', body);
+  const nextBody = body.slice(0, -1);
+  await LS.set('gymverse_body', nextBody);
+  body = nextBody;
   renderStats();
 }
 
@@ -1914,29 +2355,22 @@ function renderHistory() {
     const groups = {};
     const order = [];
     (s.details || []).forEach((d, idx) => {
-      if (!groups[d.exerciseId]) { groups[d.exerciseId] = { name: d.exerciseName, items: [] }; order.push(d.exerciseId); }
-      groups[d.exerciseId].items.push({ d, idx });
+      const key = `${d.exerciseId}/${Object.hasOwn(d, 'variantId') ? d.variantId : '__missing__'}`;
+      if (!groups[key]) { groups[key] = { name: d.exerciseName, variant: variantName({ key: d.exerciseId, ...(Object.hasOwn(d, 'variantId') ? { variantId: d.variantId } : {}) }), exerciseId: d.exerciseId, variantId: d.variantId, items: [] }; order.push(key); }
+      groups[key].items.push({ d, idx });
     });
-    const plan = getPlan(s.planId);
-    let keys = order.slice();
-    if (plan) {
-      const pk = plan.exercises.map(e => e.key);
-      keys = pk.filter(k => groups[k]).concat(keys.filter(k => !pk.includes(k)));
-      pk.forEach(k => { if (!groups[k]) { groups[k] = { name: nameOf(k), items: [], missing: true }; } });
-      keys = keys.concat(pk.filter(k => groups[k].missing && !keys.includes(k)));
-    }
-    const det = keys.map(k => {
+    const det = order.map(k => {
       const g = groups[k];
-      const rv = s.rir && s.rir[k] !== undefined ? ` <small>· zapas ${s.rir[k] === 3 ? '3+' : s.rir[k]}</small>` : '';
+      const rv = s.rir && s.rir[g.exerciseId] !== undefined ? ` <small>· zapas ${s.rir[g.exerciseId] === 3 ? '3+' : s.rir[g.exerciseId]}</small>` : '';
       const chips = g.items.sort((a, b) => a.d.setNumber - b.d.setNumber).map(x =>
-        `<button class="set-chip" data-act="histEditSet" data-i="${i}" data-d="${x.idx}">${esc(setStr(k, x.d.weight, x.d.reps))}</button>`).join('');
-      return `<div class="hist-ex ${g.missing ? 'missing' : ''}"><b>${esc(g.name)}${rv}</b>${chips}<button class="set-chip add" data-act="histAddSet" data-i="${i}" data-k="${esc(k)}">+ seria</button></div>`;
+        `<button class="set-chip" data-act="histEditSet" data-i="${i}" data-d="${x.idx}">${esc(setStr(g.exerciseId, x.d.weight, x.d.reps))}</button>`).join('');
+      return `<div class="hist-ex"><b>${esc(g.name)} · ${esc(g.variant)}${rv}</b>${chips}<button class="set-chip add" data-act="histAddSet" data-i="${i}" data-k="${esc(g.exerciseId)}" data-v="${esc(g.variantId || '')}">+ seria</button></div>`;
     }).join('');
     const open = histOpen.has(i) || !!histFilterDay;
     return `<div class="hist-card">
       <div class="hist-head" data-act="histToggle" data-i="${i}">
         <div><b>${esc(s.planTitle)}</b><div class="muted small">${esc(date)}${s.durationMin ? ' · ' + s.durationMin + ' min' : ''}</div></div>
-        <div class="hist-stats">${fmt(s.totalVolume)} kg<br>${s.totalReps} powt.</div>
+        <div class="hist-stats">Objętość: ${fmt(s.totalVolume)} kg<br>${s.totalReps} powt.</div>
       </div>
       <div class="hist-body" id="hist_${i}" ${open ? '' : 'hidden'}>
         <p class="muted small" style="padding:8px 0">Dotknij serii, aby ją poprawić lub usunąć.</p>
@@ -1946,26 +2380,33 @@ function renderHistory() {
   }).join('');
 }
 
-function histEditSet(i, dIdx) {
+async function histEditSet(i, dIdx) {
   const s = history[i];
   const d = s && s.details[dIdx];
   if (!d) return;
   const txt = prompt(`${d.exerciseName}\nCiężar × powtórzenia (np. 80x8${isBW(d.exerciseId) ? ' lub samo 8' : ''}).\nWpisz „usuń", aby skasować serię.`, `${d.weight}x${d.reps}`);
   if (txt === null) return;
+  const nextHistory = JSON.parse(JSON.stringify(history));
+  const nextSession = nextHistory[i];
+  const nextDetail = nextSession && nextSession.details[dIdx];
+  if (!nextDetail) return;
   if (/^\s*(usu[nń]|del|delete)\s*$/i.test(txt)) {
-    s.details.splice(dIdx, 1);
+    nextSession.details.splice(dIdx, 1);
   } else {
     const p = parseSetInput(txt, d.exerciseId);
     if (!p || !validSet(d.exerciseId, p.w, p.r)) { toast('Nieprawidłowy zapis – użyj formatu 80x8'); return; }
-    d.weight = p.w; d.reps = p.r;
+    nextDetail.weight = p.w; nextDetail.reps = p.r;
   }
-  recalcSession(s);
-  rebuildAll();
+  recalcSession(nextSession);
+  const message = /^\s*(usu[nń]|del|delete)\s*$/i.test(txt)
+    ? `Usunięcie serii ${d.exerciseName}`
+    : `Zmiana serii ${d.exerciseName} na ${parseSetInput(txt, d.exerciseId).w}×${parseSetInput(txt, d.exerciseId).r}`;
+  if (!await commitHistoryChanges(nextHistory, message)) return;
   histOpen.add(i);
   renderHistory();
 }
 
-function histAddSet(i, key) {
+async function histAddSet(i, key, variantId) {
   const s = history[i];
   if (!s) return;
   const ls = (lastSets[key] || [])[0];
@@ -1973,15 +2414,17 @@ function histAddSet(i, key) {
   if (txt === null || !txt.trim()) return;
   const p = parseSetInput(txt, key);
   if (!p || !validSet(key, p.w, p.r)) { toast('Nieprawidłowy zapis – użyj formatu 80x8'); return; }
-  const same = s.details.filter(d => d.exerciseId === key);
-  s.details.push({ exerciseId: key, exerciseName: nameOf(key), setNumber: same.reduce((a, d) => Math.max(a, d.setNumber), 0) + 1, weight: p.w, reps: p.r, date: s.date });
-  recalcSession(s);
-  rebuildAll();
+  const nextHistory = JSON.parse(JSON.stringify(history));
+  const nextSession = nextHistory[i];
+  const same = nextSession.details.filter(d => d.exerciseId === key && (d.variantId || '') === (variantId || ''));
+  nextSession.details.push({ id: createUuid(), exerciseId: key, ...(variantId ? { variantId } : {}), exerciseName: nameOf(key), setNumber: same.reduce((a, d) => Math.max(a, d.setNumber), 0) + 1, weight: p.w, reps: p.r, date: s.date });
+  recalcSession(nextSession);
+  if (!await commitHistoryChanges(nextHistory, `Nowa seria ${nameOf(key)} ${p.w}×${p.r}`)) return;
   histOpen.add(i);
   renderHistory();
 }
 
-function histNew() {
+async function histNew() {
   const plan = getPlan($('histNewPlan').value);
   const v = $('histNewDate').value;
   if (!plan) { toast('Wybierz plan'); return; }
@@ -1989,11 +2432,21 @@ function histNew() {
   if (!m) { toast('Wybierz datę'); return; }
   const dt = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]), 12, 0, 0);
   if (isNaN(dt) || dt.getTime() > Date.now() + DAY) { toast('Data nie może być z przyszłości'); return; }
-  history.push({ date: dt.toISOString(), planId: plan.id, planTitle: plan.title, totalVolume: 0, totalReps: 0, details: [] });
-  saveAll();
+  const nextHistory = JSON.parse(JSON.stringify(history));
+  nextHistory.push({ id: createUuid(), date: dt.toISOString(), planId: plan.id, planTitle: plan.title, totalVolume: 0, totalReps: 0, details: [] });
+  if (!await commitHistoryChanges(nextHistory, `Nowy trening ${plan.title} (${dkey(dt)})`)) return;
   histOpen.add(history.length - 1);
   renderHistory();
   toast('Dodano trening – dotknij „+ seria", aby wpisać serie');
+}
+
+async function histDelete(index) {
+  const session = history[index];
+  if (!session || !confirm('Usunąć ten trening z historii?')) return;
+  const nextHistory = history.filter((_, row) => row !== index);
+  if (!await commitHistoryChanges(nextHistory, `Usunięcie treningu ${session.planTitle} (${dkey(new Date(session.date))})`)) return;
+  histOpen = new Set();
+  renderHistory();
 }
 
 /* ================== EDYTOR PLANÓW ================== */
@@ -2010,10 +2463,9 @@ function renderPlanEditor() {
   const p = getPlan(editPlanId);
   if (!p) { editPlanId = null; renderPlanEditor(); return; }
   $('planEditTitle').textContent = 'Edycja planu';
-  const used = new Set(p.exercises.map(e => e.key));
   let sel = '<option value="">— wybierz ćwiczenie —</option>';
   GROUPS_LIST.forEach(g => {
-    const ks = Object.keys(CATALOG).filter(k => GROUP[k] === g && !used.has(k));
+    const ks = Object.keys(CATALOG).filter(k => GROUP[k] === g);
     if (ks.length) sel += `<optgroup label="${esc(g)}">${ks.map(k => `<option value="${esc(k)}">${esc(CATALOG[k])}</option>`).join('')}</optgroup>`;
   });
   sel += '<option value="__custom__">➕ Własne ćwiczenie…</option>';
@@ -2034,6 +2486,13 @@ function renderPlanEditor() {
         <span>Powt.</span>
         <input class="pe-target" data-field="peTarget" data-i="${i}" value="${esc(e.target)}" maxlength="7" inputmode="text" aria-label="Zakres powtórzeń">
       </div>
+      ${VARIANTS.some(v => v.exerciseId === e.key) ? `<label class="small">Wariant
+        <select class="select-custom" data-field="peVariant" data-i="${i}" aria-label="Wariant ćwiczenia ${esc(exName(e))}">
+          <option value="default" ${e.variantId === 'default' ? 'selected' : ''}>Wersja podstawowa</option>
+          ${VARIANTS.filter(v => v.exerciseId === e.key).map(v => `<option value="${esc(v.variantId)}" ${e.variantId === v.variantId ? 'selected' : ''}>${esc(variantDisplayName(v))}</option>`).join('')}
+          ${!e.variantId ? '<option value="" selected>Wariant nie został zapisany</option>' : ''}
+          ${e.variantId && !validVariant(e.key, e.variantId) ? '<option value="" selected>Wariant nierozpoznany</option>' : ''}
+        </select></label>` : ''}
     </div>`).join('');
   box.innerHTML = `
     <input class="select-custom pe-title" data-field="peTitle" value="${esc(p.title)}" maxlength="40" aria-label="Nazwa planu">
@@ -2054,105 +2513,261 @@ function renderPlanEditor() {
 }
 
 const peEdit = () => getPlan(editPlanId);
-function peMove(i, d) {
+async function peMove(i, d) {
   const p = peEdit(); const j = i + d;
   if (!p || j < 0 || j >= p.exercises.length) return;
-  [p.exercises[i], p.exercises[j]] = [p.exercises[j], p.exercises[i]];
-  savePlans(); renderPlanEditor();
+  const nextPlans = clonePlans();
+  const nextPlan = nextPlans.find(plan => plan.id === p.id);
+  [nextPlan.exercises[i], nextPlan.exercises[j]] = [nextPlan.exercises[j], nextPlan.exercises[i]];
+  if (await savePlanChanges(nextPlans, { failureMessage: `Zmiana kolejności ćwiczeń w planie „${p.title}”` })) renderPlanEditor();
 }
-function peDel(i) {
+async function peDel(i) {
   const p = peEdit();
   if (!p || !confirm(`Usunąć „${exName(p.exercises[i])}" z planu?`)) return;
-  p.exercises.splice(i, 1);
-  savePlans(); renderPlanEditor();
+  const nextPlans = clonePlans();
+  nextPlans.find(plan => plan.id === p.id).exercises.splice(i, 1);
+  if (await savePlanChanges(nextPlans, { failureMessage: `Usunięcie ćwiczenia z planu „${p.title}”` })) renderPlanEditor();
 }
-function peSets(i, d) {
+async function peSets(i, d) {
   const p = peEdit();
   if (!p) return;
-  p.exercises[i].sets = Math.min(12, Math.max(1, p.exercises[i].sets + d));
-  savePlans(); renderPlanEditor();
+  const nextPlans = clonePlans();
+  const nextExercise = nextPlans.find(plan => plan.id === p.id).exercises[i];
+  const nextSets = Math.min(12, Math.max(1, nextExercise.sets + d));
+  if (nextSets === nextExercise.sets) return;
+  nextExercise.sets = nextSets;
+  if (await savePlanChanges(nextPlans, { failureMessage: `Zmiana liczby serii ćwiczenia ${exName(p.exercises[i])} w planie „${p.title}”` })) renderPlanEditor();
 }
-function peAdd() {
+async function peAdd() {
   const p = peEdit();
   const v = $('peAddSelect').value;
   if (!p || !v) { toast('Wybierz ćwiczenie z listy'); return; }
   if (v === '__custom__') { toast('Wypełnij formularz własnego ćwiczenia'); return; }
-  p.exercises.push({ key: v, sets: 3, target: '8-12' });
-  savePlans(); renderPlanEditor();
+  const nextPlans = clonePlans();
+  nextPlans.find(plan => plan.id === p.id).exercises.push({ key: v, variantId: 'default', sets: 3, target: '8-12' });
+  if (await savePlanChanges(nextPlans, { failureMessage: `Dodanie ćwiczenia ${nameOf(v)} do planu „${p.title}”` })) renderPlanEditor();
 }
-function peCreateCustom() {
+async function peCreateCustom() {
   const p = peEdit();
   const name = $('peCName').value.trim();
   if (!p || name.length < 2) { toast('Podaj nazwę ćwiczenia (min. 2 znaki)'); return; }
   const slug = name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/ł/g, 'l').replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '').slice(0, 20) || 'cw';
   let key = `c_${slug}_${Date.now().toString(36).slice(-4)}`;
-  while (CUSTOM[key]) key += 'x';
-  CUSTOM[key] = { name: name.slice(0, 60), group: $('peCGroup').value, bw: $('peCBw').checked };
-  LS.set('gymverse_custom', CUSTOM);
-  applyCustom();
-  p.exercises.push({ key, sets: 3, target: CUSTOM[key].bw ? '6-10' : '8-12' });
-  savePlans(); renderPlanEditor();
+  const nextCustom = JSON.parse(JSON.stringify(CUSTOM));
+  while (nextCustom[key]) key += 'x';
+  nextCustom[key] = { name: name.slice(0, 60), group: $('peCGroup').value, bw: $('peCBw').checked };
+  const nextPlans = clonePlans();
+  nextPlans.find(plan => plan.id === p.id).exercises.push({ key, sets: 3, target: nextCustom[key].bw ? '6-10' : '8-12' });
+  if (!await savePlanChanges(nextPlans, { custom: nextCustom, failureMessage: `Utworzenie ćwiczenia „${name.slice(0, 60)}” i przypisanie go do planu „${p.title}”` })) return;
+  renderPlanEditor();
   toast('Dodano własne ćwiczenie. Zdjęcie (opcjonalne): img/' + key + '.jpg');
 }
-function peNew() {
+async function peNew() {
   const id = 'p_' + Date.now().toString(36);
-  PLANS.push({ id, title: 'Nowy plan', exercises: [] });
-  savePlans();
+  const nextPlans = clonePlans();
+  nextPlans.push({ id, title: 'Nowy plan', exercises: [] });
+  if (!await savePlanChanges(nextPlans, { failureMessage: 'Utworzenie nowego planu' })) return;
   editPlanId = id;
   renderPlanEditor();
 }
-function peDelPlan() {
+async function peDelPlan() {
   const p = peEdit();
   if (!p) return;
   if (PLANS.length <= 1) { toast('Musi zostać przynajmniej jeden plan'); return; }
   if (!confirm(`Usunąć plan „${p.title}"? Historia treningów zostanie.`)) return;
-  PLANS = PLANS.filter(x => x.id !== p.id);
-  savePlans();
+  const nextPlans = PLANS.filter(x => x.id !== p.id);
+  if (!await savePlanChanges(nextPlans, { failureMessage: `Usunięcie planu „${p.title}”` })) return;
   editPlanId = null;
   renderPlanEditor();
 }
-function peReset() {
+async function peReset() {
   if (!confirm('Przywrócić 4 domyślne plany Push/Pull? Twoje zmiany w planach zostaną nadpisane (historia zostaje).')) return;
-  PLANS = defaultPlans();
-  savePlans();
-  renderPlanEditor();
+  if (await savePlanChanges(defaultPlans(), { failureMessage: 'Przywrócenie domyślnych planów' })) renderPlanEditor();
 }
 
 /* ================== KOPIA ZAPASOWA I EKSPORT ================== */
-async function deliverFile(name, mime, content) {
-  try {
-    const file = new File([content], name, { type: mime });
-    if (navigator.canShare && navigator.canShare({ files: [file] })) {
-      await navigator.share({ files: [file], title: name });
-      return true;
+function deliverFile(name, mime, content) {
+  if (navigator.userActivation && !navigator.userActivation.isActive) return Promise.reject(new Error('FILE_DELIVERY_GESTURE_REQUIRED'));
+  const file = new File([content], name, { type: mime });
+  if (navigator.canShare && navigator.share && navigator.canShare({ files: [file] })) {
+    try {
+      return Promise.resolve(navigator.share({ files: [file], title: name })).then(() => true).catch(error => {
+        if (error && error.name === 'AbortError') return false;
+        throw error;
+      });
+    } catch (error) {
+      if (error && error.name === 'AbortError') return Promise.resolve(false);
+      return Promise.reject(error);
     }
-  } catch (e) {
-    if (e && e.name === 'AbortError') return false;
   }
   const url = URL.createObjectURL(new Blob([content], { type: mime }));
   const a = document.createElement('a');
   a.href = url; a.download = name;
   document.body.appendChild(a); a.click(); a.remove();
   setTimeout(() => URL.revokeObjectURL(url), 2000);
-  return true;
+  return Promise.resolve(true);
+}
+
+function stageFileDelivery(name, mime, content) {
+  if (pendingFileDelivery) pendingFileDelivery.resolve(false);
+  const isAppleMobile = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+  const instructions = isAppleMobile
+    ? `Plik ${name} jest gotowy. Dotknij przycisku, w arkuszu udostępniania wybierz „Zapisz w Plikach”, wskaż folder i zapisz. Po powrocie potwierdź, że plik jest widoczny w Plikach.`
+    : `Plik ${name} jest gotowy. Dotknij przycisku, aby pobrać go lub udostępnić, a potem sprawdź, że został zapisany.`;
+  $('fileDeliveryInstructions').textContent = instructions;
+  $('fileDeliveryPrompt').hidden = false;
+  return new Promise(resolve => { pendingFileDelivery = { name, mime, content, resolve }; });
+}
+
+async function deliverPreparedFile() {
+  const pending = pendingFileDelivery;
+  if (!pending) return false;
+  let delivered = false;
+  try { delivered = await deliverFile(pending.name, pending.mime, pending.content); }
+  catch (error) {
+    toast(error.message === 'FILE_DELIVERY_GESTURE_REQUIRED' ? 'Dotknij przycisku zapisu pliku, aby rozpocząć pobieranie.' : 'Nie udało się udostępnić pliku. Kopia pozostaje przygotowana.');
+    return false;
+  }
+  if (!delivered) {
+    pendingFileDelivery = null;
+    $('fileDeliveryPrompt').hidden = true;
+    pending.resolve(false);
+    return false;
+  }
+  const saved = confirm(/iPhone|iPad|iPod/i.test(navigator.userAgent)
+    ? 'Czy sprawdziłeś aplikację Pliki i potwierdzasz, że kopia została tam zapisana?'
+    : 'Czy sprawdziłeś pobrany plik i potwierdzasz, że kopia została zapisana?');
+  pendingFileDelivery = null;
+  $('fileDeliveryPrompt').hidden = true;
+  pending.resolve(saved);
+  return saved;
 }
 
 async function exportData() {
-  const payload = JSON.stringify({ app: 'gymverse', version: 4, exportedAt: new Date().toISOString(), history, lastWeights: lastSets, body, plans: PLANS, custom: CUSTOM }, null, 2);
-  const ok = await deliverFile(`gymverse_backup_${dkey(new Date())}.json`, 'application/json', payload);
-  if (ok) {
-    LS.set('gymverse_last_backup', new Date().toISOString());
+  try {
+    await STORE.flush();
+    const { createBackupV5, GV_DATA_LEGACY_KEYS, readLegacyInterpretations, readCustomMedia } = await import('./src/gv-data.js');
+    const snapshot = {};
+    GV_DATA_LEGACY_KEYS.forEach(key => {
+      const raw = STORE.storage.getItem(key);
+      if (raw !== null) snapshot[key] = JSON.parse(raw);
+    });
+    Object.assign(snapshot, backupSnapshotDefaults(snapshot));
+    const legacyInterpretations = await readLegacyInterpretations();
+    const customMedia = await readCustomMedia();
+    const archive = await createBackupV5(snapshot, {
+      legacyInterpretations, customMedia,
+      validationOptions: { strictExerciseCatalog: true, catalog: CATALOG, bodyweightExerciseIds: Array.from(BW), exerciseIdMap: ID_MAP }
+    });
+    const ok = await stageFileDelivery(`gymverse_backup_${dkey(new Date())}.zip`, 'application/zip', archive);
+    if (!ok) { toast('Zapis kopii anulowany; data ostatniej kopii nie została zmieniona.'); return; }
+    try { await LS.set('gymverse_last_backup', new Date().toISOString()); await STORE.flush(); }
+    catch (_) { toast('Kopia ZIP została przygotowana i jej zapis potwierdzono, ale nie udało się zapisać daty kopii w aplikacji.'); return; }
     renderPlans();
     $('sumBackup').innerHTML = '';
-    toast('Kopia zapasowa gotowa');
+    toast('Zapis kopii ZIP v5 potwierdzony przez Ciebie.');
+  } catch (error) {
+    toast('Nie udało się przygotować kopii. Dane lokalne pozostały bez zmian.');
+    if (STORE && STORE.mode === 'indexeddb') await offerEmergencyExport(history, lastSets, active, true);
+  }
+}
+
+function runtimeJsonSnapshot() {
+  return STORE.exportSnapshot().then(raw => {
+    const snapshot = {};
+    Object.entries(raw).forEach(([key, value]) => { snapshot[key] = JSON.parse(value); });
+    return snapshot;
+  });
+}
+
+function backupSnapshotDefaults(snapshot) {
+  const result = { ...snapshot };
+  if (!Object.hasOwn(result, 'gymverse_schema')) result.gymverse_schema = 4;
+  if (!Object.hasOwn(result, 'gymverse_history')) result.gymverse_history = history;
+  if (!Object.hasOwn(result, 'gymverse_last_weights')) result.gymverse_last_weights = lastSets;
+  if (!Object.hasOwn(result, 'gymverse_body')) result.gymverse_body = body;
+  if (!Object.hasOwn(result, 'gymverse_plans')) result.gymverse_plans = PLANS;
+  if (!Object.hasOwn(result, 'gymverse_custom')) result.gymverse_custom = CUSTOM;
+  if (!Object.hasOwn(result, 'gymverse_active') && active) result.gymverse_active = active;
+  if (!Object.hasOwn(result, 'gymverse_draft_v1')) result.gymverse_draft_v1 = BASE_B.readDraftPayload(STORE.storage);
+  if (!Object.hasOwn(result, 'gymverse_rest')) result.gymverse_rest = restSetting;
+  if (!Object.hasOwn(result, 'gymverse_bar')) result.gymverse_bar = barKg;
+  return result;
+}
+
+function activeGymVerseWindowCount() {
+  const controller = navigator.serviceWorker && navigator.serviceWorker.controller;
+  if (!controller || typeof MessageChannel !== 'function') return Promise.reject(new Error('SERVICE_WORKER_NOT_READY'));
+  return new Promise((resolve, reject) => {
+    const channel = new MessageChannel();
+    const timeout = setTimeout(() => { channel.port1.close(); reject(new Error('SERVICE_WORKER_CLIENT_CHECK_FAILED')); }, 3000);
+    channel.port1.onmessage = event => {
+      clearTimeout(timeout);
+      channel.port1.close();
+      if (!event.data || event.data.error || !Number.isInteger(event.data.count)) reject(new Error('SERVICE_WORKER_CLIENT_CHECK_FAILED'));
+      else resolve(event.data.count);
+    };
+    controller.postMessage({ type: 'GYMVERSE_COUNT_APP_CLIENTS' }, [channel.port2]);
+  });
+}
+
+async function prepareDataMigration() {
+  if (!STORE || STORE.mode !== 'localStorage') { toast('Dane korzystają już z IndexedDB albo magazyn nie jest gotowy.'); return; }
+  let preview;
+  try {
+    const appWindows = await activeGymVerseWindowCount();
+    if (appWindows !== 1) throw new Error('OTHER_TABS_OPEN');
+    await STORE.flush();
+    preview = await STORE.previewMigration();
+    const { createBackupV5, previewBackupV5, readLegacyInterpretations, readCustomMedia } = await import('./src/gv-data.js');
+    const snapshot = DATA_IDS.addStableIdentifiers(backupSnapshotDefaults(await runtimeJsonSnapshot()));
+    const legacy = {
+      app: 'gymverse', version: 4, exportedAt: new Date().toISOString(),
+      history: snapshot.gymverse_history || [], lastWeights: snapshot.gymverse_last_weights || {},
+      body: snapshot.gymverse_body || [], plans: snapshot.gymverse_plans || [], custom: snapshot.gymverse_custom || {},
+      ...(snapshot.gymverse_active == null ? {} : { activeWorkout: snapshot.gymverse_active }),
+      ...(snapshot.gymverse_draft_v1 == null ? {} : { drafts: snapshot.gymverse_draft_v1 })
+    };
+    const sourceOk = await stageFileDelivery(`gymverse_zrodlo_${dkey(new Date())}.json`, 'application/json', JSON.stringify(legacy, null, 2));
+    if (!sourceOk) {
+      toast('Migracja anulowana; magazyn źródłowy nie został zmieniony.');
+      return;
+    }
+    const validationOptions = { strictExerciseCatalog: true, catalog: CATALOG, bodyweightExerciseIds: Array.from(BW), exerciseIdMap: ID_MAP };
+    const archive = await createBackupV5(snapshot, { legacyInterpretations: await readLegacyInterpretations(), customMedia: await readCustomMedia(), validationOptions });
+    const checked = await previewBackupV5(archive, validationOptions);
+    if (!checked.ok) throw new Error('V5_BACKUP_VERIFICATION_FAILED');
+    const ok = await stageFileDelivery(`gymverse_backup_${dkey(new Date())}.zip`, 'application/zip', archive);
+    if (!ok) { toast('Przeniesienie anulowano; kopia ZIP nie została potwierdzona.'); return; }
+    toast(`Zweryfikowana kopia ZIP v5 zawiera ${checked.counts.sessions} treningów i ${checked.counts.sets} serii.`);
+    if (await activeGymVerseWindowCount() !== 1) throw new Error('OTHER_TABS_OPEN');
+    if (!confirm('Ostatnie potwierdzenie: przełączyć bieżący magazyn na IndexedDB? Oryginalne dane localStorage pozostaną zachowane.')) return;
+    const result = await STORE.activateMigration(preview, { sourceExportVerified: true, v5ExportVerified: true });
+    await STORE.flush();
+    $('migrateDataButton').hidden = true;
+    toast(`Migracja zakończona i zweryfikowana: ${result.records ?? preview.count} rekordów. Dane źródłowe zachowano.`);
+  } catch (error) {
+    toast(error.message === 'MIGRATION_LOCK_UNAVAILABLE'
+      ? 'Nie można bezpiecznie zablokować innych kart w tej przeglądarce. Migracja nie została uruchomiona.'
+      : error.message === 'SOURCE_CHANGED_DURING_MIGRATION'
+        ? 'Dane zmieniły się podczas przygotowania. Migracja nie została aktywowana; przygotuj ją ponownie.'
+        : error.message === 'SERVICE_WORKER_NOT_READY'
+          ? 'Aplikacja wymaga jednego przeładowania, aby sprawdzić otwarte karty. Dane nie zostały zmienione.'
+          : error.message === 'SERVICE_WORKER_CLIENT_CHECK_FAILED'
+            ? 'Nie udało się sprawdzić innych okien aplikacji. Migracja nie została uruchomiona.'
+        : error.message === 'MIGRATION_LOCK_BUSY'
+          ? 'Inna karta lub okno wykonuje teraz migrację. Zamknij pozostałe okna GymNastika i spróbuj ponownie.'
+          : error.message === 'OTHER_TABS_OPEN'
+            ? 'Wykryto inne otwarte okno GymNastika. Zamknij je, aby zablokować równoczesne zmiany, i spróbuj ponownie.'
+          : 'Nie udało się zweryfikować migracji. Aktywny magazyn pozostał bez zmian; zachowaj kopię źródłową.' );
   }
 }
 
 function csvExport() {
-  const rows = [['Data', 'Trening', 'Ćwiczenie', 'Seria', 'Ciężar (kg)', 'Powtórzenia', 'Szac. 1RM (kg)']];
+  const rows = [['Data', 'Trening', 'Ćwiczenie', 'Wariant ID', 'Wariant', 'Seria', 'Ciężar (kg)', 'Powtórzenia', 'Szac. 1RM (kg)']];
   history.slice().sort(byDate).forEach(s => {
     const dt = dkey(new Date(s.date));
-    (s.details || []).forEach(d => rows.push([dt, s.planTitle, d.exerciseName, d.setNumber, d.weight, d.reps, isBW(d.exerciseId) ? '' : e1rm(d.weight, d.reps)]));
+    (s.details || []).forEach(d => rows.push([dt, s.planTitle, d.exerciseName, d.variantId || '', variantName({ key: d.exerciseId, ...(Object.hasOwn(d, 'variantId') ? { variantId: d.variantId } : {}) }), d.setNumber, d.weight, d.reps, isBW(d.exerciseId) ? '' : e1rm(d.weight, d.reps)]));
   });
   const cell = v => {
     let t = typeof v === 'number' ? String(v).replace('.', ',') : String(v);
@@ -2161,15 +2776,39 @@ function csvExport() {
   };
   if (rows.length === 1) { toast('Brak danych do eksportu'); return; }
   const csv = '\ufeff' + rows.map(r => r.map(cell).join(';')).join('\r\n');
-  deliverFile(`gymverse_dane_${dkey(new Date())}.csv`, 'text/csv;charset=utf-8', csv);
+  deliverFile(`gymverse_dane_${dkey(new Date())}.csv`, 'text/csv;charset=utf-8', csv).catch(() => toast('Nie udało się zapisać pliku CSV.'));
 }
 
-function importData(ev) {
+async function importData(ev) {
   const file = ev.target.files[0];
   ev.target.value = '';
   if (!file) return;
+  if (/\.zip$/i.test(file.name) || file.type === 'application/zip') {
+    try {
+      const { previewBackupV5, restoreBackupV5 } = await import('./src/gv-data.js');
+      const validationOptions = { strictExerciseCatalog: true, catalog: CATALOG, bodyweightExerciseIds: Array.from(BW), exerciseIdMap: ID_MAP };
+      const preview = await previewBackupV5(file, validationOptions);
+      const overview = `Kopia v5: ${preview.counts.sessions} treningów, ${preview.counts.sets} serii, ${preview.counts.plans} planów, ${preview.counts.customExercises} ćwiczeń własnych, ${preview.counts.drafts} roboczych wpisów, ${preview.counts.legacyInterpretations} potwierdzonych reguł historii i ${preview.media.length} plików graficznych. Pełne odtworzenie zastąpi obecne dane GymNastika.`;
+      if (!confirm(`${overview}\n\nCzy kontynuować do wyboru aktywnego treningu i draftów?`)) return;
+      const restoreActive = confirm('Czy odtworzyć aktywny trening z kopii?');
+      const restoreDrafts = confirm('Czy odtworzyć niezapisane drafty z kopii?');
+      if (!confirm('Ostatnie potwierdzenie: zastąpić dane GymNastika zawartością tej kopii?')) return;
+      await restoreBackupV5(STORE.storage, preview, { confirmed: true, restoreActive, restoreDrafts, validationOptions });
+      await STORE.flush();
+      toast('Dane odtworzono. Aplikacja uruchomi się ponownie.');
+      setTimeout(() => location.reload(), 350);
+    } catch (error) {
+      if (error && error.integrityUncertain) {
+        toast('Integralność lokalnego zapisu jest niepewna.');
+        offerEmergencyExport(history, lastSets, active, true);
+      } else {
+        toast(error && error.message === 'RESTORE_CONFIRMATION_REQUIRED' ? 'Odtworzenie anulowano.' : 'Nie udało się zweryfikować ani odtworzyć kopii ZIP. Dane nie zostały celowo zmienione.');
+      }
+    }
+    return;
+  }
   const reader = new FileReader();
-  reader.onload = () => {
+  reader.onload = async () => {
     try {
       const parsed = JSON.parse(reader.result);
       if (!parsed || typeof parsed !== 'object' || !Array.isArray(parsed.history) || (parsed.version != null && Number(parsed.version) > 4)) throw new Error('format');
@@ -2194,8 +2833,24 @@ function importData(ev) {
       });
       const addedWeights = Object.keys(backupWeights).filter(key => !Object.hasOwn(lastSets, key));
       const keptLocalWeights = Object.keys(backupWeights).length - addedWeights.length;
-      const have = new Set(history.map(s => s.date));
-      const fresh = incoming.filter(s => !have.has(s.date));
+      const knownIds = new Set(history.map(session => session.id).filter(Boolean));
+      const existingLegacyCounts = new Map();
+      history.forEach(session => {
+        const fingerprint = DATA_IDS.legacySessionFingerprint(session);
+        existingLegacyCounts.set(fingerprint, (existingLegacyCounts.get(fingerprint) || 0) + 1);
+      });
+      const incomingLegacyCounts = new Map();
+      const fresh = [];
+      incoming.forEach(session => {
+        if (session.id) {
+          if (!knownIds.has(session.id)) { knownIds.add(session.id); fresh.push(session); }
+          return;
+        }
+        const fingerprint = DATA_IDS.legacySessionFingerprint(session);
+        const occurrence = (incomingLegacyCounts.get(fingerprint) || 0) + 1;
+        incomingLegacyCounts.set(fingerprint, occurrence);
+        if (occurrence > (existingLegacyCounts.get(fingerprint) || 0)) fresh.push(session);
+      });
       const haveBody = new Set(body.map(b => b.date));
       if (parsed.body != null && !Array.isArray(parsed.body)) throw new Error('format');
       const normalizedBody = normalizeBody(parsed.body || []);
@@ -2206,6 +2861,22 @@ function importData(ev) {
       if (parsed.plans != null && inPlans.length !== parsed.plans.length) throw new Error('format');
       const plansDiffer = inPlans.length > 0 && JSON.stringify(inPlans) !== JSON.stringify(PLANS);
       const replacePlans = !!(plansDiffer && !active);
+      if (parsed.app === 'gymverse' && Number(parsed.version) === 4) {
+        const { inspectLegacySnapshot, restoreLegacyV4 } = await import('./src/gv-data.js');
+        const validationOptions = { strictExerciseCatalog: true, catalog: CATALOG, bodyweightExerciseIds: Array.from(BW), exerciseIdMap: ID_MAP };
+        const preview = await inspectLegacySnapshot(parsed, validationOptions);
+        if (!preview.ok) throw new Error('format');
+        if (confirm(`OK = pełne odtworzenie JSON v4, które zastąpi treningi, plany, ćwiczenia własne, pomiary i ciężary z kopii. Anuluj = przejdź do importu łączeniowego. Liczba treningów w kopii: ${preview.counts.sessions}. Ustawienia aplikacji pozostaną bez zmian.`)) {
+          const restoreActive = confirm('Czy kopia awaryjna zawiera aktywny trening do odtworzenia? Wybierz OK, aby go przywrócić.');
+          const restoreDrafts = confirm('Czy przywrócić niezapisane drafty, jeśli znajdują się w kopii?');
+          if (!confirm('Ostatnie potwierdzenie: pełne odtworzenie zastąpi obecny stan danych GymNastika. Kontynuować?')) return;
+          await restoreLegacyV4(STORE.storage, parsed, { confirmed: true, restoreActive, restoreDrafts, validationOptions });
+          await STORE.flush();
+          toast('Dane JSON v4 odtworzono. Aplikacja uruchomi się ponownie.');
+          setTimeout(() => location.reload(), 350);
+          return;
+        }
+      }
       if (!fresh.length && !freshBody.length && !newCustom.length && !replacePlans && !addedWeights.length) {
         toast(keptLocalWeights ? `Zachowano ${keptLocalWeights} lokalnych ciężarów; kopia nie zawiera innych nowych danych.` : 'Plik nie zawiera nowych danych');
         return;
@@ -2215,7 +2886,7 @@ function importData(ev) {
       const weightsInfo = `, ciężary z kopii – ${addedWeights.length}${keptLocalWeights ? `; ${keptLocalWeights} lokalnych ciężarów pozostanie bez zmian` : ''}`;
       if (!confirm(`Zaimportować dane: treningi – ${fresh.length}, pomiary wagi – ${freshBody.length}${customInfo}${planInfo}${weightsInfo}? Duplikaty zostaną pominięte; niczego nie usunę.`)) return;
 
-      const nextHistory = JSON.parse(JSON.stringify(history.concat(fresh)));
+      const nextHistory = DATA_IDS.ensureStableHistoryIds(JSON.parse(JSON.stringify(history.concat(fresh))));
       const nextBody = body.concat(freshBody).sort((a, b) => a.date.localeCompare(b.date));
       nextHistory.forEach(session => recalcSession2(session, nextBW, nextBody));
       const nextPlans = replacePlans ? inPlans : PLANS;
@@ -2226,7 +2897,7 @@ function importData(ev) {
       if (freshBody.length) updates.gymverse_body = nextBody;
       if (newCustom.length) updates.gymverse_custom = nextCustom;
       if (replacePlans) updates.gymverse_plans = nextPlans;
-      BASE_B.persistJsonTransaction(localStorage, updates);
+      await STORE.transact(updates);
 
       history = nextHistory;
       body = nextBody;
@@ -2242,7 +2913,7 @@ function importData(ev) {
       renderPlans();
       toast(msg);
     } catch (e) {
-      if (e && e.rollbackErrors && e.rollbackErrors.length) {
+      if (e && (e.integrityUncertain || (e.rollbackErrors && e.rollbackErrors.length))) {
         toast('Integralność lokalnego zapisu jest niepewna.');
         offerEmergencyExport(history, lastSets, active, true);
         return;
@@ -2260,13 +2931,13 @@ const ACTIONS = {
   view: el => switchView(el.dataset.view),
   startPlan: el => startWorkout(el.dataset.plan),
   resume: openWorkout,
-  resumeDiscard: () => { if (confirm('Porzucić niedokończony trening?')) { discardActive(); renderPlans(); } },
+  resumeDiscard: async () => { if (confirm('Porzucić niedokończony trening?') && await discardActive()) renderPlans(); },
   done: el => onDone(Number(el.dataset.i)),
   fillprev: el => fillPrev(Number(el.dataset.i)),
   wstep: el => stepWeight(Number(el.dataset.d)),
   copyPrev,
   plates: togglePlates,
-  bar: el => { barKg = Number(el.dataset.kg); LS.set('gymverse_bar', barKg); updatePlates(); },
+  bar: async el => { const next = Number(el.dataset.kg); await LS.set('gymverse_bar', next); barKg = next; updatePlates(); },
   addSet, removeSet, swapOpen,
   rir: el => setRir(Number(el.dataset.v)),
   next: nextStep,
@@ -2277,12 +2948,14 @@ const ACTIONS = {
   timerPause, timerAdd, timerSkip: stopTimer,
   range: setRange,
   export: exportData,
+  deliverPreparedFile,
+  migrateData: prepareDataMigration,
   csv: csvExport,
   importBtn: () => $('importFile').click(),
   shareSummary,
-  deloadStart: () => { LS.set('gymverse_deload_until', Date.now() + 7 * DAY); LS.set('gymverse_deload_start', Date.now()); renderPlans(); },
-  deloadSnooze: () => { LS.set('gymverse_deload_snooze', Date.now() + 14 * DAY); renderPlans(); },
-  deloadEnd: () => { LS.set('gymverse_deload_until', 0); renderPlans(); },
+  deloadStart: async () => { const now = Date.now(); await STORE.transact({ gymverse_deload_until: now + 7 * DAY, gymverse_deload_start: now }); renderPlans(); },
+  deloadSnooze: async () => { await LS.set('gymverse_deload_snooze', Date.now() + 14 * DAY); renderPlans(); },
+  deloadEnd: async () => { await LS.set('gymverse_deload_until', 0); renderPlans(); },
   editPlans: () => { if (active) { toast('Najpierw zakończ lub porzuć trwający trening'); return; } switchView('view-planedit'); },
   peOpen: el => { editPlanId = el.dataset.id; renderPlanEditor(); window.scrollTo(0, 0); },
   peNew, peReset, peAdd, peCreateCustom, peDelPlan,
@@ -2303,24 +2976,32 @@ const ACTIONS = {
     if (b.hidden) histOpen.delete(i); else histOpen.add(i);
   },
   histEditSet: el => histEditSet(Number(el.dataset.i), Number(el.dataset.d)),
-  histAddSet: el => histAddSet(Number(el.dataset.i), el.dataset.k),
+  histAddSet: el => histAddSet(Number(el.dataset.i), el.dataset.k, el.dataset.v),
   histNew,
   histClearDay: () => { histFilterDay = null; renderHistory(); },
-  histDelete: el => {
-    if (!confirm('Usunąć ten trening z historii?')) return;
-    history.splice(Number(el.dataset.i), 1);
-    histOpen = new Set();
-    rebuildAll();
-    renderHistory();
-  }
+  histDelete: el => histDelete(Number(el.dataset.i))
 };
 
-document.addEventListener('click', e => {
+document.addEventListener('click', async e => {
   unlockAudio();
   const el = e.target.closest('[data-act]');
   if (!el) return;
   const fn = ACTIONS[el.dataset.act];
-  if (fn) fn(el);
+  if (!fn) return;
+  try {
+    await fn(el);
+    if (STORE) {
+      try { await STORE.flush(); }
+      catch (error) {
+        if (suppressNextStoreFlushError) suppressNextStoreFlushError = false;
+        else throw error;
+      }
+    }
+  } catch (error) {
+    suppressNextStoreFlushError = false;
+    toast(storageFailureMessage(error));
+    if (STORE && STORE.mode === 'indexeddb') await offerEmergencyExport(history, lastSets, active, true);
+  }
 });
 document.addEventListener('input', e => {
   const t = e.target;
@@ -2330,27 +3011,46 @@ document.addEventListener('input', e => {
     if (t.id.startsWith('weight_')) { lastRow = Number(t.dataset.i); updatePlates(); }
   }
 });
-document.addEventListener('focusout', e => {
+document.addEventListener('focusout', async e => {
   const t = e.target;
-  if (t.classList && t.classList.contains('input-cell') && active) flushDraftsForStep(active.step);
+  if (t.classList && t.classList.contains('input-cell') && active) {
+    flushDraftsForStep(active.step);
+    await STORE.flush().catch(error => toast(storageFailureMessage(error)));
+  }
 });
-document.addEventListener('change', e => {
+document.addEventListener('change', async e => {
   const t = e.target;
   if (t.id === 'peAddSelect') { $('peCustom').hidden = t.value !== '__custom__'; return; }
   const f = t.dataset && t.dataset.field;
   if (!f) return;
   const p = peEdit();
   if (!p) return;
+  let saved = true;
   if (f === 'peTitle') {
-    p.title = t.value.trim().slice(0, 40) || 'Plan';
-    savePlans();
+    const nextPlans = clonePlans();
+    nextPlans.find(plan => plan.id === p.id).title = t.value.trim().slice(0, 40) || 'Plan';
+    saved = await savePlanChanges(nextPlans, { failureMessage: `Zmiana nazwy planu „${p.title}”` });
+    renderPlanEditor();
+  } else if (f === 'peVariant') {
+    const i = Number(t.dataset.i);
+    if (!Number.isInteger(i) || !p.exercises[i] || !validVariant(p.exercises[i].key, t.value)) { toast('Nieprawidłowy wariant ćwiczenia'); renderPlanEditor(); return; }
+    const nextPlans = clonePlans();
+    nextPlans.find(plan => plan.id === p.id).exercises[i].variantId = t.value;
+    saved = await savePlanChanges(nextPlans, { failureMessage: 'Zmiana wariantu w planie' });
+    renderPlanEditor();
   } else if (f === 'peTarget') {
     const v = t.value.trim().replace(/\s+/g, '').replace('–', '-');
     if (!/^\d{1,3}(-\d{1,3})?$/.test(v)) { toast('Zakres w formacie 8-12 lub 15'); renderPlanEditor(); return; }
-    p.exercises[Number(t.dataset.i)].target = v;
-    savePlans();
+    const exerciseIndex = Number(t.dataset.i);
+    const nextPlans = clonePlans();
+    const nextExercise = nextPlans.find(plan => plan.id === p.id).exercises[exerciseIndex];
+    const exerciseName = exName(p.exercises[exerciseIndex]);
+    nextExercise.target = v;
+    saved = await savePlanChanges(nextPlans, { failureMessage: `Zmiana zakresu powtórzeń dla ${exerciseName} w planie „${p.title}”` });
     renderPlanEditor();
   }
+  if (!saved) suppressNextStoreFlushError = false;
+  if (saved) await STORE.flush().catch(error => toast(storageFailureMessage(error)));
 });
 document.addEventListener('focusin', e => {
   const t = e.target;
@@ -2360,29 +3060,30 @@ document.addEventListener('focusin', e => {
     updatePlates();
   }
 });
-document.addEventListener('keydown', e => {
+document.addEventListener('keydown', async e => {
   if (e.key !== 'Enter') return;
   const t = e.target;
-  if (t.id === 'bodyInput') { e.preventDefault(); saveBody(); return; }
+  if (t.id === 'bodyInput') { e.preventDefault(); await saveBody(); await STORE.flush().catch(error => toast(storageFailureMessage(error))); return; }
   if (!t.classList || !t.classList.contains('input-cell')) return;
   e.preventDefault();
   const i = Number(t.dataset.i);
   if (t.id.startsWith('weight_')) { $('reps_' + i).focus(); return; }
   const btn = $('btnDone_' + i);
-  if (btn && btn.classList.contains('ready')) { if (onDone(i)) focusNextRow(); }
+  if (btn && btn.classList.contains('ready')) { if (await onDone(i)) focusNextRow(); await STORE.flush().catch(error => toast(storageFailureMessage(error))); }
 });
 $('chartExerciseSelect').addEventListener('change', updateCharts);
-$('swapSelect').addEventListener('change', e => applySwap(e.target.value));
+$('swapSelect').addEventListener('change', async e => { await applySwap(e.target.value); await STORE.flush().catch(error => toast(storageFailureMessage(error))); });
 $('importFile').addEventListener('change', importData);
 
-document.addEventListener('visibilitychange', () => {
+document.addEventListener('visibilitychange', async () => {
   if (document.visibilityState === 'hidden' && active) flushDraftsForStep(active.step);
+  if (document.visibilityState === 'hidden' && STORE) await STORE.flush().catch(error => toast(storageFailureMessage(error)));
   if (document.visibilityState === 'visible') {
     if (active && $('view-workout').classList.contains('active')) lockScreen();
     if (timerInt) tick();
   }
 });
-window.addEventListener('pagehide', () => { if (active) flushDraftsForStep(active.step); });
+window.addEventListener('pagehide', () => { if (active) flushDraftsForStep(active.step); if (STORE) STORE.flush().catch(() => {}); });
 let resizeT = null;
 window.addEventListener('resize', () => {
   clearTimeout(resizeT);
@@ -2393,17 +3094,50 @@ window.addEventListener('resize', () => {
 });
 
 /* ================== START ================== */
-function init() {
-  loadState();
-  initChartsSelect();
-  renderPlans();
-  try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch (e) {}
-  if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
-    navigator.serviceWorker.register('sw.js').catch(() => {});
+async function init() {
+  try {
+    VARIANTS = (await import('./src/exercise/catalog.js')).EXERCISE_VARIANTS;
+    const dataModule = await import('./src/gv-data.js');
+    DATA_IDS = dataModule;
+    const { createRuntimeStore } = dataModule;
+    STORE = await createRuntimeStore();
+    if (location.hostname === '127.0.0.1' || location.hostname === 'localhost') {
+      Object.defineProperty(window, '__gymverseTestHarness', { value: Object.freeze({ getStore: () => STORE }), configurable: true });
+    }
+    STORE.setFailureHandler(error => {
+      toast(storageFailureMessage(error));
+      if (STORE.mode === 'indexeddb') offerEmergencyExport(history, lastSets, active, true);
+    });
+    await loadState();
+    await STORE.flush();
+    $('migrateDataButton').hidden = STORE.mode !== 'localStorage';
+    initChartsSelect();
+    await initializeExercisePresentation();
+    renderPlans();
+    if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
+      const workerPath = exercisePresentationPilot.pilotMode ? 'sw.js?local-exercise-presentation-pilot=1' : 'sw.js';
+      navigator.serviceWorker.register(workerPath).catch(() => {});
+    }
+  } catch (error) {
+    const notice = $('toast');
+    notice.textContent = error && error.message === 'ACTIVE_DATABASE_UNAVAILABLE'
+      ? 'IndexedDB jest niedostępne, a aplikacja nie może bezpiecznie odczytać aktywnych danych. Nie zapisuj zmian ani nie przełączaj magazynu.'
+      : 'Nie udało się bezpiecznie uruchomić magazynu danych. Dane nie zostały przełączone.';
+    notice.classList.add('show');
+    notice.setAttribute('role', 'alert');
   }
 }
+document.getElementById('exercisePresentation')?.addEventListener('click', handleExercisePresentationControl);
+document.getElementById('legacyImageControls')?.addEventListener('click', event => {
+  const button = event.target.closest('[data-legacy-image-mode]');
+  if (!button || !active) return;
+  legPressImageMode = button.dataset.legacyImageMode;
+  $('legacyExerciseImageBox').dataset.mode = legPressImageMode;
+  document.querySelectorAll('[data-legacy-image-mode]').forEach(item => item.setAttribute('aria-pressed', String(item === button)));
+});
 init();
 })();
 </script>
+<script type="module" src="src/features/anatomy/atlas.js"></script>
 </body>
 </html>

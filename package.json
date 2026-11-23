@@ -11,5 +11,8 @@
   "devDependencies": {
     "@playwright/test": "1.56.1",
     "vitest": "4.1.12"
+  },
+  "dependencies": {
+    "@zip.js/zip.js": "2.20.0"
   }
 }

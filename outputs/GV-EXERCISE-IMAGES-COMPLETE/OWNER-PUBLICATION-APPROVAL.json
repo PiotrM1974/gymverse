@@ -1,0 +1,18 @@
+{
+  "recordType": "OWNER_PUBLICATION_APPROVAL",
+  "approvedOn": "2026-11-23",
+  "ownerAuthorization": "The owner authorized publication of the current GymNastika release with the visually accepted exercise illustrations, including the work necessary to commit, push, merge through the project process, and deploy.",
+  "publicApplication": "https://piotrm1974.github.io/gymverse/",
+  "approvedRecordCount": 34,
+  "approvedTechniqueBoards": 68,
+  "approvedThumbnails": 68,
+  "scope": "Publish the exact accepted exercise/variant selections in OWNER-VISUAL-REVIEW.json, both male and female boards, and their existing derived thumbnails in the ordinary PWA. This approval applies to the current 34 accepted records only.",
+  "ownerVisualReview": "outputs/GV-EXERCISE-IMAGES-COMPLETE/OWNER-VISUAL-REVIEW.json",
+  "ownerVisualReviewSha256": "525e450f5a820dd23b5431eb0531ba0357bc6e05e7b485f5edd70a340154911d",
+  "doesNotAssert": [
+    "EXPERT_REVIEWED or independent expert assessment",
+    "a blanket MIT, CC0, or other license assignment to generated images",
+    "new rights clearance for third-party reference media"
+  ],
+  "preserveExistingAssessments": "Keep existing image-origin, author, external-resource, license, and technique-review records unchanged and separate from this publication approval."
+}

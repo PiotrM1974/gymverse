@@ -6,10 +6,15 @@ test.beforeEach(async ({ page }) => {
   await page.reload();
 });
 
+async function keepLegacyV4Merge(dialog) {
+  if (dialog.message().startsWith('OK = pełne odtworzenie JSON v4')) await dialog.dismiss();
+  else await dialog.accept();
+}
+
 test('starts the first plan, records a set, finishes, survives reload and imports synthetic backup v4', async ({ page }) => {
   const pageErrors = [];
   page.on('pageerror', error => pageErrors.push(error.message));
-  page.on('dialog', dialog => dialog.accept());
+  page.on('dialog', keepLegacyV4Merge);
   await page.locator('[data-act="startPlan"][data-plan="push_a1"]').click();
   await page.locator('#weight_0').fill('40');
   await page.locator('#reps_0').fill('8');
@@ -17,9 +22,14 @@ test('starts the first plan, records a set, finishes, survives reload and import
   await page.getByRole('button', { name: /zakończ i zapisz trening/i }).click();
   await expect(page.getByText('Trening zaliczony!')).toBeVisible();
   expect(await page.evaluate(() => localStorage.getItem('gymverse_active'))).toBeNull();
-  expect(await page.evaluate(() => JSON.parse(localStorage.getItem('gymverse_history') || '[]'))).toHaveLength(1);
+  const firstSession = await page.evaluate(() => JSON.parse(localStorage.getItem('gymverse_history') || '[]')[0]);
+  expect(firstSession.id).toMatch(/^[0-9a-f-]{36}$/i);
+  expect(firstSession.details[0].id).toMatch(/^[0-9a-f-]{36}$/i);
   await page.reload();
   expect(pageErrors).toEqual([]);
+  const reloadedSession = await page.evaluate(() => JSON.parse(localStorage.getItem('gymverse_history') || '[]')[0]);
+  expect(reloadedSession.id).toBe(firstSession.id);
+  expect(reloadedSession.details[0].id).toBe(firstSession.details[0].id);
   await page.getByRole('button', { name: 'Historia' }).click();
   await expect(page.locator('#historyList').getByText('Push A1')).toBeVisible();
   await page.locator('#importFile').setInputFiles('tests/fixtures/backup-v4.json');
