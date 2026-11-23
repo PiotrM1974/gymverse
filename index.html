@@ -7,8 +7,9 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="GymNastika">
-<meta name="theme-color" content="#0d0f12">
-<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#F4F6F8" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0D1420" media="(prefers-color-scheme: dark)">
+<meta name="color-scheme" content="light dark">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="stylesheet" href="src/features/anatomy/atlas.css">
@@ -255,25 +256,32 @@ select.select-custom, input.select-custom { width: 100%; background: var(--card-
 
 #toast { position: fixed; left: 50%; top: calc(env(safe-area-inset-top, 0px) + 70px); transform: translateX(-50%); background: var(--card-sub); border: 1px solid var(--lime); color: var(--text); padding: 10px 16px; border-radius: 12px; font-size: 0.9rem; font-weight: 600; z-index: 200; max-width: 90%; text-align: center; opacity: 0; pointer-events: none; transition: opacity 0.25s; }
 #toast.show { opacity: 1; }
+/* GymNastika 2.0 — zatwierdzony system Signal */
+:root{color-scheme:light;--bg:#F4F6F8;--card-bg:#fff;--card-sub:#EDF1F5;--lime:#0647D8;--lime-dim:#DEE7FF;--text:#17212B;--text-muted:#4F6270;--border:#D7E0E6;--danger:#B42318;--orange:#AA3E00;--blue:#0647D8;--radius:20px;--push:#AA3E00;--push-soft:#FFE5D8;--pull:#00666B;--pull-soft:#D9F5F5}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){color-scheme:dark;--bg:#0D1420;--card-bg:#1C2A3A;--card-sub:#24364A;--lime:#76A0FF;--lime-dim:#293E69;--text:#F6F8FB;--text-muted:#B0C0D0;--border:#374B5D;--danger:#FF938B;--orange:#FF7A32;--blue:#76A0FF;--push:#FF7A32;--push-soft:#503020;--pull:#35D6D0;--pull-soft:#1D494A}}
+:root[data-theme="dark"]{color-scheme:dark;--bg:#0D1420;--card-bg:#1C2A3A;--card-sub:#24364A;--lime:#76A0FF;--lime-dim:#293E69;--text:#F6F8FB;--text-muted:#B0C0D0;--border:#374B5D;--danger:#FF938B;--orange:#FF7A32;--blue:#76A0FF;--push:#FF7A32;--push-soft:#503020;--pull:#35D6D0;--pull-soft:#1D494A}
+*{font-family:'Source Sans 3',-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}body{padding-bottom:calc(110px + env(safe-area-inset-bottom,0px));background:var(--bg);color:var(--text)}header{position:sticky;top:0;padding:calc(env(safe-area-inset-top,0px) + 10px) max(16px,calc((100vw - 960px)/2)) 10px;background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(14px);border-color:var(--border);transition:padding .2s}header.compact{padding-top:calc(env(safe-area-inset-top,0px) + 5px);padding-bottom:5px}.logo{font:800 28px/.95 'Barlow Condensed',Impact,sans-serif;letter-spacing:0}.logo span{color:var(--push)}.header-actions{gap:6px}.btn-icon{min-height:44px;border-radius:13px;background:var(--card-bg);border-color:var(--border);color:var(--text);cursor:pointer}.container{max-width:980px;padding:24px clamp(16px,4vw,34px)}h1,h2,h3,.plan-card h3,.exercise-meta{font-family:'Barlow Condensed',Impact,sans-serif}.plan-grid{grid-template-columns:repeat(auto-fit,minmax(min(100%,360px),1fr));gap:14px}.plan-card{min-height:132px;padding:20px;background:var(--card-bg);border-radius:22px;border-color:var(--border);align-items:flex-start;flex-direction:column;gap:12px}.plan-card.next{border:2px solid #B88F00;padding:19px}.plan-card h3{font-size:1.65rem}.plan-card p{font-size:.95rem}.plan-arrow{align-self:flex-end;color:var(--lime)}.badge{background:#FFD223;color:#715C00;border-radius:999px;padding:5px 10px}.btn-primary{background:var(--lime);color:#fff;min-height:52px;border-radius:16px}.btn-secondary{background:var(--card-bg);border-color:var(--border);color:var(--text);min-height:48px;border-radius:14px}.btn-link{color:var(--blue);min-height:44px}.week-strip,.banner,.data-box,.exercise-hero,.chart-container,.stat-card,.hist-card,.compare-box,.records,.pe-ex{background:var(--card-bg);border-color:var(--border);border-radius:18px}.week-strip b,.hero-target,.stat-card .val,.records h4,.records li,.compare-box .up,.hist-stats,.rec-row .v{color:var(--lime)}.exercise-presentation__figure,.hero-img-box{background:#090b0e}.exercise-presentation__group button[aria-pressed="true"],.legacy-image-controls button[aria-pressed="true"]{border-color:var(--lime);background:var(--lime-dim);color:var(--lime)}.training-atlas-disclosure>summary{background:var(--card-bg);border-color:var(--border);min-height:48px;border-radius:14px}.rp{min-height:44px;padding:8px 12px;border-radius:12px;background:var(--card-bg);color:var(--text)}.rp.active,.pill.active{background:var(--lime);color:#fff;border-color:var(--lime)}.sets-table{border-spacing:0 8px}.set-row td{background:var(--card-bg);border-color:var(--border)}.input-cell,.select-custom,.body-row input,.pe-target{background:var(--card-sub);color:var(--text);border-color:var(--border);min-height:46px}.input-cell:focus{border-color:var(--lime)}.btn-done.ready{background:var(--lime);color:#fff;border-color:var(--lime)}.btn-done.completed{background:#00979E;color:#fff;border-color:#00979E}.bottom-bar{max-width:none;padding:10px max(16px,calc((100vw - 900px)/2)) calc(10px + env(safe-area-inset-bottom,0px));background:color-mix(in srgb,var(--card-bg) 94%,transparent);border-color:var(--border)}.timer-digits{color:var(--lime)}.btn-timer{min-height:44px;background:var(--card-sub);color:var(--text);border-color:var(--border)}#toast{background:var(--card-bg);border-color:var(--lime);color:var(--text)}:focus-visible{outline:3px solid var(--lime);outline-offset:2px}@media(max-width:560px){.container{padding:18px 16px}.plan-card{min-height:120px}.sets-table th{font-size:.66rem}.input-cell{width:58px}.bottom-bar{gap:8px}.timer-ctrls{gap:4px}.btn-timer{padding:8px}}
 </style>
+<link rel="stylesheet" href="src/ui/signal.css">
 </head>
 <body>
 
-<header>
-  <div class="logo" data-act="view" data-view="view-plans">GYM<span>NASTIKA</span></div>
-  <div class="header-actions">
-    <button class="btn-icon" data-act="view" data-view="view-stats" aria-label="Statystyki" title="Statystyki">📊</button>
-    <button class="btn-icon" data-act="view" data-view="view-charts" aria-label="Progres" title="Progres ćwiczeń">📈</button>
-    <button class="btn-icon" data-act="view" data-view="view-history" aria-label="Historia" title="Historia">📜</button>
-  </div>
+<header id="appHeader">
+  <div class="header-top"><div class="header-brand"><span class="brand-kicker">TWOJE TRENINGI</span><button type="button" class="logo" data-act="view" data-view="view-plans" aria-label="GymNastika — Plany">GYM<span>NASTIKA</span></button></div><span class="header-mark" aria-hidden="true">✦</span></div>
+  <nav class="header-nav" aria-label="Główna nawigacja">
+    <button type="button" data-act="view" data-view="view-plans" aria-current="page"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 3h6M8 9h8M8 13h8M8 17h5"/></svg><span>Plany</span></button>
+    <button type="button" data-act="view" data-view="view-stats"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V11m5 9V5m5 15v-8m5 8V8M3 20h18"/></svg><span>Statystyki</span></button>
+    <button type="button" data-act="view" data-view="view-charts"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 17l6-6 4 3 7-8"/></svg><span>Progres</span></button>
+    <button type="button" data-act="view" data-view="view-history"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7v5h5M5 12a8 8 0 1 0 2-5M12 7v5l3 2"/></svg><span>Historia</span></button>
+  </nav>
 </header>
 
 <div class="container">
 
   <!-- WIDOK 1: WYBÓR PLANU -->
   <div id="view-plans" class="view-section active">
-    <h2 style="font-size: 1.4rem; margin-top: 8px;">Wybierz trening</h2>
-    <p class="muted" style="font-size: 0.9rem; margin-bottom: 4px;">Plan Push / Pull</p>
+    <p class="screen-eyebrow">Plan Push / Pull</p>
+    <h1 class="screen-title">Wybierz trening</h1>
     <div id="resumeBox"></div>
     <div id="deloadBox"></div>
     <div id="weekStrip"></div>
@@ -283,8 +291,8 @@ select.select-custom, input.select-custom { width: 100%; background: var(--card-
       <div class="small muted" id="backupInfo"></div>
       <div class="small muted">Kopia ZIP v5 obejmuje także aktywny trening i robocze wpisy; import JSON v4 pozostaje obsługiwany.</div>
       <div class="row">
-        <button class="btn-secondary" data-act="export">💾 Zapisz kopię</button>
-        <button class="btn-secondary" data-act="importBtn">📂 Wczytaj kopię</button>
+        <button class="btn-secondary icon-action" data-act="export" aria-label="Zapisz kopię" title="Zapisz kopię"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v11m-4-4 4 4 4-4M4 16v4h16v-4"/></svg></button>
+        <button class="btn-secondary icon-action" data-act="importBtn" aria-label="Wczytaj kopię" title="Wczytaj kopię"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21V10m-4 4 4-4 4 4M4 8V4h16v4"/></svg></button>
       </div>
       <div class="row">
         <button class="btn-secondary" data-act="csv">📄 Eksport do CSV (Excel)</button>
@@ -299,7 +307,6 @@ select.select-custom, input.select-custom { width: 100%; background: var(--card-
   <div id="view-workout" class="view-section">
     <div class="progress-bar-container"><div class="progress-bar" id="progressBar"></div></div>
     <div class="exercise-meta">
-      <span id="metaWorkoutName">Push A1</span>
       <span id="metaExerciseStep">Ćwiczenie 1 z 5</span>
       <span id="metaExerciseProgress" aria-live="polite">Serie 0/17</span>
     </div>
@@ -337,6 +344,7 @@ select.select-custom, input.select-custom { width: 100%; background: var(--card-
       <p id="variantImageShared" class="hero-hint" hidden>Ilustracja wariantu podstawowego</p>
       <p id="variantImageMissing" class="hero-hint" hidden>Brak ilustracji tego wariantu.</p>
       <div class="hero-title-box">
+        <div class="workout-heading-row"><span>Aktywny trening</span><span id="metaWorkoutName">Push A1</span></div>
         <h2><span id="currentExName"></span><span id="swappedTag" class="swapped-tag" hidden>zamiennik</span></h2>
         <div class="hero-hint" id="currentExVariant"></div>
         <div class="hero-target" id="currentExTarget"></div>
@@ -346,7 +354,7 @@ select.select-custom, input.select-custom { width: 100%; background: var(--card-
       </div>
     </div>
     <details id="trainingAtlasDisclosure" class="training-atlas-disclosure" hidden>
-      <summary><span data-atlas-disclosure-open>Pokaż mięśnie</span><span data-atlas-disclosure-close>Ukryj mięśnie</span></summary>
+      <summary><span data-atlas-disclosure-open>Zaangażowane mięśnie · pokaż</span><span data-atlas-disclosure-close>Zaangażowane mięśnie · ukryj</span></summary>
       <div id="anatomyAtlas" data-exercise-id="" hidden></div>
     </details>
     <p id="variantAtlasNotice" class="hero-hint" hidden>Brak odpowiedniej mapy mięśni dla nierozpoznanego wariantu.</p>
@@ -607,6 +615,41 @@ const CATALOG_BASE = {
   dips: 'Dipy na poręczach',
   pushup: 'Pompki'
 };
+const EXERCISE_NAMES_EN = Object.freeze({
+  bench_flat: 'Barbell Bench Press',
+  db_incline: 'Incline Dumbbell Press',
+  lat_raise_stand: 'Standing Dumbbell Lateral Raise',
+  tri_rope: 'Rope Triceps Pushdown',
+  leg_press: 'Leg Press',
+  lat_pulldown_wide: 'Wide-Grip Lat Pulldown',
+  row_v: 'Seated Cable Row (V-Grip)',
+  rear_delt: 'Bent-Over Dumbbell Reverse Fly',
+  biceps_preacher: 'Machine Preacher Curl',
+  leg_curl: 'Lying Leg Curl',
+  db_bench: 'Flat Dumbbell Bench Press',
+  db_fly: 'Dumbbell Chest Fly',
+  front_raise: 'Dumbbell Front Raise',
+  lat_raise_seated: 'Seated Dumbbell Lateral Raise',
+  tri_machine: 'Machine Triceps Extension',
+  lat_pulldown_neutral: 'Close-Grip Neutral Lat Pulldown',
+  row_straight: 'Seated Cable Row (Straight Bar)',
+  chest_machine: 'Chest Press Machine',
+  pec_deck: 'Pec Deck Fly',
+  shoulder_press: 'Machine Shoulder Press',
+  lat_raise_cable: 'Cable Lateral Raise',
+  face_pull: 'Cable Face Pull',
+  row_machine: 'Seated Row Machine',
+  hammer_curl: 'Dumbbell Hammer Curl',
+  cable_curl: 'Cable Biceps Curl',
+  tri_overhead: 'Overhead Dumbbell Triceps Extension',
+  leg_extension: 'Seated Leg Extension',
+  smith_squat: 'Smith Machine Squat',
+  pullup: 'Pull-Up',
+  dips: 'Parallel Bar Dip',
+  pushup: 'Push-Up',
+  'leg_press/high_feet': 'Leg Press — High Foot Placement'
+});
+window.GymNastikaExerciseNames = EXERCISE_NAMES_EN;
 const GROUP_BASE = {
   bench_flat: 'Klatka', db_incline: 'Klatka', db_bench: 'Klatka', db_fly: 'Klatka', chest_machine: 'Klatka', pec_deck: 'Klatka', dips: 'Klatka', pushup: 'Klatka',
   lat_raise_stand: 'Barki', lat_raise_seated: 'Barki', front_raise: 'Barki', rear_delt: 'Barki', shoulder_press: 'Barki', lat_raise_cable: 'Barki', face_pull: 'Barki',
@@ -649,7 +692,7 @@ let BW = new Set(BW_BASE);
 let CUSTOM = {};           // własne ćwiczenia: key -> {name, group, bw}
 const NAMES = {};          // key -> ostatnia znana nazwa (z historii)
 const isBW = k => BW.has(k);
-const nameOf = k => CATALOG[k] || NAMES[k] || k;
+const nameOf = k => EXERCISE_NAMES_EN[k] || CATALOG[k] || NAMES[k] || k;
 const safeImg = s => (/^[\w-]{1,40}$/.test(String(s || '')) ? String(s) : null);
 
 function applyCustom() {
@@ -702,7 +745,7 @@ function defaultPlans() {
 }
 let PLANS = [];
 const getPlan = id => PLANS.find(p => p.id === id);
-const exName = e => e.name || nameOf(e.key);
+const exName = e => EXERCISE_NAMES_EN[e.key] || e.name || nameOf(e.key);
 const imgFor = e => e.key === SHARED_LEG_PRESS_MEDIA.exerciseId && ['default', SHARED_LEG_PRESS_MEDIA.variantId].includes(e.variantId)
   ? SHARED_LEG_PRESS_MEDIA.technique : safeImg(e.img) || IMG_BY_KEY[e.key] || safeImg(e.key) || 'none';
 const startable = () => PLANS.filter(p => p.exercises.length > 0);
@@ -1033,6 +1076,10 @@ function switchView(id) {
   document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
   const t = $(id);
   if (t) t.classList.add('active');
+  document.querySelectorAll('.header-nav [data-view]').forEach(button => {
+    if (button.dataset.view === id || (['view-planedit', 'view-workout', 'view-summary'].includes(id) && button.dataset.view === 'view-plans')) button.setAttribute('aria-current', 'page');
+    else button.removeAttribute('aria-current');
+  });
   window.scrollTo(0, 0);
   if (id !== 'view-planedit') editPlanId = null;
   if (id !== 'view-history') histFilterDay = null;
@@ -1042,6 +1089,25 @@ function switchView(id) {
   if (id === 'view-stats') renderStats();
   if (id === 'view-planedit') renderPlanEditor();
 }
+
+const appHeader = document.getElementById('appHeader');
+const updateHeaderSize = () => appHeader.classList.toggle('compact', window.scrollY > 72);
+window.addEventListener('scroll', updateHeaderSize, { passive: true });
+updateHeaderSize();
+const workoutView = document.getElementById('view-workout');
+const workoutHero = workoutView.querySelector('.exercise-hero');
+workoutView.insertBefore(workoutHero.querySelector('.hero-title-box'), workoutView.querySelector('.progress-bar-container'));
+const workoutControls = document.createElement('section');
+workoutControls.className = 'workout-control-card';
+['.sets-table', '.step-strip', '.set-ctrl'].forEach(selector => workoutControls.append(workoutView.querySelector(selector)));
+workoutView.insertBefore(workoutControls, workoutView.querySelector('.link-row'));
+document.addEventListener('keydown', event => {
+  const card = event.target.closest('.plan-card[data-act]');
+  if (card && (event.key === 'Enter' || event.key === ' ')) {
+    event.preventDefault();
+    card.click();
+  }
+});
 
 function lastDoneMap() {
   const m = {};
@@ -1063,12 +1129,12 @@ function renderPlans() {
   const list = startable();
   $('planList').innerHTML = list.length ? list.map(p => {
     const when = done[p.id] ? 'ostatnio: ' + new Date(done[p.id]).toLocaleDateString('pl-PL', { day: 'numeric', month: 'short' }) : 'jeszcze nie robiony';
-    return `<div class="plan-card ${p.id === next ? 'next' : ''}" data-act="startPlan" data-plan="${esc(p.id)}">
-      <div>
-        <h3>${esc(p.title)} ${p.id === next ? '<span class="badge">Następny</span>' : ''}</h3>
-        <p>${p.exercises.length} ćwiczeń • ${esc(p.exercises.slice(0, 3).map(e => exName(e).split(' ')[0]).join(', '))}... • ${when}</p>
-      </div>
-      <div class="plan-arrow">▶</div>
+    const type = /^push/i.test(p.title) ? 'push' : /^pull/i.test(p.title) ? 'pull' : 'other';
+    return `<div class="plan-card ${type} ${p.id === next ? 'next' : ''}" data-act="startPlan" data-plan="${esc(p.id)}" role="button" tabindex="0" aria-label="Rozpocznij trening ${esc(p.title)}">
+      <div class="plan-card-top"><span class="plan-type">${type === 'other' ? 'PLAN' : type.toUpperCase()}</span>${p.id === next ? '<span class="badge">Następny</span>' : ''}</div>
+      <h3>${esc(p.title)}</h3>
+      <p>${p.exercises.length} ćwiczeń · ${when}</p>
+      <span class="plan-start" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="M8 5.5v13l10-6.5z"/></svg></span>
     </div>`;
   }).join('') : '<p class="muted">Brak planów z ćwiczeniami. Dodaj je w edytorze poniżej.</p>';
 
@@ -1116,7 +1182,7 @@ function renderPlans() {
 function exAt(step) {
   const base = activePlan().exercises[step];
   const sw = active.swaps && active.swaps[step];
-  if (sw && CATALOG[sw]) return { ...base, key: sw, variantId: 'default', name: CATALOG[sw], img: IMG_BY_KEY[sw] || safeImg(sw) || 'none', swapped: true, baseKey: base.key };
+  if (sw && CATALOG[sw]) return { ...base, key: sw, variantId: 'default', name: nameOf(sw), img: IMG_BY_KEY[sw] || safeImg(sw) || 'none', swapped: true, baseKey: base.key };
   return Object.assign({}, base, { name: exName(base), img: imgFor(base), swapped: false });
 }
 function activePlan() {
@@ -1229,7 +1295,7 @@ function renderExercisePresentation(exercise) {
   positions.hidden = state.mode === 'thumbnail';
   figure.dataset.mode = state.mode;
   figure.dataset.position = state.position;
-  figure.setAttribute('aria-label', `${state.sex === 'male' ? 'Męska' : 'Żeńska'} ilustracja techniki — pozycja ${labels[state.position]}`);
+  figure.setAttribute('aria-label', `${state.sex === 'male' ? 'Męska' : 'Żeńska'} ilustracja techniki — pozycje ${labels.lower} i ${labels.raised}, wybrana ${labels[state.position]}`);
   $('exercisePresentationDetailsText').textContent = copy.details;
   $('exercisePresentationCaption').textContent = state.mode === 'thumbnail'
     ? copy.thumbnail || 'Miniatura pokazuje pozycję DÓŁ.'
@@ -1398,6 +1464,8 @@ function renderStep() {
   const total = plan.exercises.length;
   const n = setsFor(active.step);
   const bw = isBW(e.key);
+  $('view-workout').dataset.bodyweight = String(bw);
+  $('view-workout').dataset.planType = /^push/i.test(plan.title) ? 'push' : /^pull/i.test(plan.title) ? 'pull' : 'other';
 
   $('metaWorkoutName').textContent = plan.title;
   $('metaExerciseStep').textContent = `Ćwiczenie ${active.step + 1} z ${total}`;
@@ -1473,7 +1541,7 @@ function renderStep() {
       <td class="prev-val" data-act="fillprev" data-i="${i}">${prev}</td>
       <td><input class="input-cell" inputmode="decimal" enterkeyhint="next" autocomplete="off" id="weight_${i}" data-i="${i}" placeholder="0" value="${logged ? logged.weight : draft ? esc(draft.weight) : ''}" ${logged ? 'disabled' : ''} aria-label="${bw ? 'Dodatkowe kg' : 'Ciężar'}, seria ${i + 1}"></td>
       <td><input class="input-cell" inputmode="numeric" enterkeyhint="done" autocomplete="off" id="reps_${i}" data-i="${i}" placeholder="0" value="${logged ? logged.reps : draft ? esc(draft.reps) : ''}" ${logged ? 'disabled' : ''} aria-label="Powtórzenia, seria ${i + 1}"></td>
-      <td><button class="btn-done ${logged ? 'completed' : ''}" id="btnDone_${i}" data-act="done" data-i="${i}">${logged ? '✓' : 'Zrobione'}</button></td>
+      <td><button class="btn-done ${logged ? 'completed' : ''}" id="btnDone_${i}" data-act="done" data-i="${i}" aria-label="${logged ? 'Seria ' + (i + 1) + ' zapisana' : 'Zapisz serię ' + (i + 1)}">${logged ? '✓' : 'Zrobione'}</button></td>
     </tr>`;
   }
   $('setsBody').innerHTML = html;
@@ -1734,7 +1802,7 @@ function swapOpen() {
   let html = '<option value="">— wybierz zamiennik —</option>';
   if (cur.swapped && !used.has(base.key)) html += `<option value="__base__">↩ Wróć do: ${esc(exName(base))}</option>`;
   Object.keys(CATALOG).forEach(k => {
-    if (GROUP[k] === group && k !== cur.key && k !== base.key && !used.has(k)) html += `<option value="${esc(k)}">${esc(CATALOG[k])}</option>`;
+    if (GROUP[k] === group && k !== cur.key && k !== base.key && !used.has(k)) html += `<option value="${esc(k)}">${esc(nameOf(k))}</option>`;
   });
   $('swapSelect').innerHTML = html;
   box.hidden = false;
@@ -1947,42 +2015,45 @@ function shareSummary() {
   const c = document.createElement('canvas');
   c.width = 1080; c.height = 1350;
   const g = c.getContext('2d');
-  g.fillStyle = '#0d0f12'; g.fillRect(0, 0, 1080, 1350);
-  g.fillStyle = '#161a1f'; g.fillRect(40, 40, 1000, 1270);
+  const css = getComputedStyle(document.documentElement);
+  const color = token => css.getPropertyValue(token).trim();
+  const ink = color('--text'), muted = color('--text-muted'), accent = color('--accent-text');
+  g.fillStyle = color('--bg'); g.fillRect(0, 0, 1080, 1350);
+  g.fillStyle = color('--card-bg'); g.fillRect(40, 40, 1000, 1270);
   g.textAlign = 'left';
-  g.fillStyle = '#ffffff'; g.font = '800 64px -apple-system, sans-serif'; g.fillText('GYM', 90, 140);
-  g.fillStyle = '#ccff00'; g.fillText('VERSE', 90 + g.measureText('GYM').width, 140);
-  g.fillStyle = '#ffffff'; g.font = '800 96px -apple-system, sans-serif'; g.fillText(S.title, 90, 290);
-  g.fillStyle = '#8e95a5'; g.font = '600 40px -apple-system, sans-serif'; g.fillText(S.dateStr, 90, 350);
+  g.fillStyle = ink; g.font = '800 64px -apple-system, sans-serif'; g.fillText('GYM', 90, 140);
+  g.fillStyle = color('--push'); g.fillText('NASTIKA', 90 + g.measureText('GYM').width, 140);
+  g.fillStyle = ink; g.font = '800 96px -apple-system, sans-serif'; g.fillText(S.title, 90, 290);
+  g.fillStyle = muted; g.font = '600 40px -apple-system, sans-serif'; g.fillText(S.dateStr, 90, 350);
   const cards = [[`${fmt(S.vol)} kg`, 'TONAŻ'], [String(S.reps), 'POWTÓRZENIA'], [`${S.min} min`, 'CZAS']];
   cards.forEach((cd, i) => {
     const x = 90 + i * 315;
-    g.fillStyle = '#1e232b'; g.fillRect(x, 410, 295, 190);
+    g.fillStyle = color('--card-sub'); g.fillRect(x, 410, 295, 190);
     g.textAlign = 'center';
-    g.fillStyle = '#ccff00'; g.font = '800 58px -apple-system, sans-serif'; g.fillText(cd[0], x + 147, 505);
-    g.fillStyle = '#8e95a5'; g.font = '600 28px -apple-system, sans-serif'; g.fillText(cd[1], x + 147, 560);
+    g.fillStyle = accent; g.font = '800 58px -apple-system, sans-serif'; g.fillText(cd[0], x + 147, 505);
+    g.fillStyle = muted; g.font = '600 28px -apple-system, sans-serif'; g.fillText(cd[1], x + 147, 560);
   });
   g.textAlign = 'left';
   let y = 700;
   g.font = '600 40px -apple-system, sans-serif';
-  if (S.cmpPlain) { g.fillStyle = '#ffffff'; y = wrapText(g, S.cmpPlain, 90, y, 900, 54) + 10; }
-  g.fillStyle = '#ffffff'; y = wrapText(g, S.weekLine, 90, y, 900, 54) + 10;
+  if (S.cmpPlain) { g.fillStyle = ink; y = wrapText(g, S.cmpPlain, 90, y, 900, 54) + 10; }
+  g.fillStyle = ink; y = wrapText(g, S.weekLine, 90, y, 900, 54) + 10;
   if (S.records.length) {
-    g.fillStyle = '#ccff00'; g.font = '800 44px -apple-system, sans-serif'; g.fillText('🏆 Nowe rekordy', 90, y + 30); y += 90;
-    g.font = '600 38px -apple-system, sans-serif'; g.fillStyle = '#ffffff';
+    g.fillStyle = accent; g.font = '800 44px -apple-system, sans-serif'; g.fillText('🏆 Nowe rekordy', 90, y + 30); y += 90;
+    g.font = '600 38px -apple-system, sans-serif'; g.fillStyle = ink;
     S.records.slice(0, 4).forEach(r => { y = wrapText(g, `• ${r.name}: ${r.val}`, 90, y, 900, 50); });
   }
-  g.fillStyle = '#8e95a5'; g.font = '600 34px -apple-system, sans-serif';
+  g.fillStyle = muted; g.font = '600 34px -apple-system, sans-serif';
   wrapText(g, S.humor, 90, 1130, 900, 46);
   c.toBlob(async blob => {
     if (!blob) { toast('Nie udało się utworzyć obrazu'); return; }
-    const file = new File([blob], 'gymverse_trening.png', { type: 'image/png' });
+    const file = new File([blob], 'gymnastika_trening.png', { type: 'image/png' });
     try {
       if (navigator.canShare && navigator.canShare({ files: [file] })) { await navigator.share({ files: [file] }); return; }
     } catch (e) { if (e && e.name === 'AbortError') return; }
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
-    a.href = url; a.download = 'gymverse_trening.png';
+    a.href = url; a.download = 'gymnastika_trening.png';
     document.body.appendChild(a); a.click(); a.remove();
     setTimeout(() => URL.revokeObjectURL(url), 2000);
   }, 'image/png');
@@ -2182,9 +2253,10 @@ function updateCharts() {
   $('chTitleE').textContent = bw ? 'Dodatkowe obciążenie (kg)' : 'Szacowane 1RM – najlepsza seria (kg)';
   $('chTitleV').textContent = bw ? 'Tonaż z wagą ciała (kg)' : 'Tonaż ćwiczenia w treningu (kg)';
   const labels = rows.map(r => r.label);
-  drawChart('chartW', labels, rows.map(r => r.a), '#ccff00');
-  drawChart('chartE', labels, rows.map(r => r.b), '#38bdf8');
-  drawChart('chartV', labels, rows.map(r => r.v), '#ff9f43');
+  const chartColors = getComputedStyle(document.documentElement);
+  drawChart('chartW', labels, rows.map(r => r.a), chartColors.getPropertyValue('--accent-fill').trim());
+  drawChart('chartE', labels, rows.map(r => r.b), chartColors.getPropertyValue('--pull').trim());
+  drawChart('chartV', labels, rows.map(r => r.v), chartColors.getPropertyValue('--push').trim());
 }
 
 function setRange(el) {
@@ -2226,7 +2298,7 @@ function renderStats() {
     labels.push(st.toLocaleDateString('pl-PL', { day: 'numeric', month: 'numeric' }));
     vals.push(weekStats(st).vol);
   }
-  drawBars('chartWeeks', labels, vals, '#ccff00');
+  drawBars('chartWeeks', labels, vals, getComputedStyle(document.documentElement).getPropertyValue('--accent-fill').trim());
 
   renderCalendar();
 
@@ -2262,7 +2334,7 @@ function renderStats() {
 
   drawChart('chartBody',
     body.slice(-30).map(b => new Date(b.date + 'T12:00:00').toLocaleDateString('pl-PL', { day: 'numeric', month: 'short' })),
-    body.slice(-30).map(b => b.kg), '#38bdf8');
+    body.slice(-30).map(b => b.kg), getComputedStyle(document.documentElement).getPropertyValue('--pull').trim());
 }
 
 function renderCalendar() {
@@ -2356,7 +2428,7 @@ function renderHistory() {
     const order = [];
     (s.details || []).forEach((d, idx) => {
       const key = `${d.exerciseId}/${Object.hasOwn(d, 'variantId') ? d.variantId : '__missing__'}`;
-      if (!groups[key]) { groups[key] = { name: d.exerciseName, variant: variantName({ key: d.exerciseId, ...(Object.hasOwn(d, 'variantId') ? { variantId: d.variantId } : {}) }), exerciseId: d.exerciseId, variantId: d.variantId, items: [] }; order.push(key); }
+      if (!groups[key]) { groups[key] = { name: EXERCISE_NAMES_EN[d.exerciseId] || d.exerciseName, variant: variantName({ key: d.exerciseId, ...(Object.hasOwn(d, 'variantId') ? { variantId: d.variantId } : {}) }), exerciseId: d.exerciseId, variantId: d.variantId, items: [] }; order.push(key); }
       groups[key].items.push({ d, idx });
     });
     const det = order.map(k => {
@@ -2384,7 +2456,7 @@ async function histEditSet(i, dIdx) {
   const s = history[i];
   const d = s && s.details[dIdx];
   if (!d) return;
-  const txt = prompt(`${d.exerciseName}\nCiężar × powtórzenia (np. 80x8${isBW(d.exerciseId) ? ' lub samo 8' : ''}).\nWpisz „usuń", aby skasować serię.`, `${d.weight}x${d.reps}`);
+  const txt = prompt(`${EXERCISE_NAMES_EN[d.exerciseId] || d.exerciseName}\nCiężar × powtórzenia (np. 80x8${isBW(d.exerciseId) ? ' lub samo 8' : ''}).\nWpisz „usuń", aby skasować serię.`, `${d.weight}x${d.reps}`);
   if (txt === null) return;
   const nextHistory = JSON.parse(JSON.stringify(history));
   const nextSession = nextHistory[i];
@@ -2399,8 +2471,8 @@ async function histEditSet(i, dIdx) {
   }
   recalcSession(nextSession);
   const message = /^\s*(usu[nń]|del|delete)\s*$/i.test(txt)
-    ? `Usunięcie serii ${d.exerciseName}`
-    : `Zmiana serii ${d.exerciseName} na ${parseSetInput(txt, d.exerciseId).w}×${parseSetInput(txt, d.exerciseId).r}`;
+    ? `Usunięcie serii ${EXERCISE_NAMES_EN[d.exerciseId] || d.exerciseName}`
+    : `Zmiana serii ${EXERCISE_NAMES_EN[d.exerciseId] || d.exerciseName} na ${parseSetInput(txt, d.exerciseId).w}×${parseSetInput(txt, d.exerciseId).r}`;
   if (!await commitHistoryChanges(nextHistory, message)) return;
   histOpen.add(i);
   renderHistory();
@@ -2454,8 +2526,10 @@ function renderPlanEditor() {
   const box = $('planEditBody');
   if (!editPlanId) {
     $('planEditTitle').textContent = 'Edytuj plany';
-    box.innerHTML = '<div class="plan-grid">' + PLANS.map(p =>
-      `<div class="plan-card" data-act="peOpen" data-id="${esc(p.id)}"><div><h3>${esc(p.title)}</h3><p>${p.exercises.length} ćwiczeń</p></div><div class="plan-arrow">✎</div></div>`).join('') + '</div>' +
+    box.innerHTML = '<div class="plan-grid">' + PLANS.map(p => {
+      const type = /^push/i.test(p.title) ? 'push' : /^pull/i.test(p.title) ? 'pull' : 'other';
+      return `<div class="plan-card ${type}" data-act="peOpen" data-id="${esc(p.id)}" role="button" tabindex="0" aria-label="Edytuj plan ${esc(p.title)}"><span class="plan-type">${type === 'other' ? 'PLAN' : type.toUpperCase()}</span><div><h3>${esc(p.title)}</h3><p>${p.exercises.length} ćwiczeń</p></div><div class="plan-arrow" aria-hidden="true">✎</div></div>`;
+    }).join('') + '</div>' +
       `<button class="btn-secondary" data-act="peNew">+ Nowy plan</button>
        <button class="btn-link danger" style="width:100%" data-act="peReset">Przywróć domyślne plany</button>`;
     return;
@@ -2466,7 +2540,7 @@ function renderPlanEditor() {
   let sel = '<option value="">— wybierz ćwiczenie —</option>';
   GROUPS_LIST.forEach(g => {
     const ks = Object.keys(CATALOG).filter(k => GROUP[k] === g);
-    if (ks.length) sel += `<optgroup label="${esc(g)}">${ks.map(k => `<option value="${esc(k)}">${esc(CATALOG[k])}</option>`).join('')}</optgroup>`;
+    if (ks.length) sel += `<optgroup label="${esc(g)}">${ks.map(k => `<option value="${esc(k)}">${esc(nameOf(k))}</option>`).join('')}</optgroup>`;
   });
   sel += '<option value="__custom__">➕ Własne ćwiczenie…</option>';
   const last = p.exercises.length - 1;
@@ -2475,8 +2549,8 @@ function renderPlanEditor() {
       <div class="pe-top">
         <div class="pe-name">${esc(exName(e))}<small>${esc(GROUP[e.key] || '')}${isBW(e.key) ? ' · masa ciała' : ''}</small></div>
         <div class="pe-btns">
-          <button class="rp" data-act="peMove" data-i="${i}" data-d="-1" ${i === 0 ? 'disabled' : ''} aria-label="W górę">▲</button>
-          <button class="rp" data-act="peMove" data-i="${i}" data-d="1" ${i === last ? 'disabled' : ''} aria-label="W dół">▼</button>
+          <button class="rp" data-act="peMove" data-i="${i}" data-d="-1" ${i === 0 ? 'disabled' : ''} aria-label="Przenieś wyżej">Wyżej</button>
+          <button class="rp" data-act="peMove" data-i="${i}" data-d="1" ${i === last ? 'disabled' : ''} aria-label="Przenieś niżej">Niżej</button>
           <button class="rp danger" data-act="peDel" data-i="${i}" aria-label="Usuń">✕</button>
         </div>
       </div>
@@ -2767,7 +2841,7 @@ function csvExport() {
   const rows = [['Data', 'Trening', 'Ćwiczenie', 'Wariant ID', 'Wariant', 'Seria', 'Ciężar (kg)', 'Powtórzenia', 'Szac. 1RM (kg)']];
   history.slice().sort(byDate).forEach(s => {
     const dt = dkey(new Date(s.date));
-    (s.details || []).forEach(d => rows.push([dt, s.planTitle, d.exerciseName, d.variantId || '', variantName({ key: d.exerciseId, ...(Object.hasOwn(d, 'variantId') ? { variantId: d.variantId } : {}) }), d.setNumber, d.weight, d.reps, isBW(d.exerciseId) ? '' : e1rm(d.weight, d.reps)]));
+    (s.details || []).forEach(d => rows.push([dt, s.planTitle, EXERCISE_NAMES_EN[d.exerciseId] || d.exerciseName, d.variantId || '', variantName({ key: d.exerciseId, ...(Object.hasOwn(d, 'variantId') ? { variantId: d.variantId } : {}) }), d.setNumber, d.weight, d.reps, isBW(d.exerciseId) ? '' : e1rm(d.weight, d.reps)]));
   });
   const cell = v => {
     let t = typeof v === 'number' ? String(v).replace('.', ',') : String(v);

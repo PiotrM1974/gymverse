@@ -9,7 +9,7 @@ describe('GymNastika rebrand compatibility', () => {
   it('uses GymNastika in the visible app and PWA labels', () => {
     expect(indexHtml).toContain('<meta name="apple-mobile-web-app-title" content="GymNastika">');
     expect(indexHtml).toContain('<title>GymNastika</title>');
-    expect(indexHtml).toContain('>GYM<span>NASTIKA</span></div>');
+    expect(indexHtml).toContain('class="logo" data-act="view" data-view="view-plans" aria-label="GymNastika — Plany">GYM<span>NASTIKA</span></button>');
     expect(manifest.name).toBe('GymNastika');
     expect(manifest.short_name).toBe('GymNastika');
     expect(manifest.description).toBe('Dziennik treningowy — plany, treningi, historia i postępy');
@@ -29,7 +29,7 @@ describe('GymNastika rebrand compatibility', () => {
     }
     expect(indexHtml).toContain("app: 'gymverse'");
     expect(indexHtml).toContain('GymVerseBaseB');
-    expect(serviceWorker).toContain("const CACHE = LOCAL_PRESENTATION_PILOT ? 'gymverse-v36-presentation-pilot' : 'gymverse-v15'");
+    expect(serviceWorker).toContain("const CACHE = LOCAL_PRESENTATION_PILOT ? 'gymverse-v36-presentation-pilot' : 'gymverse-v18'");
     expect(serviceWorker).toContain('GYMVERSE_COUNT_APP_CLIENTS');
     expect(serviceWorker).toContain("'manifest.webmanifest'");
   });
