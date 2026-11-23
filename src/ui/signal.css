@@ -79,7 +79,10 @@ select.select-custom, input.select-custom, .pe-target { min-height: 49px; }.pill
 .icon-action svg { width:25px; height:25px; fill:none; stroke:var(--lime); stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
 @media(max-width:360px) { .data-box .row button { white-space:nowrap; font-size:12px; padding:9px 4px; } }
 #view-workout > .hero-title-box { padding: 5px 0 17px; }
-#view-workout > .hero-title-box::before { content: 'Aktywny trening'; display: block; color: var(--lime); font-size: 12px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; margin-bottom: 10px; }
+#view-workout > .hero-title-box .workout-heading-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 10px; color: var(--accent-text); font-size: 12px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+#metaWorkoutName { min-height: 36px; display: grid; place-items: center; padding: 6px 10px; border-radius: 10px; background: var(--push-soft); color: var(--push-text); letter-spacing: .03em; text-align: center; }
+#view-workout[data-plan-type="pull"] #metaWorkoutName { background: var(--pull-soft); color: var(--pull-text); }
+#view-workout[data-plan-type="other"] #metaWorkoutName { background: var(--lime-dim); color: var(--accent-text); }
 #view-workout > .hero-title-box h2 { font: 800 clamp(35px,8vw,52px)/1.16 'Barlow Condensed','Arial Narrow',sans-serif; margin: 0 0 9px; }
 #view-workout > .hero-title-box .hero-target { color: var(--text-muted); font-size: 16px; }
 .workout-control-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 21px; padding: 15px; margin: 18px 0 14px; }
@@ -118,3 +121,75 @@ select.select-custom, input.select-custom, .pe-target { min-height: 49px; }.pill
   .timer-digits { text-align: center; font-size: 42px; }.timer-label { text-align: center; }
   .timer-ctrls { display: grid; grid-template-columns: 1fr 1fr 1.25fr; }.btn-timer { min-height: 46px; }
 }
+
+/* Signal: exact approved color roles in both color schemes. */
+header { background: var(--bg); backdrop-filter: none; -webkit-backdrop-filter: none; }
+.bottom-bar { background: var(--card-bg); backdrop-filter: none; -webkit-backdrop-filter: none; }
+body:has(#timerBar[style*="display: flex"]) { padding-bottom: calc(160px + env(safe-area-inset-bottom, 0px)); }
+:root {
+  --accent-fill: #0647D8;
+  --accent-text: #0647D8;
+  --on-accent: #FFFFFF;
+  --yellow: #FFD223;
+  --yellow-text: #715C00;
+  --yellow-line: #B88F00;
+  --yellow-soft: #FFF4BE;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --accent-fill: #5D90FF;
+    --accent-text: #76A0FF;
+    --on-accent: #0A1B35;
+    --yellow: #FFDC3D;
+    --yellow-text: #FFDC3D;
+    --yellow-line: #FFDC3D;
+    --yellow-soft: #534822;
+  }
+}
+:root[data-theme="dark"] {
+  --accent-fill: #5D90FF;
+  --accent-text: #76A0FF;
+  --on-accent: #0A1B35;
+  --yellow: #FFDC3D;
+  --yellow-text: #FFDC3D;
+  --yellow-line: #FFDC3D;
+  --yellow-soft: #534822;
+}
+.header-nav button[aria-current="page"], .screen-eyebrow, .workout-heading-row, .week-strip b,
+.stat-card .val, .records h4, .records li, .compare-box .up, .hist-stats, .rec-row .v,
+.btn-link, .timer-ctrls .btn-timer:last-child { color: var(--accent-text); }
+.header-nav button[aria-current="page"] { border-bottom-color: var(--accent-fill); }
+.logo span { color: var(--push); }
+.header-mark { color: var(--yellow-text); }
+.plan-card.next { border-color: var(--yellow-line); }
+.badge { background: var(--yellow-soft); color: var(--yellow-text); border: 1px solid var(--yellow-line); }
+.progress-bar, .plan-card.next .plan-start, .btn-primary, .btn-done.ready,
+.rp.active, .pill.active, #view-planedit [data-act="peNew"] { background: var(--accent-fill); color: var(--on-accent); border-color: var(--accent-fill); }
+.btn-done.completed { background: var(--pull-soft); color: var(--pull-text); border-color: var(--pull); }
+.exercise-presentation__group button[aria-pressed="true"], .legacy-image-controls button[aria-pressed="true"] { color: var(--accent-text); border-color: var(--accent-text); background: var(--lime-dim); }
+.exercise-presentation__group button:focus-visible, .legacy-image-controls button:focus-visible,
+.training-atlas-disclosure > summary:focus-visible { outline: 3px solid var(--accent-text); outline-offset: 2px; }
+.exercise-presentation__figure:not([data-mode="thumbnail"]) { width: 100%; aspect-ratio: 3 / 2; position: relative; }
+.exercise-presentation__figure:not([data-mode="thumbnail"]) img { width: 100%; height: 100%; object-fit: contain; transform: none; }
+.exercise-presentation__figure:not([data-mode="thumbnail"])::after { content: ''; position: absolute; inset: 0 50% 0 0; border: 3px solid var(--accent-fill); border-radius: 12px 0 0 12px; pointer-events: none; }
+.exercise-presentation__figure[data-position="raised"]:not([data-mode="thumbnail"])::after { inset: 0 0 0 50%; border-radius: 0 12px 12px 0; }
+.exercise-presentation__figure, .hero-img-box { background: var(--card-sub); }
+.training-atlas-disclosure > summary { min-height: 56px; }
+.training-atlas-disclosure > summary::before { content: ''; width: 10px; height: 10px; flex: none; margin-right: 24px; border-radius: 50%; background: #F04438; box-shadow: 15px 0 0 #F3B544; }
+.anatomy-atlas { background: #FFFFFF; border-color: var(--border); }
+.anatomy-atlas__controls button[aria-pressed="true"] { background: var(--accent-fill); border-color: var(--accent-fill); color: var(--on-accent); }
+.anatomy-atlas__legend-group h3 { font-family: 'Source Sans 3',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; font-size: .78rem; font-weight: 800; line-height: 1.35; }
+.anatomy-atlas__legend-group:first-child h3 { color: #F04438; }
+.anatomy-atlas__legend-group:nth-child(2) h3 { color: #B88000; }
+.workout-control-card { margin-top: 14px; }
+.timer-digits, .timer-label { color: var(--yellow-text); }
+.bottom-bar.flash { animation: signalFlash .6s ease 4; }
+@keyframes signalFlash { 50% { background: color-mix(in srgb, var(--yellow) 30%, var(--card-bg)); } }
+.humor-card { background: var(--card-bg); border-color: var(--border); }
+.humor-card h4 { color: var(--accent-text); }
+.swapped-tag { background: var(--push-soft); color: var(--push-text); }
+.cal-day.trained { background: var(--accent-fill); color: var(--on-accent); }
+.gbar .gfill { background: var(--accent-fill); }
+.gbar .gfill.low { background: var(--push); }
+.gbar .gfill.high { background: var(--pull); }
+@media (prefers-reduced-motion: reduce) { .bottom-bar.flash { animation: none; } }
