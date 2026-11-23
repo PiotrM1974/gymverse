@@ -94,13 +94,12 @@ header {
 .exercise-presentation__group button { min-height: 38px; border: 1px solid var(--border); border-radius: 999px; padding: 8px 13px; background: var(--card-sub); color: var(--text); font-size: .82rem; font-weight: 700; cursor: pointer; }
 .exercise-presentation__group button[aria-pressed="true"] { border-color: #81d9b1; background: #18372e; color: #a7f3d0; }
 .exercise-presentation__group button:focus-visible { outline: 2px solid #a7f3d0; outline-offset: 2px; }
-.exercise-presentation__figure { width: min(100%, 270px); aspect-ratio: 3 / 4; margin: 0 auto; overflow: hidden; border: 1px solid var(--border); border-radius: 12px; background: #090b0e; }
+.exercise-presentation__figure { width: 100%; aspect-ratio: 3 / 2; margin: 0 auto; overflow: hidden; border: 1px solid var(--border); border-radius: 12px; background: var(--card-sub); }
 .exercise-presentation__figure[hidden] { display: none !important; }
-.exercise-presentation__figure img { display: block; width: 200%; height: 100%; max-width: none; object-fit: fill; object-position: left center; transform: none; }
-.exercise-presentation__figure[data-position="raised"] img { transform: translateX(-50%); }
-.exercise-presentation__figure[data-mode="thumbnail"] { width: min(100%, 256px); aspect-ratio: 1; }
-.exercise-presentation__figure[data-mode="thumbnail"] img { width: 100%; height: 100%; object-fit: contain; transform: none; }
-.exercise-presentation__caption { margin: 8px 0 0; text-align: center; color: var(--text); font-size: .86rem; line-height: 1.4; }
+.exercise-presentation__figure img { display: block; width: 100%; height: 100%; object-fit: contain; }
+.exercise-presentation__caption { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: 10px 0 0; color: var(--text); font-size: .82rem; line-height: 1.4; }
+.exercise-presentation__caption > div { min-width: 0; overflow-wrap: anywhere; }
+.exercise-presentation__caption strong { display: block; margin-bottom: 3px; color: var(--accent-text, var(--lime)); font-size: .75rem; letter-spacing: .04em; }
 .exercise-presentation__alert { margin: 8px 0 0; color: var(--orange); font-size: .86rem; line-height: 1.45; }
 .exercise-presentation__status { margin: 8px 0 0; color: var(--text-muted); font-size: .72rem; text-align: center; }
 .exercise-presentation__details { margin-top: 9px; color: var(--text-muted); font-size: .78rem; line-height: 1.45; }
@@ -115,12 +114,6 @@ header {
 .training-atlas-disclosure:not([open]) [data-atlas-disclosure-close], .training-atlas-disclosure[open] [data-atlas-disclosure-open] { display: none; }
 .hero-img-box { width: 100%; height: 280px; background: #090b0e; display: flex; align-items: center; justify-content: center; border-bottom: 1px solid var(--border); padding: 8px; }
 .hero-img-box img { width: 100%; height: 100%; object-fit: contain; object-position: center; display: block; }
-.hero-img-box[data-mode="thumbnail"] { height: 160px; }
-.legacy-image-controls { display: flex; gap: 8px; padding: 8px 12px 0; }
-.legacy-image-controls[hidden] { display: none !important; }
-.legacy-image-controls button { min-height: 38px; border: 1px solid var(--border); border-radius: 10px; background: var(--card-sub); color: var(--text); padding: 0 12px; cursor: pointer; }
-.legacy-image-controls button[aria-pressed="true"] { border-color: #81d9b1; color: #a7f3d0; }
-.legacy-image-controls button:focus-visible { outline: 2px solid #a7f3d0; outline-offset: 2px; }
 .hero-title-box { padding: 14px 16px; }
 .hero-title-box h2 { font-size: 1.25rem; font-weight: 700; margin-bottom: 4px; line-height: 1.3; }
 .swapped-tag { font-size: 0.7rem; font-weight: 800; color: #000; background: var(--orange); border-radius: 6px; padding: 2px 6px; vertical-align: middle; margin-left: 6px; }
@@ -317,18 +310,13 @@ select.select-custom, input.select-custom { width: 100%; background: var(--card-
           <button type="button" data-presentation-sex="male" aria-pressed="true">Mężczyzna</button>
           <button type="button" data-presentation-sex="female" aria-pressed="false">Kobieta</button>
         </div>
-        <div class="exercise-presentation__group" role="group" aria-label="Widok ilustracji">
-          <button type="button" data-presentation-mode="technique" aria-pressed="true">Technika</button>
-          <button type="button" data-presentation-mode="thumbnail" aria-pressed="false">Miniatura</button>
-        </div>
-        <div class="exercise-presentation__group" data-presentation-positions role="group" aria-label="Pozycja ruchu">
-          <button type="button" data-presentation-position="lower" aria-pressed="true">DÓŁ</button>
-          <button type="button" data-presentation-position="raised" aria-pressed="false">GÓRA</button>
-        </div>
-        <div id="exercisePresentationFigure" class="exercise-presentation__figure" data-mode="technique" data-position="lower" role="img" aria-label="Męska ilustracja techniki — pozycja DÓŁ">
+        <div id="exercisePresentationFigure" class="exercise-presentation__figure" role="img" aria-label="Męska ilustracja techniki — dwie pozycje ruchu">
           <img id="exercisePresentationImage" src="" alt="" decoding="async">
         </div>
-        <p id="exercisePresentationCaption" class="exercise-presentation__caption" aria-live="polite">Pozycja DÓŁ: hantle przy bokach ud.</p>
+        <div id="exercisePresentationCaption" class="exercise-presentation__caption" aria-label="Opis obu pozycji ruchu">
+          <div data-panel="lower"><strong>DÓŁ</strong><span></span></div>
+          <div data-panel="raised"><strong>GÓRA</strong><span></span></div>
+        </div>
         <p id="exercisePresentationAlert" class="exercise-presentation__alert" role="alert" hidden></p>
         <p class="exercise-presentation__status">Ilustracja wybrana do GymNastiki jest dostępna w aplikacji. Nie stanowi niezależnej oceny eksperckiej techniki.</p>
         <details class="exercise-presentation__details">
@@ -337,10 +325,6 @@ select.select-custom, input.select-custom { width: 100%; background: var(--card-
         </details>
       </section>
       <div id="legacyExerciseImageBox" class="hero-img-box"><img id="currentExImg" src="" alt="Ćwiczenie"></div>
-      <div id="legacyImageControls" class="legacy-image-controls" role="group" aria-label="Widok ilustracji suwnicy" hidden>
-        <button type="button" data-legacy-image-mode="technique" aria-pressed="true">Technika</button>
-        <button type="button" data-legacy-image-mode="thumbnail" aria-pressed="false">Miniatura</button>
-      </div>
       <p id="variantImageShared" class="hero-hint" hidden>Ilustracja wariantu podstawowego</p>
       <p id="variantImageMissing" class="hero-hint" hidden>Brak ilustracji tego wariantu.</p>
       <div class="hero-title-box">
@@ -541,7 +525,7 @@ let toastTimer = null;
 let draftSaveTimer = null;
 let pendingDraftSnapshot = null;
 const exercisePresentationPilot = {
-  active: false, pilotMode: false, ready: false, module: null, registry: null, error: '', sex: 'male', position: 'lower', mode: 'technique',
+  active: false, pilotMode: false, ready: false, module: null, registry: null, error: '', sex: 'male',
   currentExerciseId: '', currentExercise: null, requestId: 0, loadingPath: '', loadedPath: '', currentAsset: null
 };
 const PRESENTATION_CAPTIONS = Object.freeze({
@@ -671,7 +655,7 @@ const IMG_BY_KEY = {
   db_bench: 'p2_1', db_fly: 'p2_2', front_raise: 'p2_3', lat_raise_seated: 'p2_4', tri_machine: 'p2_5',
   lat_pulldown_neutral: 'pl2_1', row_straight: 'pl2_2'
 };
-const SHARED_LEG_PRESS_MEDIA = Object.freeze({ exerciseId: 'leg_press', variantId: 'high_feet', technique: IMG_BY_KEY.leg_press, thumbnail: IMG_BY_KEY.leg_press });
+const SHARED_LEG_PRESS_MEDIA = Object.freeze({ exerciseId: 'leg_press', variantId: 'high_feet', technique: IMG_BY_KEY.leg_press });
 const ID_MAP = {
   p1_1: 'bench_flat', p1_2: 'db_incline', p1_3: 'lat_raise_stand', p1_4: 'tri_rope', p1_5: 'leg_press',
   pl1_1: 'lat_pulldown_wide', pl1_2: 'row_v', pl1_3: 'rear_delt', pl1_4: 'biceps_preacher', pl1_5: 'leg_curl',
@@ -808,7 +792,6 @@ let histFilterDay = null;
 let histPrefillDate = null;
 let lastRow = 0;
 let barKg = 20;
-let legPressImageMode = 'technique';
 let lastSummary = null;
 
 /* Obciążenie serii do tonażu: dla ćwiczeń z masą ciała dolicza wagę ciała. */
@@ -1251,6 +1234,15 @@ function updateExercisePresentationAtlas(exerciseId, presentationContext = null)
   if (disclosure) disclosure.hidden = atlas.hidden;
 }
 
+function panelDescription(copy, label) {
+  const text = copy.trim();
+  const normalized = text.toLocaleLowerCase('pl-PL');
+  for (const prefix of [`Pozycja ${label}:`, `${label}:`]) {
+    if (normalized.startsWith(prefix.toLocaleLowerCase('pl-PL'))) return text.slice(prefix.length).trim();
+  }
+  return text;
+}
+
 function renderExercisePresentation(exercise) {
   const state = exercisePresentationPilot;
   const panel = $('exercisePresentation');
@@ -1280,28 +1272,17 @@ function renderExercisePresentation(exercise) {
   panel.dataset.exerciseId = exercise.key;
   legacyBox.hidden = true;
   const figure = $('exercisePresentationFigure');
-  const positions = document.querySelector('[data-presentation-positions]');
   const sexButtons = document.querySelectorAll('#exercisePresentation [data-presentation-sex]');
-  const modeButtons = document.querySelectorAll('#exercisePresentation [data-presentation-mode]');
-  const positionButtons = document.querySelectorAll('#exercisePresentation [data-presentation-position]');
   const labels = record.labels || { lower: 'DÓŁ', raised: 'GÓRA' };
   const copy = record.copy || PRESENTATION_CAPTIONS[exercise.key];
   sexButtons.forEach(button => button.setAttribute('aria-pressed', String(button.dataset.presentationSex === state.sex)));
-  modeButtons.forEach(button => button.setAttribute('aria-pressed', String(button.dataset.presentationMode === state.mode)));
-  positionButtons.forEach(button => {
-    button.setAttribute('aria-pressed', String(button.dataset.presentationPosition === state.position));
-    button.textContent = labels[button.dataset.presentationPosition];
-  });
-  positions.hidden = state.mode === 'thumbnail';
-  figure.dataset.mode = state.mode;
-  figure.dataset.position = state.position;
-  figure.setAttribute('aria-label', `${state.sex === 'male' ? 'Męska' : 'Żeńska'} ilustracja techniki — pozycje ${labels.lower} i ${labels.raised}, wybrana ${labels[state.position]}`);
+  figure.setAttribute('aria-label', `${state.sex === 'male' ? 'Męska' : 'Żeńska'} ilustracja techniki — lewy panel ${labels.lower}, prawy panel ${labels.raised}`);
+  for (const position of ['lower', 'raised']) {
+    const caption = document.querySelector(`#exercisePresentationCaption [data-panel="${position}"]`);
+    caption.querySelector('strong').textContent = labels[position];
+    caption.querySelector('span').textContent = panelDescription(copy[position], labels[position]);
+  }
   $('exercisePresentationDetailsText').textContent = copy.details;
-  $('exercisePresentationCaption').textContent = state.mode === 'thumbnail'
-    ? copy.thumbnail || 'Miniatura pokazuje pozycję DÓŁ.'
-    : state.position === 'lower'
-      ? copy.lower
-      : copy.raised;
   const presentationContext = { sharedSexControl: true, sex: state.sex };
   if (!state.ready) {
     showExercisePresentationError(state.error || 'Rejestr prezentacji jest niedostępny. Nie użyto obrazu zastępczego.');
@@ -1314,11 +1295,10 @@ function renderExercisePresentation(exercise) {
     showExercisePresentationError('Nie można rozwiązać zasobu dla wybranej sylwetki. Nie użyto obrazu zastępczego.');
     return presentationContext;
   }
-  const asset = state.mode === 'thumbnail' ? resolved.thumbnail : resolved.technique;
+  const asset = resolved.technique;
   const image = $('exercisePresentationImage');
   const alert = $('exercisePresentationAlert');
-  const altText = state.mode === 'thumbnail' ? resolved.thumbnail.altText :
-    `${resolved.technique.altText} — wybrana pozycja ${labels[state.position]}`;
+  const altText = resolved.technique.altText;
   alert.hidden = true;
   alert.textContent = '';
   figure.hidden = false;
@@ -1360,20 +1340,12 @@ function renderExercisePresentation(exercise) {
 }
 
 function handleExercisePresentationControl(event) {
-  const target = event.target.closest('[data-presentation-sex], [data-presentation-position], [data-presentation-mode]');
+  const target = event.target.closest('[data-presentation-sex]');
   if (!target || !exercisePresentationPilot.active || !exercisePresentationPilot.currentExercise) return;
   const state = exercisePresentationPilot;
-  let synchronizeAtlas = false;
-  if (target.dataset.presentationSex) {
-    state.sex = target.dataset.presentationSex;
-    synchronizeAtlas = true;
-  } else if (target.dataset.presentationPosition) {
-    state.position = target.dataset.presentationPosition;
-  } else if (target.dataset.presentationMode) {
-    state.mode = target.dataset.presentationMode;
-  }
+  state.sex = target.dataset.presentationSex;
   renderExercisePresentation(state.currentExercise);
-  if (synchronizeAtlas) updateExercisePresentationAtlas(variantKey(state.currentExercise), { sharedSexControl: true, sex: state.sex });
+  updateExercisePresentationAtlas(variantKey(state.currentExercise), { sharedSexControl: true, sex: state.sex });
 }
 
 async function startWorkout(planId) {
@@ -1487,11 +1459,7 @@ function renderStep() {
   updateExercisePresentationAtlas(recognizedVariant ? variantKey(e) : `${e.key}/unrecognized`, presentationContext);
   $('variantAtlasNotice').hidden = recognizedVariant;
   const sharedLegPressImage = e.key === SHARED_LEG_PRESS_MEDIA.exerciseId && e.variantId === SHARED_LEG_PRESS_MEDIA.variantId;
-  const legPressImage = e.key === SHARED_LEG_PRESS_MEDIA.exerciseId && ['default', SHARED_LEG_PRESS_MEDIA.variantId].includes(e.variantId);
   const missingVariantImage = !!e.variantId && e.variantId !== 'default' && !sharedLegPressImage;
-  $('legacyImageControls').hidden = !legPressImage || !!presentationContext;
-  $('legacyExerciseImageBox').dataset.mode = legPressImage ? legPressImageMode : 'technique';
-  document.querySelectorAll('[data-legacy-image-mode]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.legacyImageMode === legPressImageMode)));
   $('variantImageShared').hidden = !sharedLegPressImage;
   $('variantImageMissing').hidden = !missingVariantImage;
   if (missingVariantImage) $('legacyExerciseImageBox').hidden = true;
@@ -1514,7 +1482,6 @@ function renderStep() {
           $('variantImageShared').hidden = true;
           $('variantImageMissing').hidden = false;
           $('legacyExerciseImageBox').hidden = true;
-          $('legacyImageControls').hidden = true;
           return;
         }
         img.src = PLACEHOLDER;
@@ -3202,13 +3169,6 @@ async function init() {
   }
 }
 document.getElementById('exercisePresentation')?.addEventListener('click', handleExercisePresentationControl);
-document.getElementById('legacyImageControls')?.addEventListener('click', event => {
-  const button = event.target.closest('[data-legacy-image-mode]');
-  if (!button || !active) return;
-  legPressImageMode = button.dataset.legacyImageMode;
-  $('legacyExerciseImageBox').dataset.mode = legPressImageMode;
-  document.querySelectorAll('[data-legacy-image-mode]').forEach(item => item.setAttribute('aria-pressed', String(item === button)));
-});
 init();
 })();
 </script>

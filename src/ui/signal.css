@@ -41,7 +41,7 @@ body { padding-top: calc(136px + env(safe-area-inset-top, 0px)); }
 .exercise-hero { border-radius: 22px; }
 .hero-title-box h2 { font: 800 clamp(25px, 6vw, 36px)/1 'Barlow Condensed', 'Arial Narrow', sans-serif; }
 .exercise-presentation__figure { width: min(100%, 245px); }
-.exercise-presentation__group button, .legacy-image-controls button { min-height: 44px; border-radius: 12px; }
+.exercise-presentation__group button { min-height: 44px; border-radius: 12px; }
 .exercise-presentation__details summary { min-height: 44px; display: flex; align-items: center; }
 .training-atlas-disclosure>summary { font-weight: 800; padding: 0 16px; }
 .training-atlas-disclosure>summary::after { content: '+'; margin-left: auto; font-size: 23px; color: var(--lime); }
@@ -166,13 +166,11 @@ body:has(#timerBar[style*="display: flex"]) { padding-bottom: calc(160px + env(s
 .progress-bar, .plan-card.next .plan-start, .btn-primary, .btn-done.ready,
 .rp.active, .pill.active, #view-planedit [data-act="peNew"] { background: var(--accent-fill); color: var(--on-accent); border-color: var(--accent-fill); }
 .btn-done.completed { background: var(--pull-soft); color: var(--pull-text); border-color: var(--pull); }
-.exercise-presentation__group button[aria-pressed="true"], .legacy-image-controls button[aria-pressed="true"] { color: var(--accent-text); border-color: var(--accent-text); background: var(--lime-dim); }
-.exercise-presentation__group button:focus-visible, .legacy-image-controls button:focus-visible,
+.exercise-presentation__group button[aria-pressed="true"] { color: var(--accent-text); border-color: var(--accent-text); background: var(--lime-dim); }
+.exercise-presentation__group button:focus-visible,
 .training-atlas-disclosure > summary:focus-visible { outline: 3px solid var(--accent-text); outline-offset: 2px; }
-.exercise-presentation__figure:not([data-mode="thumbnail"]) { width: 100%; aspect-ratio: 3 / 2; position: relative; }
-.exercise-presentation__figure:not([data-mode="thumbnail"]) img { width: 100%; height: 100%; object-fit: contain; transform: none; }
-.exercise-presentation__figure:not([data-mode="thumbnail"])::after { content: ''; position: absolute; inset: 0 50% 0 0; border: 3px solid var(--accent-fill); border-radius: 12px 0 0 12px; pointer-events: none; }
-.exercise-presentation__figure[data-position="raised"]:not([data-mode="thumbnail"])::after { inset: 0 0 0 50%; border-radius: 0 12px 12px 0; }
+.exercise-presentation__figure { width: 100%; aspect-ratio: 3 / 2; }
+.exercise-presentation__figure img { width: 100%; height: 100%; object-fit: contain; transform: none; }
 .exercise-presentation__figure, .hero-img-box { background: var(--card-sub); }
 .training-atlas-disclosure > summary { min-height: 56px; }
 .training-atlas-disclosure > summary::before { content: ''; width: 10px; height: 10px; flex: none; margin-right: 24px; border-radius: 50%; background: #F04438; box-shadow: 15px 0 0 #F3B544; }

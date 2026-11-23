@@ -3,7 +3,7 @@ const PILOT_URL = new URL(self.location?.href || 'sw.js', self.registration.scop
 const LOOPBACK_HOSTS = new Set(['127.0.0.1', 'localhost', '[::1]']);
 const LOCAL_PRESENTATION_PILOT = LOOPBACK_HOSTS.has(PILOT_URL.hostname.toLowerCase()) &&
   PILOT_URL.searchParams.get('local-exercise-presentation-pilot') === '1';
-const CACHE = LOCAL_PRESENTATION_PILOT ? 'gymverse-v36-presentation-pilot' : 'gymverse-v18';
+const CACHE = LOCAL_PRESENTATION_PILOT ? 'gymverse-v36-presentation-pilot' : 'gymverse-v19';
 const RELEASE_REGISTRY = 'src/data/exercise-presentations/release-registry.json';
 const BASE_SHELL = ['./', 'index.html', 'src/ui/signal.css', 'src/gv-base-b.js', 'src/gv-data.js', 'src/exercise/catalog.js', 'src/exercise/presentation-contract.js', 'src/vendor/zip.min.js', 'src/features/anatomy/atlas.js', 'src/features/anatomy/atlas.css', 'src/features/anatomy/highlight-engine.js', 'src/data/anatomy/catalog-mapping.js', 'src/data/anatomy/musclemap-diagrams.js', 'src/data/anatomy/atlas-data.js', 'src/data/anatomy/male-front.js', 'src/data/anatomy/male-back.js', 'src/data/anatomy/female-front.js', 'src/data/anatomy/female-back.js', 'src/data/anatomy/bodies/male-front.webp', 'src/data/anatomy/bodies/male-back.webp', 'src/data/anatomy/bodies/female-front.webp', 'src/data/anatomy/bodies/female-back.webp', 'src/data/anatomy/THIRD-PARTY-NOTICES.md', 'img/p1_5.jpg', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png', 'apple-touch-icon.png'];
 const PRESENTATION_PILOT_SHELL = [
@@ -39,9 +39,8 @@ async function installPresentationAssets(cache) {
   if (registry.presentationContractVersion !== 2 || registry.status !== 'released' || !Array.isArray(registry.records) || registry.records.length !== 34) {
     throw new Error('EXERCISE_PRESENTATION_REGISTRY_INVALID');
   }
-  const paths = registry.records.flatMap(record => Object.values(record.bySex || {}).flatMap(views =>
-    ['technique', 'thumbnail'].map(view => views?.[view]?.path)));
-  if (paths.length !== 136 || paths.some(path => typeof path !== 'string' || !path.startsWith('src/data/exercise-images/selected/') || path.includes('..') || path.includes(':'))) {
+  const paths = registry.records.flatMap(record => Object.values(record.bySex || {}).map(views => views?.technique?.path));
+  if (paths.length !== 68 || new Set(paths).size !== 68 || paths.some(path => typeof path !== 'string' || !path.startsWith('src/data/exercise-images/selected/technique/') || path.includes('..') || path.includes(':'))) {
     throw new Error('EXERCISE_PRESENTATION_ASSET_LIST_INVALID');
   }
   await cache.put(registryUrl, response.clone());

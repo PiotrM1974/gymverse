@@ -18,7 +18,7 @@ async function installPlan(page) {
   await page.locator('[data-act="startPlan"][data-plan="new_images_synthetic"]').click();
 }
 
-test('released boards, thumbnails, labels and input state appear in ordinary workout cards without the pilot flag', async ({ page }) => {
+test('released two-panel boards, both captions and input state appear in ordinary workout cards without the pilot flag', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await installPlan(page);
   for (let index = 0; index < ids.length; index += 1) {
@@ -34,23 +34,17 @@ test('released boards, thumbnails, labels and input state appear in ordinary wor
       const technique = page.locator('#exercisePresentationImage');
       await expect(technique).toHaveAttribute('src', new RegExp(`/src/data/exercise-images/selected/technique/${id}__default-${sex}\\.webp$`));
       await expect.poll(() => technique.evaluate(image => [image.naturalWidth, image.naturalHeight])).toEqual([768, 512]);
-      for (const position of ['lower', 'raised']) {
-        await page.locator(`#exercisePresentation [data-presentation-position="${position}"]`).click();
-        await expect(page.locator('#exercisePresentationFigure')).toHaveAttribute('data-position', position);
-        if (id === 'tri_rope') {
-          const screenshotDir = resolve('outputs/GV-EXERCISE-IMAGES-COMPLETE/screenshots');
-          await mkdir(screenshotDir, { recursive: true });
-          await page.locator('#exercisePresentation').screenshot({ path: resolve(screenshotDir, `tri_rope-${sex}-${position}-390.png`) });
-        }
+      await expect(page.locator('#exercisePresentationCaption [data-panel="lower"]')).toBeVisible();
+      await expect(page.locator('#exercisePresentationCaption [data-panel="raised"]')).toBeVisible();
+      if (id === 'tri_rope') {
+        const screenshotDir = resolve('outputs/GV-EXERCISE-IMAGES-COMPLETE/screenshots');
+        await mkdir(screenshotDir, { recursive: true });
+        await page.locator('#exercisePresentation').screenshot({ path: resolve(screenshotDir, `tri_rope-${sex}-paired-390.png`) });
       }
       if (id === 'row_v') {
-        await expect(page.locator('[data-presentation-position="lower"]')).toHaveText('ODDALONE');
-        await expect(page.locator('[data-presentation-position="raised"]')).toHaveText('PRZY BRZUCHU');
+        await expect(page.locator('#exercisePresentationCaption [data-panel="lower"] strong')).toHaveText('ODDALONE');
+        await expect(page.locator('#exercisePresentationCaption [data-panel="raised"] strong')).toHaveText('PRZY BRZUCHU');
       }
-      await page.locator('#exercisePresentation [data-presentation-mode="thumbnail"]').click();
-      await expect(technique).toHaveAttribute('src', new RegExp(`/src/data/exercise-images/selected/thumbnails/${id}__default-${sex}\\.webp$`));
-      await expect.poll(() => technique.evaluate(image => [image.naturalWidth, image.naturalHeight])).toEqual([256, 256]);
-      await page.locator('#exercisePresentation [data-presentation-mode="technique"]').click();
       await expect(page.locator('#weight_0')).toHaveValue('42.5');
       await expect(page.locator('#reps_0')).toHaveValue('8');
     }
@@ -68,9 +62,9 @@ test('production images install into the ordinary offline cache and survive an o
   await page.reload();
   await expect.poll(() => page.evaluate(() => navigator.serviceWorker.controller?.scriptURL || '')).toMatch(/\/gymverse\/sw\.js$/);
   await expect.poll(() => page.evaluate(async () => {
-    const cache = await caches.open('gymverse-v18');
+    const cache = await caches.open('gymverse-v19');
     return (await cache.keys()).filter(request => request.url.includes('/src/data/exercise-images/selected/')).length;
-  })).toBe(136);
+  })).toBe(68);
   await page.context().setOffline(true);
   await installPlan(page);
   for (let index = 0; index < ids.length; index += 1) {
@@ -102,10 +96,8 @@ test('incline fly variant uses its own board without losing variant identity or 
   for (const sex of ['male', 'female']) {
     await page.locator(`#exercisePresentation [data-presentation-sex="${sex}"]`).click();
     await expect(page.locator('#exercisePresentationImage')).toHaveAttribute('src', new RegExp(`/db_fly__incline-${sex}\\.webp$`));
-    await page.locator('[data-presentation-position="raised"]').click();
-    await page.locator('[data-presentation-mode="thumbnail"]').click();
-    await expect(page.locator('#exercisePresentationImage')).toHaveAttribute('src', new RegExp(`/db_fly__incline-${sex}\\.webp$`));
-    await page.locator('[data-presentation-mode="technique"]').click();
+    await expect(page.locator('#exercisePresentationCaption [data-panel="lower"]')).toContainText('ROZŁOŻONE');
+    await expect(page.locator('#exercisePresentationCaption [data-panel="raised"]')).toContainText('ZŁĄCZONE');
     await expect(page.locator('#weight_0')).toHaveValue('42.5');
     await expect(page.locator('#reps_0')).toHaveValue('8');
   }
@@ -139,16 +131,16 @@ test('corrected machines and distinct variants render in the workout card', asyn
     const { key, variantId } = exercises[index];
     await expect(page.locator('#exercisePresentation')).toHaveAttribute('data-exercise-id', key);
     if (key === 'tri_machine') {
-      await expect(page.locator('#exercisePresentation [data-presentation-position="lower"]')).toHaveText('START');
-      await expect(page.locator('#exercisePresentation [data-presentation-position="raised"]')).toHaveText('KONIEC');
+      await expect(page.locator('#exercisePresentationCaption [data-panel="lower"] strong')).toHaveText('START');
+      await expect(page.locator('#exercisePresentationCaption [data-panel="raised"] strong')).toHaveText('KONIEC');
     }
     if (key === 'biceps_preacher') {
-      await expect(page.locator('#exercisePresentation [data-presentation-position="lower"]')).toHaveText('DÓŁ');
-      await expect(page.locator('#exercisePresentation [data-presentation-position="raised"]')).toHaveText('GÓRA');
+      await expect(page.locator('#exercisePresentationCaption [data-panel="lower"] strong')).toHaveText('DÓŁ');
+      await expect(page.locator('#exercisePresentationCaption [data-panel="raised"] strong')).toHaveText('GÓRA');
     }
     if (key === 'row_machine') {
-      await expect(page.locator('#exercisePresentation [data-presentation-position="lower"]')).toHaveText('ODDALONE');
-      await expect(page.locator('#exercisePresentation [data-presentation-position="raised"]')).toHaveText('PRZY TUŁOWIU');
+      await expect(page.locator('#exercisePresentationCaption [data-panel="lower"] strong')).toHaveText('ODDALONE');
+      await expect(page.locator('#exercisePresentationCaption [data-panel="raised"] strong')).toHaveText('PRZY TUŁOWIU');
       await expect(page.locator('#exercisePresentationDetailsText')).toContainText('dolnym bloczkiem');
     }
     if (key === 'tri_overhead' && variantId === 'rope') {
@@ -163,25 +155,12 @@ test('corrected machines and distinct variants render in the workout card', asyn
       const expected = `${key}__${key === 'leg_press' && variantId === 'high_feet' ? 'default' : (variantId || 'default')}-${sex}`;
       await expect(image).toHaveAttribute('src', new RegExp(`/src/data/exercise-images/selected/technique/${expected}[.]webp$`));
       await expect.poll(() => image.evaluate(element => element.naturalWidth)).toBe(768);
-      await page.locator('#exercisePresentation [data-presentation-position="lower"]').click();
       if (['biceps_preacher', 'tri_machine', 'row_machine'].includes(key) && sex === 'male') {
-        await page.locator('#exercisePresentation').screenshot({ path: resolve(screenshotDir, `${key}-male-lower-390.png`) });
-      }
-      if (key === 'biceps_preacher' && sex === 'female') {
-        await page.locator('#exercisePresentation').screenshot({ path: resolve(screenshotDir, `${key}-female-lower-390.png`) });
-      }
-      await page.locator('#exercisePresentation [data-presentation-position="raised"]').click();
-      await expect(page.locator('#exercisePresentationFigure')).toHaveAttribute('data-position', 'raised');
-      if (['biceps_preacher', 'tri_machine'].includes(key) && sex === 'male') {
-        await page.locator('#exercisePresentation').screenshot({ path: resolve(screenshotDir, `${key}-male-raised-390.png`) });
+        await page.locator('#exercisePresentation').screenshot({ path: resolve(screenshotDir, `${key}-male-paired-390.png`) });
       }
       if (['biceps_preacher', 'tri_machine', 'row_machine'].includes(key) && sex === 'female') {
-        await page.locator('#exercisePresentation').screenshot({ path: resolve(screenshotDir, `${key}-female-raised-390.png`) });
+        await page.locator('#exercisePresentation').screenshot({ path: resolve(screenshotDir, `${key}-female-paired-390.png`) });
       }
-      await page.locator('#exercisePresentation [data-presentation-mode="thumbnail"]').click();
-      await expect(image).toHaveAttribute('src', new RegExp(`/src/data/exercise-images/selected/thumbnails/${expected}[.]webp$`));
-      await expect.poll(() => image.evaluate(element => element.naturalWidth)).toBe(256);
-      await page.locator('#exercisePresentation [data-presentation-mode="technique"]').click();
       await expect(page.locator('#weight_0')).toHaveValue('42.5');
       await expect(page.locator('#reps_0')).toHaveValue('8');
     }
