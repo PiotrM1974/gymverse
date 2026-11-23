@@ -118,7 +118,7 @@ export async function inspectLegacySnapshot(snapshot, validationOptions = {}) {
       if (!isPlainObject(session) || !Array.isArray(session.details)) { add(anomalies, 'INVALID_SESSION'); return; }
       session.details.forEach(set => {
         counts.sets += 1;
-        if (!isPlainObject(set) || typeof set.exerciseId !== 'string' || !Number.isFinite(Number(set.weight)) || Number(set.weight) < 0 || !Number.isInteger(Number(set.reps)) || Number(set.reps) <= 0) add(anomalies, 'INVALID_SERIES');
+        if (!isPlainObject(set) || typeof set.exerciseId !== 'string' || (Object.hasOwn(set, 'variantId') && (typeof set.variantId !== 'string' || !set.variantId.trim())) || !Number.isFinite(Number(set.weight)) || Number(set.weight) < 0 || !Number.isInteger(Number(set.reps)) || Number(set.reps) <= 0) add(anomalies, 'INVALID_SERIES');
         else if (validationOptions.strictExerciseCatalog) {
           const exerciseId = (validationOptions.exerciseIdMap || {})[set.exerciseId] || set.exerciseId;
           if (!Object.hasOwn(exerciseCatalog, exerciseId)) add(anomalies, 'EXERCISE_UNKNOWN');
@@ -130,7 +130,7 @@ export async function inspectLegacySnapshot(snapshot, validationOptions = {}) {
   if (snapshot.gymverse_plans != null && !Array.isArray(snapshot.gymverse_plans)) add(anomalies, 'PLANS_NOT_ARRAY');
   else {
     counts.plans = (snapshot.gymverse_plans || []).length;
-    if ((snapshot.gymverse_plans || []).some(plan => !isPlainObject(plan) || typeof plan.id !== 'string' || !Array.isArray(plan.exercises) || plan.exercises.some(exercise => !isPlainObject(exercise) || typeof exercise.key !== 'string' || !Number.isInteger(Number(exercise.sets)) || Number(exercise.sets) < 1))) add(anomalies, 'PLANS_INVALID');
+    if ((snapshot.gymverse_plans || []).some(plan => !isPlainObject(plan) || typeof plan.id !== 'string' || !Array.isArray(plan.exercises) || plan.exercises.some(exercise => !isPlainObject(exercise) || typeof exercise.key !== 'string' || (Object.hasOwn(exercise, 'variantId') && (typeof exercise.variantId !== 'string' || !exercise.variantId.trim())) || !Number.isInteger(Number(exercise.sets)) || Number(exercise.sets) < 1))) add(anomalies, 'PLANS_INVALID');
   }
   if (snapshot.gymverse_custom != null && !isPlainObject(snapshot.gymverse_custom)) add(anomalies, 'CUSTOM_NOT_OBJECT');
   else {
@@ -146,6 +146,11 @@ export async function inspectLegacySnapshot(snapshot, validationOptions = {}) {
   else if (Object.values(snapshot.gymverse_last_weights || {}).some(rows => !Array.isArray(rows) || rows.some(row => !isPlainObject(row) || !Number.isFinite(Number(row.weight)) || Number(row.weight) < 0 || !Number.isInteger(Number(row.reps)) || Number(row.reps) <= 0))) add(anomalies, 'LAST_WEIGHTS_INVALID');
   if (snapshot.gymverse_schema != null && (!Number.isInteger(Number(snapshot.gymverse_schema)) || Number(snapshot.gymverse_schema) < 1 || Number(snapshot.gymverse_schema) > 4)) add(anomalies, 'SCHEMA_UNSUPPORTED');
   if (snapshot.gymverse_active != null && !isPlainObject(snapshot.gymverse_active)) add(anomalies, 'ACTIVE_NOT_OBJECT');
+  if (isPlainObject(snapshot.gymverse_active)) {
+    const active = snapshot.gymverse_active;
+    if (Array.isArray(active.exercises) && active.exercises.some(exercise => !isPlainObject(exercise) || typeof exercise.key !== 'string' || (Object.hasOwn(exercise, 'variantId') && (typeof exercise.variantId !== 'string' || !exercise.variantId.trim())))) add(anomalies, 'ACTIVE_EXERCISES_INVALID');
+    if (Array.isArray(active.sets) && active.sets.some(set => !isPlainObject(set) || (Object.hasOwn(set, 'variantId') && (typeof set.variantId !== 'string' || !set.variantId.trim())))) add(anomalies, 'ACTIVE_SETS_INVALID');
+  }
   if (snapshot.gymverse_draft_v1 != null) {
     const drafts = snapshot.gymverse_draft_v1;
     if (!isPlainObject(drafts) || drafts.version !== 1 || !Array.isArray(drafts.items) || drafts.items.some(item => !isPlainObject(item) || typeof item.planId !== 'string' || typeof item.sessionId !== 'string' || !Number.isInteger(Number(item.step)) || Number(item.step) < 0 || !Number.isInteger(Number(item.setNumber)) || Number(item.setNumber) < 1 || typeof item.weight !== 'string' || typeof item.reps !== 'string')) add(anomalies, 'DRAFT_INVALID');

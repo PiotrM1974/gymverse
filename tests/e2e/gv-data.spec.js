@@ -642,7 +642,7 @@ test('service worker installs and serves the backup module and ZIP codec offline
   await page.reload();
   await page.waitForFunction(() => !!navigator.serviceWorker.controller);
   const cached = await page.evaluate(async () => {
-    const cache = await caches.open('gymverse-v6');
+    const cache = await caches.open('gymverse-v15');
     return {
       module: !!await cache.match(new URL('src/gv-data.js', location.href).href),
       codec: !!await cache.match(new URL('src/vendor/zip.min.js', location.href).href)

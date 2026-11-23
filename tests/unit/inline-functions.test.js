@@ -1,6 +1,8 @@
 import { readFileSync } from 'node:fs';
 import { runInNewContext, Script } from 'node:vm';
 import { describe, expect, it } from 'vitest';
+import { EXERCISE_VARIANTS } from '../../src/exercise/catalog.js';
+import { EXERCISE_ATLAS_MAP } from '../../src/data/anatomy/atlas-data.js';
 
 const html = readFileSync(new URL('../../index.html', import.meta.url), 'utf8');
 
@@ -37,6 +39,28 @@ function evaluate(name, prelude, expression) {
 }
 
 describe('inline helpers characterize current behavior', () => {
+  it('resolves all four catalog variant pairs and rejects assignment to another exercise', () => {
+    const prelude = `const VARIANTS = ${JSON.stringify(EXERCISE_VARIANTS)}; const CATALOG = Object.fromEntries(VARIANTS.map(v => [v.exerciseId, v.exerciseId])); const variantFor = (key, variantId) => VARIANTS.find(v => v.exerciseId === key && v.variantId === variantId);`;
+    for (const variant of EXERCISE_VARIANTS) {
+      expect(evaluate('const validVariant', prelude, `validVariant('${variant.exerciseId}', '${variant.variantId}')`)).toBe(true);
+      expect(EXERCISE_ATLAS_MAP[`${variant.exerciseId}/${variant.variantId}`]).toBeTruthy();
+      const other = EXERCISE_VARIANTS.find(v => v.exerciseId !== variant.exerciseId);
+      expect(evaluate('const validVariant', prelude, `validVariant('${other.exerciseId}', '${variant.variantId}')`)).toBe(false);
+    }
+  });
+
+  it('cleanPlan keeps an optional variant on its exercise and leaves legacy entries without one', () => {
+    const prelude = `const CATALOG = { leg_press: 'Suwnica' }; const safeImg = () => null;`;
+    const result = evaluate('function cleanPlan', prelude, `JSON.stringify(cleanPlan({ id: 'synthetic', title: 'Plan', exercises: [
+      { key: 'leg_press', sets: 3, target: '8-10', variantId: 'high_feet' },
+      { key: 'leg_press', sets: 2, target: '12-15' }
+    ] }))`);
+    expect(JSON.parse(result).exercises).toEqual([
+      { key: 'leg_press', sets: 3, target: '8-10', variantId: 'high_feet' },
+      { key: 'leg_press', sets: 2, target: '12-15' }
+    ]);
+  });
+
   it('the current inline application script parses without changing the HTML', () => {
     const script = [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].at(-1)?.[1];
     expect(script).toBeTruthy();
@@ -57,6 +81,26 @@ describe('inline helpers characterize current behavior', () => {
     const prelude = 'const BW = new Set(["pullup", "dips", "pushup"]); const isBW = k => BW.has(k); const bodyAt = () => 70;';
     expect(evaluate('const setLoad', prelude, 'setLoad("pullup", 5, 8, "2026-01-05")')).toBe(600);
     expect(evaluate('const setLoad', prelude, 'setLoad("bench_flat", 40, 8, "2026-01-05")')).toBe(320);
+  });
+
+  it('recalcSession keeps legacy volume distinct from the sum of entered weights', () => {
+    const prelude = 'const BW = new Set(); const body = []; const isBW = () => false; const bodyAt = () => 0; '
+      + declaration(html, 'const setLoad');
+    const cases = [
+      { details: [{ exerciseId: 'leg_press', variantId: 'high_feet', weight: 85, reps: 10 }], volume: 850, reps: 10 },
+      { details: [
+        { exerciseId: 'leg_press', variantId: 'high_feet', weight: 85, reps: 10 },
+        { exerciseId: 'leg_press', variantId: 'default', weight: 80, reps: 8 }
+      ], volume: 1490, reps: 18 },
+      { details: [], volume: 0, reps: 0 }
+    ];
+    for (const { details, volume, reps } of cases) {
+      const session = JSON.parse(evaluate('function recalcSession', prelude,
+        `const s = ${JSON.stringify({ date: '2026-01-05T10:00:00Z', details, totalVolume: -1, totalReps: -1 })}; recalcSession(s); JSON.stringify(s)`));
+      expect(session.totalVolume).toBe(volume);
+      expect(session.totalReps).toBe(reps);
+      expect(session.details).toEqual(details);
+    }
   });
 
   it('metric uses Epley for loaded lifts and weight-times-1000-plus-reps for bodyweight lifts', () => {
