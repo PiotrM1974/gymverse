@@ -94,13 +94,12 @@ header {
 .exercise-presentation__group button { min-height: 38px; border: 1px solid var(--border); border-radius: 999px; padding: 8px 13px; background: var(--card-sub); color: var(--text); font-size: .82rem; font-weight: 700; cursor: pointer; }
 .exercise-presentation__group button[aria-pressed="true"] { border-color: #81d9b1; background: #18372e; color: #a7f3d0; }
 .exercise-presentation__group button:focus-visible { outline: 2px solid #a7f3d0; outline-offset: 2px; }
-.exercise-presentation__figure { width: min(100%, 270px); aspect-ratio: 3 / 4; margin: 0 auto; overflow: hidden; border: 1px solid var(--border); border-radius: 12px; background: #090b0e; }
+.exercise-presentation__figure { width: 100%; aspect-ratio: 3 / 2; margin: 0 auto; overflow: hidden; border: 1px solid var(--border); border-radius: 12px; background: var(--card-sub); }
 .exercise-presentation__figure[hidden] { display: none !important; }
-.exercise-presentation__figure img { display: block; width: 200%; height: 100%; max-width: none; object-fit: fill; object-position: left center; transform: none; }
-.exercise-presentation__figure[data-position="raised"] img { transform: translateX(-50%); }
-.exercise-presentation__figure[data-mode="thumbnail"] { width: min(100%, 256px); aspect-ratio: 1; }
-.exercise-presentation__figure[data-mode="thumbnail"] img { width: 100%; height: 100%; object-fit: contain; transform: none; }
-.exercise-presentation__caption { margin: 8px 0 0; text-align: center; color: var(--text); font-size: .86rem; line-height: 1.4; }
+.exercise-presentation__figure img { display: block; width: 100%; height: 100%; object-fit: contain; }
+.exercise-presentation__caption { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: 10px 0 0; color: var(--text); font-size: .82rem; line-height: 1.4; }
+.exercise-presentation__caption > div { min-width: 0; overflow-wrap: anywhere; }
+.exercise-presentation__caption strong { display: block; margin-bottom: 3px; color: var(--accent-text, var(--lime)); font-size: .75rem; letter-spacing: .04em; }
 .exercise-presentation__alert { margin: 8px 0 0; color: var(--orange); font-size: .86rem; line-height: 1.45; }
 .exercise-presentation__status { margin: 8px 0 0; color: var(--text-muted); font-size: .72rem; text-align: center; }
 .exercise-presentation__details { margin-top: 9px; color: var(--text-muted); font-size: .78rem; line-height: 1.45; }
@@ -115,12 +114,6 @@ header {
 .training-atlas-disclosure:not([open]) [data-atlas-disclosure-close], .training-atlas-disclosure[open] [data-atlas-disclosure-open] { display: none; }
 .hero-img-box { width: 100%; height: 280px; background: #090b0e; display: flex; align-items: center; justify-content: center; border-bottom: 1px solid var(--border); padding: 8px; }
 .hero-img-box img { width: 100%; height: 100%; object-fit: contain; object-position: center; display: block; }
-.hero-img-box[data-mode="thumbnail"] { height: 160px; }
-.legacy-image-controls { display: flex; gap: 8px; padding: 8px 12px 0; }
-.legacy-image-controls[hidden] { display: none !important; }
-.legacy-image-controls button { min-height: 38px; border: 1px solid var(--border); border-radius: 10px; background: var(--card-sub); color: var(--text); padding: 0 12px; cursor: pointer; }
-.legacy-image-controls button[aria-pressed="true"] { border-color: #81d9b1; color: #a7f3d0; }
-.legacy-image-controls button:focus-visible { outline: 2px solid #a7f3d0; outline-offset: 2px; }
 .hero-title-box { padding: 14px 16px; }
 .hero-title-box h2 { font-size: 1.25rem; font-weight: 700; margin-bottom: 4px; line-height: 1.3; }
 .swapped-tag { font-size: 0.7rem; font-weight: 800; color: #000; background: var(--orange); border-radius: 6px; padding: 2px 6px; vertical-align: middle; margin-left: 6px; }
@@ -317,18 +310,13 @@ select.select-custom, input.select-custom { width: 100%; background: var(--card-
           <button type="button" data-presentation-sex="male" aria-pressed="true">Mężczyzna</button>
           <button type="button" data-presentation-sex="female" aria-pressed="false">Kobieta</button>
         </div>
-        <div class="exercise-presentation__group" role="group" aria-label="Widok ilustracji">
-          <button type="button" data-presentation-mode="technique" aria-pressed="true">Technika</button>
-          <button type="button" data-presentation-mode="thumbnail" aria-pressed="false">Miniatura</button>
-        </div>
-        <div class="exercise-presentation__group" data-presentation-positions role="group" aria-label="Pozycja ruchu">
-          <button type="button" data-presentation-position="lower" aria-pressed="true">DÓŁ</button>
-          <button type="button" data-presentation-position="raised" aria-pressed="false">GÓRA</button>
-        </div>
-        <div id="exercisePresentationFigure" class="exercise-presentation__figure" data-mode="technique" data-position="lower" role="img" aria-label="Męska ilustracja techniki — pozycja DÓŁ">
+        <div id="exercisePresentationFigure" class="exercise-presentation__figure" role="img" aria-label="Męska ilustracja techniki — dwie pozycje ruchu">
           <img id="exercisePresentationImage" src="" alt="" decoding="async">
         </div>
-        <p id="exercisePresentationCaption" class="exercise-presentation__caption" aria-live="polite">Pozycja DÓŁ: hantle przy bokach ud.</p>
+        <div id="exercisePresentationCaption" class="exercise-presentation__caption" aria-label="Opis obu pozycji ruchu">
+          <div data-panel="lower"><strong>DÓŁ</strong><span></span></div>
+          <div data-panel="raised"><strong>GÓRA</strong><span></span></div>
+        </div>
         <p id="exercisePresentationAlert" class="exercise-presentation__alert" role="alert" hidden></p>
         <p class="exercise-presentation__status">Ilustracja wybrana do GymNastiki jest dostępna w aplikacji. Nie stanowi niezależnej oceny eksperckiej techniki.</p>
         <details class="exercise-presentation__details">
@@ -337,10 +325,6 @@ select.select-custom, input.select-custom { width: 100%; background: var(--card-
         </details>
       </section>
       <div id="legacyExerciseImageBox" class="hero-img-box"><img id="currentExImg" src="" alt="Ćwiczenie"></div>
-      <div id="legacyImageControls" class="legacy-image-controls" role="group" aria-label="Widok ilustracji suwnicy" hidden>
-        <button type="button" data-legacy-image-mode="technique" aria-pressed="true">Technika</button>
-        <button type="button" data-legacy-image-mode="thumbnail" aria-pressed="false">Miniatura</button>
-      </div>
       <p id="variantImageShared" class="hero-hint" hidden>Ilustracja wariantu podstawowego</p>
       <p id="variantImageMissing" class="hero-hint" hidden>Brak ilustracji tego wariantu.</p>
       <div class="hero-title-box">
@@ -362,7 +346,7 @@ select.select-custom, input.select-custom { width: 100%; background: var(--card-
     <div class="link-row">
       <button class="btn-link" data-act="swapOpen">⇄ Zamień ćwiczenie</button>
     </div>
-    <div id="swapBox" hidden><select class="select-custom" id="swapSelect"></select></div>
+    <section id="swapBox" hidden aria-label="Wybór zamiennika"><h3>Zamień ćwiczenie</h3><div id="swapOptions"></div><button class="btn-secondary" data-act="swapOpen">Anuluj</button></section>
 
     <div class="rest-row">
       <span>Przerwa:</span>
@@ -541,7 +525,7 @@ let toastTimer = null;
 let draftSaveTimer = null;
 let pendingDraftSnapshot = null;
 const exercisePresentationPilot = {
-  active: false, pilotMode: false, ready: false, module: null, registry: null, error: '', sex: 'male', position: 'lower', mode: 'technique',
+  active: false, pilotMode: false, ready: false, module: null, registry: null, error: '', sex: 'male',
   currentExerciseId: '', currentExercise: null, requestId: 0, loadingPath: '', loadedPath: '', currentAsset: null
 };
 const PRESENTATION_CAPTIONS = Object.freeze({
@@ -671,7 +655,7 @@ const IMG_BY_KEY = {
   db_bench: 'p2_1', db_fly: 'p2_2', front_raise: 'p2_3', lat_raise_seated: 'p2_4', tri_machine: 'p2_5',
   lat_pulldown_neutral: 'pl2_1', row_straight: 'pl2_2'
 };
-const SHARED_LEG_PRESS_MEDIA = Object.freeze({ exerciseId: 'leg_press', variantId: 'high_feet', technique: IMG_BY_KEY.leg_press, thumbnail: IMG_BY_KEY.leg_press });
+const SHARED_LEG_PRESS_MEDIA = Object.freeze({ exerciseId: 'leg_press', variantId: 'high_feet', technique: IMG_BY_KEY.leg_press });
 const ID_MAP = {
   p1_1: 'bench_flat', p1_2: 'db_incline', p1_3: 'lat_raise_stand', p1_4: 'tri_rope', p1_5: 'leg_press',
   pl1_1: 'lat_pulldown_wide', pl1_2: 'row_v', pl1_3: 'rear_delt', pl1_4: 'biceps_preacher', pl1_5: 'leg_curl',
@@ -679,6 +663,9 @@ const ID_MAP = {
   pl2_1: 'lat_pulldown_neutral', pl2_2: 'row_straight', pl2_3: 'rear_delt', pl2_4: 'biceps_preacher', pl2_5: 'leg_curl'
 };
 
+let EXERCISE_METADATA = [];
+let swapBusy = false;
+let sessionMutationBusy = false;
 let CATALOG = Object.assign({}, CATALOG_BASE);
 let VARIANTS = [];
 const variantFor = (key, variantId) => VARIANTS.find(v => v.exerciseId === key && v.variantId === variantId);
@@ -808,7 +795,6 @@ let histFilterDay = null;
 let histPrefillDate = null;
 let lastRow = 0;
 let barKg = 20;
-let legPressImageMode = 'technique';
 let lastSummary = null;
 
 /* Obciążenie serii do tonażu: dla ćwiczeń z masą ciała dolicza wagę ciała. */
@@ -1097,10 +1083,11 @@ updateHeaderSize();
 const workoutView = document.getElementById('view-workout');
 const workoutHero = workoutView.querySelector('.exercise-hero');
 workoutView.insertBefore(workoutHero.querySelector('.hero-title-box'), workoutView.querySelector('.progress-bar-container'));
+workoutView.querySelector('.hero-title-box').append(workoutView.querySelector('.link-row'), $('swapBox'));
 const workoutControls = document.createElement('section');
 workoutControls.className = 'workout-control-card';
 ['.sets-table', '.step-strip', '.set-ctrl'].forEach(selector => workoutControls.append(workoutView.querySelector(selector)));
-workoutView.insertBefore(workoutControls, workoutView.querySelector('.link-row'));
+workoutView.insertBefore(workoutControls, workoutView.querySelector('.rest-row'));
 document.addEventListener('keydown', event => {
   const card = event.target.closest('.plan-card[data-act]');
   if (card && (event.key === 'Enter' || event.key === ' ')) {
@@ -1181,8 +1168,9 @@ function renderPlans() {
 /* ================== TRENING ================== */
 function exAt(step) {
   const base = activePlan().exercises[step];
-  const sw = active.swaps && active.swaps[step];
-  if (sw && CATALOG[sw]) return { ...base, key: sw, variantId: 'default', name: nameOf(sw), img: IMG_BY_KEY[sw] || safeImg(sw) || 'none', swapped: true, baseKey: base.key };
+  const swapValue = active.swaps && active.swaps[step];
+  const [sw, swapVariant = 'default'] = String(swapValue || '').split('/');
+  if (sw && CATALOG[sw] && validVariant(sw, swapVariant)) return { ...base, key: sw, variantId: swapVariant, name: nameOf(sw), img: IMG_BY_KEY[sw] || safeImg(sw) || 'none', swapped: true, baseKey: base.key };
   return Object.assign({}, base, { name: exName(base), img: imgFor(base), swapped: false });
 }
 function activePlan() {
@@ -1251,6 +1239,15 @@ function updateExercisePresentationAtlas(exerciseId, presentationContext = null)
   if (disclosure) disclosure.hidden = atlas.hidden;
 }
 
+function panelDescription(copy, label) {
+  const text = copy.trim();
+  const normalized = text.toLocaleLowerCase('pl-PL');
+  for (const prefix of [`Pozycja ${label}:`, `${label}:`]) {
+    if (normalized.startsWith(prefix.toLocaleLowerCase('pl-PL'))) return text.slice(prefix.length).trim();
+  }
+  return text;
+}
+
 function renderExercisePresentation(exercise) {
   const state = exercisePresentationPilot;
   const panel = $('exercisePresentation');
@@ -1280,28 +1277,17 @@ function renderExercisePresentation(exercise) {
   panel.dataset.exerciseId = exercise.key;
   legacyBox.hidden = true;
   const figure = $('exercisePresentationFigure');
-  const positions = document.querySelector('[data-presentation-positions]');
   const sexButtons = document.querySelectorAll('#exercisePresentation [data-presentation-sex]');
-  const modeButtons = document.querySelectorAll('#exercisePresentation [data-presentation-mode]');
-  const positionButtons = document.querySelectorAll('#exercisePresentation [data-presentation-position]');
   const labels = record.labels || { lower: 'DÓŁ', raised: 'GÓRA' };
   const copy = record.copy || PRESENTATION_CAPTIONS[exercise.key];
   sexButtons.forEach(button => button.setAttribute('aria-pressed', String(button.dataset.presentationSex === state.sex)));
-  modeButtons.forEach(button => button.setAttribute('aria-pressed', String(button.dataset.presentationMode === state.mode)));
-  positionButtons.forEach(button => {
-    button.setAttribute('aria-pressed', String(button.dataset.presentationPosition === state.position));
-    button.textContent = labels[button.dataset.presentationPosition];
-  });
-  positions.hidden = state.mode === 'thumbnail';
-  figure.dataset.mode = state.mode;
-  figure.dataset.position = state.position;
-  figure.setAttribute('aria-label', `${state.sex === 'male' ? 'Męska' : 'Żeńska'} ilustracja techniki — pozycje ${labels.lower} i ${labels.raised}, wybrana ${labels[state.position]}`);
+  figure.setAttribute('aria-label', `${state.sex === 'male' ? 'Męska' : 'Żeńska'} ilustracja techniki — lewy panel ${labels.lower}, prawy panel ${labels.raised}`);
+  for (const position of ['lower', 'raised']) {
+    const caption = document.querySelector(`#exercisePresentationCaption [data-panel="${position}"]`);
+    caption.querySelector('strong').textContent = labels[position];
+    caption.querySelector('span').textContent = panelDescription(copy[position], labels[position]);
+  }
   $('exercisePresentationDetailsText').textContent = copy.details;
-  $('exercisePresentationCaption').textContent = state.mode === 'thumbnail'
-    ? copy.thumbnail || 'Miniatura pokazuje pozycję DÓŁ.'
-    : state.position === 'lower'
-      ? copy.lower
-      : copy.raised;
   const presentationContext = { sharedSexControl: true, sex: state.sex };
   if (!state.ready) {
     showExercisePresentationError(state.error || 'Rejestr prezentacji jest niedostępny. Nie użyto obrazu zastępczego.');
@@ -1314,11 +1300,10 @@ function renderExercisePresentation(exercise) {
     showExercisePresentationError('Nie można rozwiązać zasobu dla wybranej sylwetki. Nie użyto obrazu zastępczego.');
     return presentationContext;
   }
-  const asset = state.mode === 'thumbnail' ? resolved.thumbnail : resolved.technique;
+  const asset = resolved.technique;
   const image = $('exercisePresentationImage');
   const alert = $('exercisePresentationAlert');
-  const altText = state.mode === 'thumbnail' ? resolved.thumbnail.altText :
-    `${resolved.technique.altText} — wybrana pozycja ${labels[state.position]}`;
+  const altText = resolved.technique.altText;
   alert.hidden = true;
   alert.textContent = '';
   figure.hidden = false;
@@ -1360,20 +1345,12 @@ function renderExercisePresentation(exercise) {
 }
 
 function handleExercisePresentationControl(event) {
-  const target = event.target.closest('[data-presentation-sex], [data-presentation-position], [data-presentation-mode]');
+  const target = event.target.closest('[data-presentation-sex]');
   if (!target || !exercisePresentationPilot.active || !exercisePresentationPilot.currentExercise) return;
   const state = exercisePresentationPilot;
-  let synchronizeAtlas = false;
-  if (target.dataset.presentationSex) {
-    state.sex = target.dataset.presentationSex;
-    synchronizeAtlas = true;
-  } else if (target.dataset.presentationPosition) {
-    state.position = target.dataset.presentationPosition;
-  } else if (target.dataset.presentationMode) {
-    state.mode = target.dataset.presentationMode;
-  }
+  state.sex = target.dataset.presentationSex;
   renderExercisePresentation(state.currentExercise);
-  if (synchronizeAtlas) updateExercisePresentationAtlas(variantKey(state.currentExercise), { sharedSexControl: true, sex: state.sex });
+  updateExercisePresentationAtlas(variantKey(state.currentExercise), { sharedSexControl: true, sex: state.sex });
 }
 
 async function startWorkout(planId) {
@@ -1418,13 +1395,32 @@ function parseRange(t) {
   return p.length === 2 ? [p[0], p[1]] : [p[0], p[0]];
 }
 function previousSetsFor(e) {
-  if (!Object.hasOwn(e, 'variantId') || !validVariant(e.key, e.variantId)) return [];
-  const previous = history.slice().sort(byDate).reverse().find(session => session.details?.some(d => d.exerciseId === e.key && d.variantId === e.variantId));
-  return previous ? previous.details.filter(d => d.exerciseId === e.key && d.variantId === e.variantId).sort((a, b) => a.setNumber - b.setNumber) : [];
+  // Legacy history predates variantId; only the base variant may use it.
+  const variant = e.variantId || 'default';
+  if (!validVariant(e.key, variant)) return [];
+  const matches = d => d.exerciseId === e.key && (d.variantId || 'default') === variant && validSet(e.key, Number(d.weight), Number(d.reps));
+  const before = active?.startedAt || Date.now();
+  const candidates = history.filter(h => h.id !== active?.id && new Date(h.date).getTime() < before && h.details?.some(matches)).sort(byDate).reverse();
+  // Same-plan loads are comparable within the same exercise order and fatigue.
+  const previous = candidates.find(h => h.planId === active?.planId) || candidates[0];
+  if (!previous) return [];
+  const result = [];
+  previous.details.filter(matches).forEach(d => {
+    if (Number.isInteger(d.setNumber) && d.setNumber > 0) result[d.setNumber - 1] = { ...d, otherPlan: previous.planId !== active?.planId };
+  });
+  return result;
+}
+function updateActiveSetHighlight() {
+  let found = false;
+  document.querySelectorAll('#setsBody .set-row').forEach(row => {
+    const current = !found && !row.querySelector('.btn-done').classList.contains('completed');
+    row.classList.toggle('is-current', current);
+    if (current) found = true;
+  });
 }
 
 function hintFor(e) {
-  const last = previousSetsFor(e);
+  const last = previousSetsFor(e).filter(Boolean);
   if (!last || !last.length) return '';
   const [lo, hi] = parseRange(e.target);
   const w = Math.max(...last.map(s => s.weight));
@@ -1487,11 +1483,7 @@ function renderStep() {
   updateExercisePresentationAtlas(recognizedVariant ? variantKey(e) : `${e.key}/unrecognized`, presentationContext);
   $('variantAtlasNotice').hidden = recognizedVariant;
   const sharedLegPressImage = e.key === SHARED_LEG_PRESS_MEDIA.exerciseId && e.variantId === SHARED_LEG_PRESS_MEDIA.variantId;
-  const legPressImage = e.key === SHARED_LEG_PRESS_MEDIA.exerciseId && ['default', SHARED_LEG_PRESS_MEDIA.variantId].includes(e.variantId);
   const missingVariantImage = !!e.variantId && e.variantId !== 'default' && !sharedLegPressImage;
-  $('legacyImageControls').hidden = !legPressImage || !!presentationContext;
-  $('legacyExerciseImageBox').dataset.mode = legPressImage ? legPressImageMode : 'technique';
-  document.querySelectorAll('[data-legacy-image-mode]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.legacyImageMode === legPressImageMode)));
   $('variantImageShared').hidden = !sharedLegPressImage;
   $('variantImageMissing').hidden = !missingVariantImage;
   if (missingVariantImage) $('legacyExerciseImageBox').hidden = true;
@@ -1514,7 +1506,6 @@ function renderStep() {
           $('variantImageShared').hidden = true;
           $('variantImageMissing').hidden = false;
           $('legacyExerciseImageBox').hidden = true;
-          $('legacyImageControls').hidden = true;
           return;
         }
         img.src = PLACEHOLDER;
@@ -1534,10 +1525,11 @@ function renderStep() {
     const logged = active.sets.find(s => s.step === active.step && s.setNumber === i + 1);
     const draft = !logged && BASE_B.getDraft(STORE.storage, draftQuery(active.step, i + 1));
     if (draft) hasDraft = true;
-    const p = last[i];
-    const prev = p ? setStr(e.key, p.weight, p.reps) : '—';
+    const rowExercise = logged || e;
+    const p = logged ? previousSetsFor(rowExercise)[i] : last[i];
+    const prev = p ? `${fmt(p.weight)} kg × ${p.reps}${p.otherPlan ? ' · inny plan' : ''}` : 'Brak danych';
     html += `<tr class="set-row">
-      <td>${i + 1}</td>
+      <td>${i + 1}${logged && (logged.key !== e.key || (logged.variantId || 'default') !== (e.variantId || 'default')) ? `<small class="original-exercise">${esc(logged.name || nameOf(logged.key)) + (logged.variantId && logged.variantId !== 'default' ? ' · ' + esc(variantName(logged)) : '')}</small>` : ''}</td>
       <td class="prev-val" data-act="fillprev" data-i="${i}">${prev}</td>
       <td><input class="input-cell" inputmode="decimal" enterkeyhint="next" autocomplete="off" id="weight_${i}" data-i="${i}" placeholder="0" value="${logged ? logged.weight : draft ? esc(draft.weight) : ''}" ${logged ? 'disabled' : ''} aria-label="${bw ? 'Dodatkowe kg' : 'Ciężar'}, seria ${i + 1}"></td>
       <td><input class="input-cell" inputmode="numeric" enterkeyhint="done" autocomplete="off" id="reps_${i}" data-i="${i}" placeholder="0" value="${logged ? logged.reps : draft ? esc(draft.reps) : ''}" ${logged ? 'disabled' : ''} aria-label="Powtórzenia, seria ${i + 1}"></td>
@@ -1547,6 +1539,7 @@ function renderStep() {
   $('setsBody').innerHTML = html;
   $('draftStatus').hidden = !hasDraft;
   for (let i = 0; i < n; i += 1) validateRow(i);
+  updateActiveSetHighlight();
   $('btnAddSet').disabled = n >= 12;
   $('btnRemoveSet').disabled = n <= 1;
 
@@ -1624,7 +1617,7 @@ function scheduleDraftSave(step) {
 }
 
 function readRow(i) {
-  const e = exAt(active.step);
+  const e = active.sets.find(s => s.step === active.step && s.setNumber === i + 1) || exAt(active.step);
   const rawW = $('weight_' + i).value.trim();
   const w = (rawW === '' && isBW(e.key)) ? 0 : num(rawW);
   return { w, r: num($('reps_' + i).value), key: e.key };
@@ -1655,7 +1648,7 @@ function stepWeight(d) {
   const e = exAt(active.step);
   let w = num($('weight_' + i).value);
   if (!isFinite(w)) {
-    const prevSet = active.sets.filter(s => s.step === active.step).sort((a, b) => b.setNumber - a.setNumber)[0];
+    const prevSet = active.sets.filter(s => s.step === active.step && s.key === exAt(active.step).key && (s.variantId || 'default') === (exAt(active.step).variantId || 'default')).sort((a, b) => b.setNumber - a.setNumber)[0];
     const lp = previousSetsFor(e)[i];
     w = prevSet ? prevSet.weight : (lp ? lp.weight : 0);
   }
@@ -1670,7 +1663,7 @@ function stepWeight(d) {
 function copyPrev() {
   const i = activeRow();
   if (i < 0) { toast('Wszystkie serie są już zapisane'); return; }
-  const done = active.sets.filter(s => s.step === active.step).sort((a, b) => b.setNumber - a.setNumber)[0];
+  const done = active.sets.filter(s => s.step === active.step && s.key === exAt(active.step).key && (s.variantId || 'default') === (exAt(active.step).variantId || 'default')).sort((a, b) => b.setNumber - a.setNumber)[0];
   const e = exAt(active.step);
   const src = done || previousSetsFor(e)[i];
   if (!src) { toast('Brak poprzedniej serii do skopiowania'); return; }
@@ -1685,7 +1678,8 @@ function copyPrev() {
 function fillPrev(i) {
   const btn = $('btnDone_' + i);
   if (!btn || btn.classList.contains('completed')) return;
-  const p = previousSetsFor(exAt(active.step))[i];
+  const e = active.sets.find(s => s.step === active.step && s.setNumber === i + 1) || exAt(active.step);
+  const p = previousSetsFor(e)[i];
   if (!p) return;
   $('weight_' + i).value = p.weight;
   $('reps_' + i).value = p.reps;
@@ -1731,11 +1725,14 @@ async function onDone(i) {
     $('reps_' + i).disabled = false;
     btn.classList.remove('completed');
     btn.textContent = 'Zapisz';
+    btn.setAttribute('aria-label', 'Zapisz serię ' + (i + 1));
+    updateActiveSetHighlight();
     validateRow(i);
     $('weight_' + i).focus();
     return false;
   }
   if (!btn.classList.contains('ready')) return false;
+  if (!flushDraftsForStep(active.step)) return false;
 
   const { w, r } = readRow(i);
   const e = exAt(active.step);
@@ -1791,35 +1788,58 @@ async function removeSet() {
   renderStep();
 }
 
+function swapCandidates() {
+  const current = exAt(active.step);
+  const source = EXERCISE_METADATA.find(e => e.id === current.key);
+  if (!source) return [];
+  // Movement families constrain suggestions before catalog muscles/equipment rank them.
+  const families = [
+    ['bench_flat','db_bench','db_incline','chest_machine','pushup','dips'],
+    ['db_fly','pec_deck'], ['row_v','row_straight','row_machine'],
+    ['lat_pulldown_wide','lat_pulldown_neutral','pullup'],
+    ['lat_raise_stand','lat_raise_seated','lat_raise_cable'],
+    ['tri_rope','tri_machine','tri_overhead'], ['biceps_preacher','hammer_curl','cable_curl'],
+    ['rear_delt','face_pull'], ['leg_press','smith_squat']
+  ];
+  const muscles = list => list.map(m => m.split(/[—(]/)[0].trim().toLocaleLowerCase('pl'));
+  const overlap = (a,b) => muscles(a).filter(m => muscles(b).includes(m)).length;
+  const equipment = text => /hant/i.test(text) ? 'hantle' : /wyciąg/i.test(text) ? 'wyciąg' : /sztang|smith/i.test(text) ? 'sztanga' : /maszyn|suwnic|butterfly/i.test(text) ? 'maszyna' : 'masa ciała';
+  const sourceEquipment = variantFor(current.key, current.variantId)?.equipment || source.equipment;
+  const family = families.find(f => f.includes(current.key)) || [current.key];
+  return EXERCISE_METADATA.filter(e => CATALOG[e.id] && family.includes(e.id))
+    .flatMap(e => [{ ...e, variantId: 'default', value: e.id }, ...VARIANTS.filter(v => v.exerciseId === e.id).map(v => ({ ...e, ...v, id: e.id, variantId: v.variantId, value: e.id + '/' + v.variantId }))])
+    .filter(e => (e.id !== current.key || e.variantId !== (current.variantId || 'default')) && overlap(e.primaryMuscles, source.primaryMuscles) > 0)
+    .map(e => ({ ...e, score: overlap(e.primaryMuscles, source.primaryMuscles) * 100 + overlap(e.secondaryMuscles, source.secondaryMuscles) * 10 + (equipment(e.equipment) === equipment(sourceEquipment) ? 1 : 0) }))
+    .sort((a,b) => b.score-a.score || a.value.localeCompare(b.value));
+}
 function swapOpen() {
   const box = $('swapBox');
   if (!box.hidden) { box.hidden = true; return; }
-  const base = activePlan().exercises[active.step];
-  const cur = exAt(active.step);
-  const group = GROUP[base.key];
-  const used = new Set();
-  activePlan().exercises.forEach((_, i) => { if (i !== active.step) used.add(exAt(i).key); });
-  let html = '<option value="">— wybierz zamiennik —</option>';
-  if (cur.swapped && !used.has(base.key)) html += `<option value="__base__">↩ Wróć do: ${esc(exName(base))}</option>`;
-  Object.keys(CATALOG).forEach(k => {
-    if (GROUP[k] === group && k !== cur.key && k !== base.key && !used.has(k)) html += `<option value="${esc(k)}">${esc(nameOf(k))}</option>`;
-  });
-  $('swapSelect').innerHTML = html;
+  const candidates = swapCandidates();
+  $('swapOptions').innerHTML = candidates.length ? candidates.map(e => {
+    const asset = exercisePresentationPilot.registry?.records?.find(r => r.exerciseId === e.id && r.variantId === e.variantId)?.bySex?.[exercisePresentationPilot.sex || 'male']?.thumbnail;
+    return '<article class="swap-option">'+(asset ? '<img width="72" height="72" alt="" src="'+esc(asset.path)+'">' : '')+'<h4>'+esc(nameOf(e.id))+(e.variantId !== 'default' ? ' · '+esc(variantDisplayName(e)) : '')+'</h4><p>'+esc(e.primaryMuscles.join(', '))+'</p><p>'+esc(e.equipment)+'</p><p>Podobny wzorzec ruchu i cel treningowy.</p><button class="btn-secondary" data-act="chooseSwap" data-key="'+esc(e.value)+'">Wybierz</button></article>';
+  }).join('') : '<p>Brak odpowiedniego zamiennika w katalogu.</p>';
   box.hidden = false;
 }
 async function applySwap(val) {
-  if (!val) return;
-  const hasSets = active.sets.some(s => s.step === active.step);
-  if (hasSets && !confirm('Zamiana usunie zapisane serie tego ćwiczenia. Kontynuować?')) { $('swapSelect').value = ''; return; }
-  const nextActive = JSON.parse(JSON.stringify(active));
-  nextActive.sets = nextActive.sets.filter(s => s.step !== nextActive.step);
-  delete nextActive.rir[nextActive.step];
-  if (val === '__base__') delete nextActive.swaps[nextActive.step]; else nextActive.swaps[nextActive.step] = val;
-  const query = { planId: active.planId, sessionId: String(active.startedAt || active.planId), step: active.step };
-  const nextDrafts = BASE_B.draftPayloadWithout(STORE.storage, item => item.planId === query.planId && item.sessionId === query.sessionId && item.step === query.step);
-  if (!await commitActiveState(nextActive, { [BASE_B.DRAFT_KEY]: nextDrafts })) return;
-  $('swapBox').hidden = true;
-  renderStep();
+  if (!val || swapBusy || !swapCandidates().some(e => e.value === val)) return;
+  swapBusy = true;
+  try {
+    const current = exAt(active.step);
+    if (!confirm('Zamienić '+current.name+' na '+nameOf(val.split('/')[0])+(val.includes('/') ? ' · '+variantDisplayName(variantFor(...val.split('/'))) : '')+'? Zapisane serie pozostaną przy dotychczasowym ćwiczeniu. Zamiana dotyczy tylko tej sesji. Niezapisane pola zostaną wyczyszczone.')) return;
+    const nextActive = JSON.parse(JSON.stringify(active));
+    // Set identities and slot numbers stay intact; only future saves use the swap.
+    nextActive.swaps[nextActive.step] = val;
+    delete nextActive.rir[nextActive.step];
+    const query = { planId: active.planId, sessionId: String(active.startedAt || active.planId), step: active.step };
+    const nextDrafts = BASE_B.draftPayloadWithout(STORE.storage, item => item.planId === query.planId && item.sessionId === query.sessionId && item.step === query.step);
+    clearTimeout(draftSaveTimer);
+    if (!await commitActiveState(nextActive, { [BASE_B.DRAFT_KEY]: nextDrafts })) { scheduleDraftSave(active.step); return; }
+    pendingDraftSnapshot = null;
+    $('swapBox').hidden = true;
+    renderStep();
+  } finally { swapBusy = false; }
 }
 
 async function setRir(v) {
@@ -2431,6 +2451,15 @@ function renderHistory() {
       if (!groups[key]) { groups[key] = { name: EXERCISE_NAMES_EN[d.exerciseId] || d.exerciseName, variant: variantName({ key: d.exerciseId, ...(Object.hasOwn(d, 'variantId') ? { variantId: d.variantId } : {}) }), exerciseId: d.exerciseId, variantId: d.variantId, items: [] }; order.push(key); }
       groups[key].items.push({ d, idx });
     });
+    // A manually added session has no details yet. Show its plan's missing
+    // exercises without inserting any historical results until the user saves.
+    for (const exercise of getPlan(s.planId)?.exercises || []) {
+      const variant = exercise.variantId || 'default';
+      if (Object.values(groups).some(g => g.exerciseId === exercise.key && (g.variantId || 'default') === variant)) continue;
+      const key = `${exercise.key}/${variant}`;
+      groups[key] = { name: exName(exercise), variant: variantName({ ...exercise, variantId: variant }), exerciseId: exercise.key, variantId: variant, items: [] };
+      order.push(key);
+    }
     const det = order.map(k => {
       const g = groups[k];
       const rv = s.rir && s.rir[g.exerciseId] !== undefined ? ` <small>· zapas ${s.rir[g.exerciseId] === 3 ? '3+' : s.rir[g.exerciseId]}</small>` : '';
@@ -3012,7 +3041,7 @@ const ACTIONS = {
   copyPrev,
   plates: togglePlates,
   bar: async el => { const next = Number(el.dataset.kg); await LS.set('gymverse_bar', next); barKg = next; updatePlates(); },
-  addSet, removeSet, swapOpen,
+  addSet, removeSet, swapOpen, chooseSwap: el => applySwap(el.dataset.key),
   rir: el => setRir(Number(el.dataset.v)),
   next: nextStep,
   prev: prevStep,
@@ -3062,6 +3091,9 @@ document.addEventListener('click', async e => {
   if (!el) return;
   const fn = ACTIONS[el.dataset.act];
   if (!fn) return;
+  const mutatesSession = ['done','chooseSwap','addSet','removeSet','next','prev','finish','discard','rir','resumeDiscard'].includes(el.dataset.act);
+  if (mutatesSession && sessionMutationBusy) return;
+  if (mutatesSession) sessionMutationBusy = true;
   try {
     await fn(el);
     if (STORE) {
@@ -3075,7 +3107,7 @@ document.addEventListener('click', async e => {
     suppressNextStoreFlushError = false;
     toast(storageFailureMessage(error));
     if (STORE && STORE.mode === 'indexeddb') await offerEmergencyExport(history, lastSets, active, true);
-  }
+  } finally { if (mutatesSession) sessionMutationBusy = false; }
 });
 document.addEventListener('input', e => {
   const t = e.target;
@@ -3143,10 +3175,15 @@ document.addEventListener('keydown', async e => {
   const i = Number(t.dataset.i);
   if (t.id.startsWith('weight_')) { $('reps_' + i).focus(); return; }
   const btn = $('btnDone_' + i);
-  if (btn && btn.classList.contains('ready')) { if (await onDone(i)) focusNextRow(); await STORE.flush().catch(error => toast(storageFailureMessage(error))); }
+  if (btn && btn.classList.contains('ready') && !sessionMutationBusy) {
+    sessionMutationBusy = true;
+    try {
+      if (await onDone(i)) focusNextRow();
+      await STORE.flush().catch(error => toast(storageFailureMessage(error)));
+    } finally { sessionMutationBusy = false; }
+  }
 });
 $('chartExerciseSelect').addEventListener('change', updateCharts);
-$('swapSelect').addEventListener('change', async e => { await applySwap(e.target.value); await STORE.flush().catch(error => toast(storageFailureMessage(error))); });
 $('importFile').addEventListener('change', importData);
 
 document.addEventListener('visibilitychange', async () => {
@@ -3170,7 +3207,9 @@ window.addEventListener('resize', () => {
 /* ================== START ================== */
 async function init() {
   try {
-    VARIANTS = (await import('./src/exercise/catalog.js')).EXERCISE_VARIANTS;
+    const catalogModule = await import('./src/exercise/catalog.js');
+    VARIANTS = catalogModule.EXERCISE_VARIANTS;
+    EXERCISE_METADATA = catalogModule.EXERCISE_CATALOG;
     const dataModule = await import('./src/gv-data.js');
     DATA_IDS = dataModule;
     const { createRuntimeStore } = dataModule;
@@ -3202,13 +3241,6 @@ async function init() {
   }
 }
 document.getElementById('exercisePresentation')?.addEventListener('click', handleExercisePresentationControl);
-document.getElementById('legacyImageControls')?.addEventListener('click', event => {
-  const button = event.target.closest('[data-legacy-image-mode]');
-  if (!button || !active) return;
-  legPressImageMode = button.dataset.legacyImageMode;
-  $('legacyExerciseImageBox').dataset.mode = legPressImageMode;
-  document.querySelectorAll('[data-legacy-image-mode]').forEach(item => item.setAttribute('aria-pressed', String(item === button)));
-});
 init();
 })();
 </script>

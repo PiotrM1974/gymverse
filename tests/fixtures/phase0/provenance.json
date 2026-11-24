@@ -1,0 +1,11 @@
+{
+  "synthetic": true,
+  "sourceUrl": "https://piotrm1974.github.io/gymverse/",
+  "sourceCommit": "4fa087b54446736ffeaf846a0da1d801d3c3e19a",
+  "captureDate": "2026-11-24",
+  "method": "Public UI export, second save click, real browser download; canShare=false selects supported fallback; fresh context",
+  "suggestedFilename": "gymverse_backup_2026-11-24.zip",
+  "file": "public-4fa087b-v5-synthetic.zip",
+  "sha256": "4d783d2acfe840ee9ddce5244d9d21c2788db5f56e63225bb857c2e2c18cdbb6",
+  "bytes": 1492
+}

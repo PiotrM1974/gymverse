@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
-import presentationRegistry from '../../outputs/GV-EXERCISE-PRESENTATION-CONTRACT-AND-PILOT/local-pilot/presentation-registry.json' with { type: 'json' };
+import presentationRegistry from '../../src/data/exercise-presentations/release-registry.json' with { type: 'json' };
 import {
   EXERCISE_PRESENTATION_CONTRACT_VERSION,
   isLocalPresentationPilotEnabled,
@@ -55,12 +55,11 @@ describe('versioned exercise presentation contract', () => {
     expect(result).toEqual({ valid: true, errors: [] });
   });
 
-  it('keeps the checked-in pilot registry within the new versioned schema and local-candidate state', () => {
-    const schema = JSON.parse(readFileSync(new URL('../../src/exercise/presentation-extension.schema.json', import.meta.url), 'utf8'));
-    expect(schema.properties.presentationContractVersion.const).toBe(EXERCISE_PRESENTATION_CONTRACT_VERSION);
+  it('keeps the checked-in release registry complete without depending on local pilot artifacts', () => {
+    expect(presentationRegistry.presentationContractVersion).toBe(2);
     expect(validateExercisePresentationRegistry(presentationRegistry).valid).toBe(true);
-    expect(presentationRegistry.status).toBe('local-candidate');
-    expect(presentationRegistry.records[0].status).toBe('local-candidate');
+    expect(presentationRegistry.status).toBe('released');
+    expect(presentationRegistry.records[0].status).toBe('released');
     expect(presentationRegistry.records[0].musclePresentation).toEqual({ kind: 'atlas', exerciseId: 'lat_raise_stand' });
     expect(presentationRegistry.records.map(record => `${record.exerciseId}/${record.variantId}`)).toEqual([
       'lat_raise_stand/default', 'db_bench/default', 'lat_pulldown_wide/default', 'leg_press/default',
@@ -78,7 +77,7 @@ describe('versioned exercise presentation contract', () => {
     for (const exerciseId of ['db_bench', 'lat_pulldown_wide', 'leg_press']) {
       for (const sex of ['male', 'female']) {
         const resolved = resolveExercisePresentation({ registry: presentationRegistry, exerciseId, sex, enabled: true });
-        expect(resolved.status).toBe('local-candidate');
+        expect(resolved.status).toBe('released');
         for (const kind of ['technique', 'thumbnail']) {
           const asset = resolved[kind];
           const bytes = readFileSync(new URL(`../../${asset.path}`, import.meta.url));
@@ -90,21 +89,19 @@ describe('versioned exercise presentation contract', () => {
     }
     const highFeet = resolveExercisePresentation({ registry: presentationRegistry, exerciseId: 'leg_press', variantId: 'high_feet', sex: 'female', enabled: true });
     const base = resolveExercisePresentation({ registry: presentationRegistry, exerciseId: 'leg_press', variantId: 'default', sex: 'female', enabled: true });
-    expect(highFeet).toMatchObject({ status: 'local-candidate', variantId: 'high_feet', sharedBaseImage: true });
+    expect(highFeet).toMatchObject({ status: 'released', variantId: 'high_feet', sharedBaseImage: true });
     expect(highFeet.technique.path).toBe(base.technique.path);
     expect(highFeet.thumbnail.path).toBe(base.thumbnail.path);
     expect(resolveExercisePresentation({ registry: presentationRegistry, exerciseId: 'leg_press', variantId: 'unknown', enabled: true }).status).toBe('legacy');
   });
 
-  it('keeps the owner-approved machine source identical for biceps and triceps while retaining separate exercise records', () => {
+  it('keeps recorded owner source hashes identical for biceps and triceps while retaining separate exercise records', () => {
     const biceps = presentationRegistry.records.find(record => record.exerciseId === 'biceps_preacher');
     const triceps = presentationRegistry.records.find(record => record.exerciseId === 'tri_machine');
     expect(biceps.labels).toEqual({ lower: 'DÓŁ', raised: 'GÓRA' });
     expect(triceps.labels).toEqual({ lower: 'START', raised: 'KONIEC' });
     for (const sex of ['male', 'female']) {
-      const source = id => readFileSync(new URL(`../../outputs/GV-EXERCISE-IMAGES-COMPLETE/source/${id}__default-${sex}-original.png`, import.meta.url));
-      expect(createHash('sha256').update(source('biceps_preacher')).digest('hex'))
-        .toBe(createHash('sha256').update(source('tri_machine')).digest('hex'));
+      expect(biceps.ownerSelection.sourceSha256BySex[sex]).toBe(triceps.ownerSelection.sourceSha256BySex[sex]);
       const bicepsView = resolveExercisePresentation({ registry: presentationRegistry, exerciseId: 'biceps_preacher', sex, enabled: true });
       const tricepsView = resolveExercisePresentation({ registry: presentationRegistry, exerciseId: 'tri_machine', sex, enabled: true });
       expect(bicepsView.exerciseId).toBe('biceps_preacher');

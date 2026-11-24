@@ -1,0 +1,87 @@
+{
+  "app": "gymverse",
+  "version": 4,
+  "exportedAt": "2026-11-24T07:46:26.722Z",
+  "history": [
+    {
+      "date": "2026-01-01T12:00:00.000Z",
+      "planId": "phase0_synthetic",
+      "planTitle": "Synthetic export verification",
+      "details": [
+        {
+          "exerciseId": "bench_flat",
+          "exerciseName": "Historical bench name",
+          "setNumber": 1,
+          "weight": 75,
+          "reps": 8,
+          "date": "2026-01-01T12:00:00.000Z"
+        },
+        {
+          "exerciseId": "bench_flat",
+          "exerciseName": "Historical bench name",
+          "setNumber": 2,
+          "weight": 70,
+          "reps": 10,
+          "date": "2026-01-01T12:00:00.000Z"
+        },
+        {
+          "exerciseId": "bench_flat",
+          "exerciseName": "Historical bench name",
+          "setNumber": 3,
+          "weight": 65,
+          "reps": 12,
+          "date": "2026-01-01T12:00:00.000Z"
+        },
+        {
+          "exerciseId": "leg_press",
+          "exerciseName": "Historical press",
+          "setNumber": 1,
+          "weight": 100,
+          "reps": 10,
+          "date": "2026-01-01T12:00:00.000Z"
+        }
+      ]
+    }
+  ],
+  "lastWeights": {
+    "bench_flat": [
+      {
+        "weight": 75,
+        "reps": 8
+      },
+      {
+        "weight": 70,
+        "reps": 10
+      },
+      {
+        "weight": 65,
+        "reps": 12
+      }
+    ]
+  },
+  "body": [
+    {
+      "date": "2026-01-01",
+      "kg": 80
+    }
+  ],
+  "plans": [
+    {
+      "id": "phase0_synthetic",
+      "title": "Synthetic export verification",
+      "exercises": [
+        {
+          "key": "bench_flat",
+          "sets": 3,
+          "target": "8-12"
+        },
+        {
+          "key": "leg_press",
+          "sets": 1,
+          "target": "10-12"
+        }
+      ]
+    }
+  ],
+  "custom": {}
+}

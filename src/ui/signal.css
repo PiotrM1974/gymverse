@@ -41,7 +41,7 @@ body { padding-top: calc(136px + env(safe-area-inset-top, 0px)); }
 .exercise-hero { border-radius: 22px; }
 .hero-title-box h2 { font: 800 clamp(25px, 6vw, 36px)/1 'Barlow Condensed', 'Arial Narrow', sans-serif; }
 .exercise-presentation__figure { width: min(100%, 245px); }
-.exercise-presentation__group button, .legacy-image-controls button { min-height: 44px; border-radius: 12px; }
+.exercise-presentation__group button { min-height: 44px; border-radius: 12px; }
 .exercise-presentation__details summary { min-height: 44px; display: flex; align-items: center; }
 .training-atlas-disclosure>summary { font-weight: 800; padding: 0 16px; }
 .training-atlas-disclosure>summary::after { content: '+'; margin-left: auto; font-size: 23px; color: var(--lime); }
@@ -111,12 +111,10 @@ select.select-custom, input.select-custom, .pe-target { min-height: 49px; }.pill
   .set-row td:nth-child(3)::before { content: 'Ciężar'; }.set-row td:nth-child(4)::before { content: 'Powt.'; }
   #view-workout[data-bodyweight="true"] .set-row td:nth-child(3)::before { content: 'Dodatk. kg'; }
   .set-row td:nth-child(3)::before, .set-row td:nth-child(4)::before { color: var(--text-muted); text-transform: uppercase; font-size: 10px; font-weight: 800; letter-spacing: .04em; }
-  .set-row:first-child { border-color: var(--lime); }
-  .set-row:first-child td:nth-child(3) .input-cell { border-color: var(--lime); }
+  .set-row.is-current { border-color: var(--lime); }
+  .set-row.is-current td:nth-child(3) .input-cell { border-color: var(--lime); }
   .input-cell { width: 100%; min-height: 54px; font-size: 20px; }
-  .set-row:first-child td:last-child { grid-column: 1 / -1; }
   .btn-done { min-height: 54px; margin-top: 20px; font-size: 13px; border-radius: 13px; }
-  .set-row:first-child .btn-done { margin-top: 2px; font-size: 17px; }
   .bottom-bar { flex-direction: column; align-items: stretch; gap: 6px; padding: 9px 16px calc(10px + env(safe-area-inset-bottom,0px)); }
   .timer-digits { text-align: center; font-size: 42px; }.timer-label { text-align: center; }
   .timer-ctrls { display: grid; grid-template-columns: 1fr 1fr 1.25fr; }.btn-timer { min-height: 46px; }
@@ -166,13 +164,11 @@ body:has(#timerBar[style*="display: flex"]) { padding-bottom: calc(160px + env(s
 .progress-bar, .plan-card.next .plan-start, .btn-primary, .btn-done.ready,
 .rp.active, .pill.active, #view-planedit [data-act="peNew"] { background: var(--accent-fill); color: var(--on-accent); border-color: var(--accent-fill); }
 .btn-done.completed { background: var(--pull-soft); color: var(--pull-text); border-color: var(--pull); }
-.exercise-presentation__group button[aria-pressed="true"], .legacy-image-controls button[aria-pressed="true"] { color: var(--accent-text); border-color: var(--accent-text); background: var(--lime-dim); }
-.exercise-presentation__group button:focus-visible, .legacy-image-controls button:focus-visible,
+.exercise-presentation__group button[aria-pressed="true"] { color: var(--accent-text); border-color: var(--accent-text); background: var(--lime-dim); }
+.exercise-presentation__group button:focus-visible,
 .training-atlas-disclosure > summary:focus-visible { outline: 3px solid var(--accent-text); outline-offset: 2px; }
-.exercise-presentation__figure:not([data-mode="thumbnail"]) { width: 100%; aspect-ratio: 3 / 2; position: relative; }
-.exercise-presentation__figure:not([data-mode="thumbnail"]) img { width: 100%; height: 100%; object-fit: contain; transform: none; }
-.exercise-presentation__figure:not([data-mode="thumbnail"])::after { content: ''; position: absolute; inset: 0 50% 0 0; border: 3px solid var(--accent-fill); border-radius: 12px 0 0 12px; pointer-events: none; }
-.exercise-presentation__figure[data-position="raised"]:not([data-mode="thumbnail"])::after { inset: 0 0 0 50%; border-radius: 0 12px 12px 0; }
+.exercise-presentation__figure { width: 100%; aspect-ratio: 3 / 2; }
+.exercise-presentation__figure img { width: 100%; height: 100%; object-fit: contain; transform: none; }
 .exercise-presentation__figure, .hero-img-box { background: var(--card-sub); }
 .training-atlas-disclosure > summary { min-height: 56px; }
 .training-atlas-disclosure > summary::before { content: ''; width: 10px; height: 10px; flex: none; margin-right: 24px; border-radius: 50%; background: #F04438; box-shadow: 15px 0 0 #F3B544; }
@@ -193,3 +189,28 @@ body:has(#timerBar[style*="display: flex"]) { padding-bottom: calc(160px + env(s
 .gbar .gfill.low { background: var(--push); }
 .gbar .gfill.high { background: var(--pull); }
 @media (prefers-reduced-motion: reduce) { .bottom-bar.flash { animation: none; } }
+
+/* Stable series controls and native mobile date sizing. */
+#histNewDate { box-sizing:border-box; width:100%; max-width:100%; min-width:0; min-inline-size:0; }
+#histNewDate::-webkit-date-and-time-value { min-width:0; text-align:left; }
+#view-history .row, #view-history .row > * { min-width:0; max-width:100%; box-sizing:border-box; }
+.original-exercise { display:block; font-size:11px; overflow-wrap:anywhere; }
+@media(max-width:560px) {
+ .set-row td:nth-child(3) { grid-column:1; grid-row:2; }
+ .set-row td:nth-child(4) { grid-column:2; grid-row:2; }
+ .set-row td:nth-child(5) { grid-column:3; grid-row:2; align-self:end; }
+ .set-row .btn-done { margin:0; height:54px; min-height:54px; font-size:0; }
+ .set-row .btn-done::after { content:'✓'; font-size:22px; }
+ .set-row td:nth-child(2) { overflow-wrap:anywhere; }
+}
+
+#swapBox { padding:16px; border:1px solid var(--border); border-radius:18px; background:var(--card-bg); }
+.swap-option { padding:12px 0; border-bottom:1px solid var(--border); }
+.swap-option p { font-size:14px; color:var(--text-muted); }
+[data-act="swapOpen"] { min-height:48px; border:1px solid var(--border); border-radius:12px; padding:10px 16px; }
+
+@media(min-width:561px) { .set-row.is-current { outline:2px solid var(--lime); outline-offset:-2px; } }
+.swap-option img { object-fit:contain; border-radius:12px; float:right; margin:0 0 8px 8px; }
+.swap-option h4 { margin:8px 0; overflow-wrap:anywhere; }
+
+#swapBox > h3 { margin:0 0 12px; font:800 20px/1.3 "Source Sans 3",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
