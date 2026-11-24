@@ -346,7 +346,7 @@ select.select-custom, input.select-custom { width: 100%; background: var(--card-
     <div class="link-row">
       <button class="btn-link" data-act="swapOpen">⇄ Zamień ćwiczenie</button>
     </div>
-    <div id="swapBox" hidden><select class="select-custom" id="swapSelect"></select></div>
+    <section id="swapBox" hidden aria-label="Wybór zamiennika"><h3>Zamień ćwiczenie</h3><div id="swapOptions"></div><button class="btn-secondary" data-act="swapOpen">Anuluj</button></section>
 
     <div class="rest-row">
       <span>Przerwa:</span>
@@ -663,6 +663,9 @@ const ID_MAP = {
   pl2_1: 'lat_pulldown_neutral', pl2_2: 'row_straight', pl2_3: 'rear_delt', pl2_4: 'biceps_preacher', pl2_5: 'leg_curl'
 };
 
+let EXERCISE_METADATA = [];
+let swapBusy = false;
+let sessionMutationBusy = false;
 let CATALOG = Object.assign({}, CATALOG_BASE);
 let VARIANTS = [];
 const variantFor = (key, variantId) => VARIANTS.find(v => v.exerciseId === key && v.variantId === variantId);
@@ -1080,10 +1083,11 @@ updateHeaderSize();
 const workoutView = document.getElementById('view-workout');
 const workoutHero = workoutView.querySelector('.exercise-hero');
 workoutView.insertBefore(workoutHero.querySelector('.hero-title-box'), workoutView.querySelector('.progress-bar-container'));
+workoutView.querySelector('.hero-title-box').append(workoutView.querySelector('.link-row'), $('swapBox'));
 const workoutControls = document.createElement('section');
 workoutControls.className = 'workout-control-card';
 ['.sets-table', '.step-strip', '.set-ctrl'].forEach(selector => workoutControls.append(workoutView.querySelector(selector)));
-workoutView.insertBefore(workoutControls, workoutView.querySelector('.link-row'));
+workoutView.insertBefore(workoutControls, workoutView.querySelector('.rest-row'));
 document.addEventListener('keydown', event => {
   const card = event.target.closest('.plan-card[data-act]');
   if (card && (event.key === 'Enter' || event.key === ' ')) {
@@ -1164,8 +1168,9 @@ function renderPlans() {
 /* ================== TRENING ================== */
 function exAt(step) {
   const base = activePlan().exercises[step];
-  const sw = active.swaps && active.swaps[step];
-  if (sw && CATALOG[sw]) return { ...base, key: sw, variantId: 'default', name: nameOf(sw), img: IMG_BY_KEY[sw] || safeImg(sw) || 'none', swapped: true, baseKey: base.key };
+  const swapValue = active.swaps && active.swaps[step];
+  const [sw, swapVariant = 'default'] = String(swapValue || '').split('/');
+  if (sw && CATALOG[sw] && validVariant(sw, swapVariant)) return { ...base, key: sw, variantId: swapVariant, name: nameOf(sw), img: IMG_BY_KEY[sw] || safeImg(sw) || 'none', swapped: true, baseKey: base.key };
   return Object.assign({}, base, { name: exName(base), img: imgFor(base), swapped: false });
 }
 function activePlan() {
@@ -1390,13 +1395,32 @@ function parseRange(t) {
   return p.length === 2 ? [p[0], p[1]] : [p[0], p[0]];
 }
 function previousSetsFor(e) {
-  if (!Object.hasOwn(e, 'variantId') || !validVariant(e.key, e.variantId)) return [];
-  const previous = history.slice().sort(byDate).reverse().find(session => session.details?.some(d => d.exerciseId === e.key && d.variantId === e.variantId));
-  return previous ? previous.details.filter(d => d.exerciseId === e.key && d.variantId === e.variantId).sort((a, b) => a.setNumber - b.setNumber) : [];
+  // Legacy history predates variantId; only the base variant may use it.
+  const variant = e.variantId || 'default';
+  if (!validVariant(e.key, variant)) return [];
+  const matches = d => d.exerciseId === e.key && (d.variantId || 'default') === variant && validSet(e.key, Number(d.weight), Number(d.reps));
+  const before = active?.startedAt || Date.now();
+  const candidates = history.filter(h => h.id !== active?.id && new Date(h.date).getTime() < before && h.details?.some(matches)).sort(byDate).reverse();
+  // Same-plan loads are comparable within the same exercise order and fatigue.
+  const previous = candidates.find(h => h.planId === active?.planId) || candidates[0];
+  if (!previous) return [];
+  const result = [];
+  previous.details.filter(matches).forEach(d => {
+    if (Number.isInteger(d.setNumber) && d.setNumber > 0) result[d.setNumber - 1] = { ...d, otherPlan: previous.planId !== active?.planId };
+  });
+  return result;
+}
+function updateActiveSetHighlight() {
+  let found = false;
+  document.querySelectorAll('#setsBody .set-row').forEach(row => {
+    const current = !found && !row.querySelector('.btn-done').classList.contains('completed');
+    row.classList.toggle('is-current', current);
+    if (current) found = true;
+  });
 }
 
 function hintFor(e) {
-  const last = previousSetsFor(e);
+  const last = previousSetsFor(e).filter(Boolean);
   if (!last || !last.length) return '';
   const [lo, hi] = parseRange(e.target);
   const w = Math.max(...last.map(s => s.weight));
@@ -1501,10 +1525,11 @@ function renderStep() {
     const logged = active.sets.find(s => s.step === active.step && s.setNumber === i + 1);
     const draft = !logged && BASE_B.getDraft(STORE.storage, draftQuery(active.step, i + 1));
     if (draft) hasDraft = true;
-    const p = last[i];
-    const prev = p ? setStr(e.key, p.weight, p.reps) : '—';
+    const rowExercise = logged || e;
+    const p = logged ? previousSetsFor(rowExercise)[i] : last[i];
+    const prev = p ? `${fmt(p.weight)} kg × ${p.reps}${p.otherPlan ? ' · inny plan' : ''}` : 'Brak danych';
     html += `<tr class="set-row">
-      <td>${i + 1}</td>
+      <td>${i + 1}${logged && (logged.key !== e.key || (logged.variantId || 'default') !== (e.variantId || 'default')) ? `<small class="original-exercise">${esc(logged.name || nameOf(logged.key)) + (logged.variantId && logged.variantId !== 'default' ? ' · ' + esc(variantName(logged)) : '')}</small>` : ''}</td>
       <td class="prev-val" data-act="fillprev" data-i="${i}">${prev}</td>
       <td><input class="input-cell" inputmode="decimal" enterkeyhint="next" autocomplete="off" id="weight_${i}" data-i="${i}" placeholder="0" value="${logged ? logged.weight : draft ? esc(draft.weight) : ''}" ${logged ? 'disabled' : ''} aria-label="${bw ? 'Dodatkowe kg' : 'Ciężar'}, seria ${i + 1}"></td>
       <td><input class="input-cell" inputmode="numeric" enterkeyhint="done" autocomplete="off" id="reps_${i}" data-i="${i}" placeholder="0" value="${logged ? logged.reps : draft ? esc(draft.reps) : ''}" ${logged ? 'disabled' : ''} aria-label="Powtórzenia, seria ${i + 1}"></td>
@@ -1514,6 +1539,7 @@ function renderStep() {
   $('setsBody').innerHTML = html;
   $('draftStatus').hidden = !hasDraft;
   for (let i = 0; i < n; i += 1) validateRow(i);
+  updateActiveSetHighlight();
   $('btnAddSet').disabled = n >= 12;
   $('btnRemoveSet').disabled = n <= 1;
 
@@ -1591,7 +1617,7 @@ function scheduleDraftSave(step) {
 }
 
 function readRow(i) {
-  const e = exAt(active.step);
+  const e = active.sets.find(s => s.step === active.step && s.setNumber === i + 1) || exAt(active.step);
   const rawW = $('weight_' + i).value.trim();
   const w = (rawW === '' && isBW(e.key)) ? 0 : num(rawW);
   return { w, r: num($('reps_' + i).value), key: e.key };
@@ -1622,7 +1648,7 @@ function stepWeight(d) {
   const e = exAt(active.step);
   let w = num($('weight_' + i).value);
   if (!isFinite(w)) {
-    const prevSet = active.sets.filter(s => s.step === active.step).sort((a, b) => b.setNumber - a.setNumber)[0];
+    const prevSet = active.sets.filter(s => s.step === active.step && s.key === exAt(active.step).key && (s.variantId || 'default') === (exAt(active.step).variantId || 'default')).sort((a, b) => b.setNumber - a.setNumber)[0];
     const lp = previousSetsFor(e)[i];
     w = prevSet ? prevSet.weight : (lp ? lp.weight : 0);
   }
@@ -1637,7 +1663,7 @@ function stepWeight(d) {
 function copyPrev() {
   const i = activeRow();
   if (i < 0) { toast('Wszystkie serie są już zapisane'); return; }
-  const done = active.sets.filter(s => s.step === active.step).sort((a, b) => b.setNumber - a.setNumber)[0];
+  const done = active.sets.filter(s => s.step === active.step && s.key === exAt(active.step).key && (s.variantId || 'default') === (exAt(active.step).variantId || 'default')).sort((a, b) => b.setNumber - a.setNumber)[0];
   const e = exAt(active.step);
   const src = done || previousSetsFor(e)[i];
   if (!src) { toast('Brak poprzedniej serii do skopiowania'); return; }
@@ -1652,7 +1678,8 @@ function copyPrev() {
 function fillPrev(i) {
   const btn = $('btnDone_' + i);
   if (!btn || btn.classList.contains('completed')) return;
-  const p = previousSetsFor(exAt(active.step))[i];
+  const e = active.sets.find(s => s.step === active.step && s.setNumber === i + 1) || exAt(active.step);
+  const p = previousSetsFor(e)[i];
   if (!p) return;
   $('weight_' + i).value = p.weight;
   $('reps_' + i).value = p.reps;
@@ -1698,11 +1725,14 @@ async function onDone(i) {
     $('reps_' + i).disabled = false;
     btn.classList.remove('completed');
     btn.textContent = 'Zapisz';
+    btn.setAttribute('aria-label', 'Zapisz serię ' + (i + 1));
+    updateActiveSetHighlight();
     validateRow(i);
     $('weight_' + i).focus();
     return false;
   }
   if (!btn.classList.contains('ready')) return false;
+  if (!flushDraftsForStep(active.step)) return false;
 
   const { w, r } = readRow(i);
   const e = exAt(active.step);
@@ -1758,35 +1788,58 @@ async function removeSet() {
   renderStep();
 }
 
+function swapCandidates() {
+  const current = exAt(active.step);
+  const source = EXERCISE_METADATA.find(e => e.id === current.key);
+  if (!source) return [];
+  // Movement families constrain suggestions before catalog muscles/equipment rank them.
+  const families = [
+    ['bench_flat','db_bench','db_incline','chest_machine','pushup','dips'],
+    ['db_fly','pec_deck'], ['row_v','row_straight','row_machine'],
+    ['lat_pulldown_wide','lat_pulldown_neutral','pullup'],
+    ['lat_raise_stand','lat_raise_seated','lat_raise_cable'],
+    ['tri_rope','tri_machine','tri_overhead'], ['biceps_preacher','hammer_curl','cable_curl'],
+    ['rear_delt','face_pull'], ['leg_press','smith_squat']
+  ];
+  const muscles = list => list.map(m => m.split(/[—(]/)[0].trim().toLocaleLowerCase('pl'));
+  const overlap = (a,b) => muscles(a).filter(m => muscles(b).includes(m)).length;
+  const equipment = text => /hant/i.test(text) ? 'hantle' : /wyciąg/i.test(text) ? 'wyciąg' : /sztang|smith/i.test(text) ? 'sztanga' : /maszyn|suwnic|butterfly/i.test(text) ? 'maszyna' : 'masa ciała';
+  const sourceEquipment = variantFor(current.key, current.variantId)?.equipment || source.equipment;
+  const family = families.find(f => f.includes(current.key)) || [current.key];
+  return EXERCISE_METADATA.filter(e => CATALOG[e.id] && family.includes(e.id))
+    .flatMap(e => [{ ...e, variantId: 'default', value: e.id }, ...VARIANTS.filter(v => v.exerciseId === e.id).map(v => ({ ...e, ...v, id: e.id, variantId: v.variantId, value: e.id + '/' + v.variantId }))])
+    .filter(e => (e.id !== current.key || e.variantId !== (current.variantId || 'default')) && overlap(e.primaryMuscles, source.primaryMuscles) > 0)
+    .map(e => ({ ...e, score: overlap(e.primaryMuscles, source.primaryMuscles) * 100 + overlap(e.secondaryMuscles, source.secondaryMuscles) * 10 + (equipment(e.equipment) === equipment(sourceEquipment) ? 1 : 0) }))
+    .sort((a,b) => b.score-a.score || a.value.localeCompare(b.value));
+}
 function swapOpen() {
   const box = $('swapBox');
   if (!box.hidden) { box.hidden = true; return; }
-  const base = activePlan().exercises[active.step];
-  const cur = exAt(active.step);
-  const group = GROUP[base.key];
-  const used = new Set();
-  activePlan().exercises.forEach((_, i) => { if (i !== active.step) used.add(exAt(i).key); });
-  let html = '<option value="">— wybierz zamiennik —</option>';
-  if (cur.swapped && !used.has(base.key)) html += `<option value="__base__">↩ Wróć do: ${esc(exName(base))}</option>`;
-  Object.keys(CATALOG).forEach(k => {
-    if (GROUP[k] === group && k !== cur.key && k !== base.key && !used.has(k)) html += `<option value="${esc(k)}">${esc(nameOf(k))}</option>`;
-  });
-  $('swapSelect').innerHTML = html;
+  const candidates = swapCandidates();
+  $('swapOptions').innerHTML = candidates.length ? candidates.map(e => {
+    const asset = exercisePresentationPilot.registry?.records?.find(r => r.exerciseId === e.id && r.variantId === e.variantId)?.bySex?.[exercisePresentationPilot.sex || 'male']?.thumbnail;
+    return '<article class="swap-option">'+(asset ? '<img width="72" height="72" alt="" src="'+esc(asset.path)+'">' : '')+'<h4>'+esc(nameOf(e.id))+(e.variantId !== 'default' ? ' · '+esc(variantDisplayName(e)) : '')+'</h4><p>'+esc(e.primaryMuscles.join(', '))+'</p><p>'+esc(e.equipment)+'</p><p>Podobny wzorzec ruchu i cel treningowy.</p><button class="btn-secondary" data-act="chooseSwap" data-key="'+esc(e.value)+'">Wybierz</button></article>';
+  }).join('') : '<p>Brak odpowiedniego zamiennika w katalogu.</p>';
   box.hidden = false;
 }
 async function applySwap(val) {
-  if (!val) return;
-  const hasSets = active.sets.some(s => s.step === active.step);
-  if (hasSets && !confirm('Zamiana usunie zapisane serie tego ćwiczenia. Kontynuować?')) { $('swapSelect').value = ''; return; }
-  const nextActive = JSON.parse(JSON.stringify(active));
-  nextActive.sets = nextActive.sets.filter(s => s.step !== nextActive.step);
-  delete nextActive.rir[nextActive.step];
-  if (val === '__base__') delete nextActive.swaps[nextActive.step]; else nextActive.swaps[nextActive.step] = val;
-  const query = { planId: active.planId, sessionId: String(active.startedAt || active.planId), step: active.step };
-  const nextDrafts = BASE_B.draftPayloadWithout(STORE.storage, item => item.planId === query.planId && item.sessionId === query.sessionId && item.step === query.step);
-  if (!await commitActiveState(nextActive, { [BASE_B.DRAFT_KEY]: nextDrafts })) return;
-  $('swapBox').hidden = true;
-  renderStep();
+  if (!val || swapBusy || !swapCandidates().some(e => e.value === val)) return;
+  swapBusy = true;
+  try {
+    const current = exAt(active.step);
+    if (!confirm('Zamienić '+current.name+' na '+nameOf(val.split('/')[0])+(val.includes('/') ? ' · '+variantDisplayName(variantFor(...val.split('/'))) : '')+'? Zapisane serie pozostaną przy dotychczasowym ćwiczeniu. Zamiana dotyczy tylko tej sesji. Niezapisane pola zostaną wyczyszczone.')) return;
+    const nextActive = JSON.parse(JSON.stringify(active));
+    // Set identities and slot numbers stay intact; only future saves use the swap.
+    nextActive.swaps[nextActive.step] = val;
+    delete nextActive.rir[nextActive.step];
+    const query = { planId: active.planId, sessionId: String(active.startedAt || active.planId), step: active.step };
+    const nextDrafts = BASE_B.draftPayloadWithout(STORE.storage, item => item.planId === query.planId && item.sessionId === query.sessionId && item.step === query.step);
+    clearTimeout(draftSaveTimer);
+    if (!await commitActiveState(nextActive, { [BASE_B.DRAFT_KEY]: nextDrafts })) { scheduleDraftSave(active.step); return; }
+    pendingDraftSnapshot = null;
+    $('swapBox').hidden = true;
+    renderStep();
+  } finally { swapBusy = false; }
 }
 
 async function setRir(v) {
@@ -2398,6 +2451,15 @@ function renderHistory() {
       if (!groups[key]) { groups[key] = { name: EXERCISE_NAMES_EN[d.exerciseId] || d.exerciseName, variant: variantName({ key: d.exerciseId, ...(Object.hasOwn(d, 'variantId') ? { variantId: d.variantId } : {}) }), exerciseId: d.exerciseId, variantId: d.variantId, items: [] }; order.push(key); }
       groups[key].items.push({ d, idx });
     });
+    // A manually added session has no details yet. Show its plan's missing
+    // exercises without inserting any historical results until the user saves.
+    for (const exercise of getPlan(s.planId)?.exercises || []) {
+      const variant = exercise.variantId || 'default';
+      if (Object.values(groups).some(g => g.exerciseId === exercise.key && (g.variantId || 'default') === variant)) continue;
+      const key = `${exercise.key}/${variant}`;
+      groups[key] = { name: exName(exercise), variant: variantName({ ...exercise, variantId: variant }), exerciseId: exercise.key, variantId: variant, items: [] };
+      order.push(key);
+    }
     const det = order.map(k => {
       const g = groups[k];
       const rv = s.rir && s.rir[g.exerciseId] !== undefined ? ` <small>· zapas ${s.rir[g.exerciseId] === 3 ? '3+' : s.rir[g.exerciseId]}</small>` : '';
@@ -2979,7 +3041,7 @@ const ACTIONS = {
   copyPrev,
   plates: togglePlates,
   bar: async el => { const next = Number(el.dataset.kg); await LS.set('gymverse_bar', next); barKg = next; updatePlates(); },
-  addSet, removeSet, swapOpen,
+  addSet, removeSet, swapOpen, chooseSwap: el => applySwap(el.dataset.key),
   rir: el => setRir(Number(el.dataset.v)),
   next: nextStep,
   prev: prevStep,
@@ -3029,6 +3091,9 @@ document.addEventListener('click', async e => {
   if (!el) return;
   const fn = ACTIONS[el.dataset.act];
   if (!fn) return;
+  const mutatesSession = ['done','chooseSwap','addSet','removeSet','next','prev','finish','discard','rir','resumeDiscard'].includes(el.dataset.act);
+  if (mutatesSession && sessionMutationBusy) return;
+  if (mutatesSession) sessionMutationBusy = true;
   try {
     await fn(el);
     if (STORE) {
@@ -3042,7 +3107,7 @@ document.addEventListener('click', async e => {
     suppressNextStoreFlushError = false;
     toast(storageFailureMessage(error));
     if (STORE && STORE.mode === 'indexeddb') await offerEmergencyExport(history, lastSets, active, true);
-  }
+  } finally { if (mutatesSession) sessionMutationBusy = false; }
 });
 document.addEventListener('input', e => {
   const t = e.target;
@@ -3110,10 +3175,15 @@ document.addEventListener('keydown', async e => {
   const i = Number(t.dataset.i);
   if (t.id.startsWith('weight_')) { $('reps_' + i).focus(); return; }
   const btn = $('btnDone_' + i);
-  if (btn && btn.classList.contains('ready')) { if (await onDone(i)) focusNextRow(); await STORE.flush().catch(error => toast(storageFailureMessage(error))); }
+  if (btn && btn.classList.contains('ready') && !sessionMutationBusy) {
+    sessionMutationBusy = true;
+    try {
+      if (await onDone(i)) focusNextRow();
+      await STORE.flush().catch(error => toast(storageFailureMessage(error)));
+    } finally { sessionMutationBusy = false; }
+  }
 });
 $('chartExerciseSelect').addEventListener('change', updateCharts);
-$('swapSelect').addEventListener('change', async e => { await applySwap(e.target.value); await STORE.flush().catch(error => toast(storageFailureMessage(error))); });
 $('importFile').addEventListener('change', importData);
 
 document.addEventListener('visibilitychange', async () => {
@@ -3137,7 +3207,9 @@ window.addEventListener('resize', () => {
 /* ================== START ================== */
 async function init() {
   try {
-    VARIANTS = (await import('./src/exercise/catalog.js')).EXERCISE_VARIANTS;
+    const catalogModule = await import('./src/exercise/catalog.js');
+    VARIANTS = catalogModule.EXERCISE_VARIANTS;
+    EXERCISE_METADATA = catalogModule.EXERCISE_CATALOG;
     const dataModule = await import('./src/gv-data.js');
     DATA_IDS = dataModule;
     const { createRuntimeStore } = dataModule;

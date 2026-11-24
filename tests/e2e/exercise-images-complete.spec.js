@@ -62,9 +62,9 @@ test('production images install into the ordinary offline cache and survive an o
   await page.reload();
   await expect.poll(() => page.evaluate(() => navigator.serviceWorker.controller?.scriptURL || '')).toMatch(/\/gymverse\/sw\.js$/);
   await expect.poll(() => page.evaluate(async () => {
-    const cache = await caches.open('gymverse-v19');
+    const cache = await caches.open('gymverse-v20');
     return (await cache.keys()).filter(request => request.url.includes('/src/data/exercise-images/selected/')).length;
-  })).toBe(68);
+  })).toBe(136);
   await page.context().setOffline(true);
   await installPlan(page);
   for (let index = 0; index < ids.length; index += 1) {

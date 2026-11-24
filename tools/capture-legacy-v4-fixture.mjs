@@ -1,0 +1,22 @@
+// Execute the original, trusted Git exporter, not a reconstruction of its schema.
+import { execFileSync } from 'node:child_process';
+import vm from 'node:vm';
+import fs from 'node:fs/promises';
+import { createHash } from 'node:crypto';
+const commit = '7d32975ec834903bf96987218bafdd67b8e0f9cf';
+const source = execFileSync('git',['show',`${commit}:index.html`],{encoding:'utf8'});
+const start = source.indexOf('async function exportData() {');
+const end = source.indexOf('function csvExport()',start);
+if(start<0||end<0)throw Error('Exporter boundaries missing');
+const exporter = source.slice(start,end).trim();
+const dir = new URL('../tests/fixtures/phase0/',import.meta.url);
+const modern = JSON.parse(await fs.readFile(new URL('public-4fa087b-source.json',dir),'utf8'));
+const history = modern.gymverse_history.map(({id,...session})=>({...session,details:session.details.map(({id,variantId,...detail})=>detail)}));
+const plans = modern.gymverse_plans.map(plan=>({...plan,exercises:plan.exercises.map(({variantId,...exercise})=>exercise)}));
+let captured;
+const sandbox = {history,PLANS:plans,body:modern.gymverse_body,lastSets:{bench_flat:[{weight:75,reps:8},{weight:70,reps:10},{weight:65,reps:12}]},CUSTOM:{},dkey:()=> '2026-11-24',deliverFile:async(name,mime,content)=>{captured={name,mime,content};return true;},LS:{set(){}},renderPlans(){},$:()=>({innerHTML:''}),toast(){}};
+vm.createContext(sandbox);
+await vm.runInContext(exporter+'\nexportData()',sandbox,{timeout:1000});
+await fs.writeFile(new URL('legacy-7d32975-v4-synthetic.json',dir),captured.content+'\n');
+await fs.writeFile(new URL('legacy-v4-provenance.json',dir),JSON.stringify({synthetic:true,sourceCommit:commit,sourcePath:'index.html',method:'Original exportData function executed with synthetic in-memory inputs and captured deliverFile output; no private data',exporterSha256:createHash('sha256').update(exporter).digest('hex'),filename:captured.name,mime:captured.mime,limitations:'Original v4 exporter does not include active session, draft or app settings. This historical fixture intentionally contains no variantId or stable row IDs.'},null,2)+'\n');
+console.log({version:JSON.parse(captured.content).version,bytes:captured.content.length});

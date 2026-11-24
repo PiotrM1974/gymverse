@@ -89,7 +89,7 @@ describe('service worker cache safety', () => {
     let installation;
     harness.listeners.install({ waitUntil: promise => { installation = promise; } });
     await installation;
-    expect(harness.opened).toContain('gymverse-v19');
+    expect(harness.opened).toContain('gymverse-v20');
     expect(harness.added).toContain('src/ui/signal.css');
     expect(harness.added).toContain('src/gv-base-b.js');
     expect(harness.added).toContain('src/gv-data.js');
@@ -123,10 +123,10 @@ describe('service worker cache safety', () => {
       let installation;
       harness.listeners.install({ waitUntil: promise => { installation = promise; } });
       await installation;
-      expect(harness.opened).toContain('gymverse-v19');
+      expect(harness.opened).toContain('gymverse-v20');
       expect(harness.added).toContain('src/data/exercise-presentations/release-registry.json');
       expect(harness.added.filter(url => url.startsWith('src/data/exercise-images/selected/technique/'))).toHaveLength(68);
-      expect(harness.added.some(url => url.startsWith('src/data/exercise-images/selected/thumbnails/'))).toBe(false);
+      expect(harness.added.filter(url => url.startsWith('src/data/exercise-images/selected/thumbnails/'))).toHaveLength(68);
       expect(harness.added.every(url => !url.startsWith('outputs/'))).toBe(true);
     }
   });
@@ -162,7 +162,7 @@ describe('service worker cache safety', () => {
     let installation;
     harness.listeners.install({ waitUntil: promise => { installation = promise; } });
     await expect(installation).rejects.toThrow('failed to cache');
-    expect(harness.opened).toContain('gymverse-v19');
+    expect(harness.opened).toContain('gymverse-v20');
     expect(harness.deleted).toEqual([]);
     expect(harness.skipWaitingCalls).toBe(0);
   });

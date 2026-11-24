@@ -4,3 +4,7 @@
 *.webp binary
 *.zip binary
 docs/spec/GymVerse_2_0_MASTER_PROMPT_v*.md -text
+
+# These approval records are hashed byte-for-byte by the release registry.
+outputs/GV-EXERCISE-IMAGES-COMPLETE/OWNER-VISUAL-REVIEW.json -text
+outputs/GV-EXERCISE-IMAGES-COMPLETE/OWNER-PUBLICATION-APPROVAL.json -text

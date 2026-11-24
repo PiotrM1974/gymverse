@@ -75,7 +75,7 @@ test('imports valid v4 lastWeights even when the backup has no new history', asy
     .toEqual([{ weight: 52, reps: 9 }]);
 });
 
-test('keeps a v4 saved weight that differs from its history after reload', async ({ page }) => {
+test('uses a saved v4 history result instead of the unrelated lastWeights hint', async ({ page }) => {
   const backup = syntheticBackup();
   backup.plans = [];
   backup.custom = {};
@@ -86,7 +86,8 @@ test('keeps a v4 saved weight that differs from its history after reload', async
     .toEqual([{ weight: 65, reps: 6 }]);
   await page.reload();
   await startPushA1(page);
-  await expect(page.locator('#setsBody .prev-val[data-i="0"]')).toContainText('65×6');
+  await expect(page.locator('#setsBody .prev-val[data-i="0"]')).toHaveText('40 kg × 8');
+  expect(await page.evaluate(() => JSON.parse(localStorage.getItem('gymverse_last_weights')).bench_flat)).toEqual([{ weight: 65, reps: 6 }]);
 });
 
 test('merges v4 sessions with the same timestamp and deduplicates an identical repeated import by multiplicity', async ({ page }) => {
@@ -175,6 +176,69 @@ test('uncommitted inputs survive a reload and are clearly marked until the set i
   await expect(page.locator('#reps_0')).toHaveValue('8');
   await page.locator('#btnDone_0').click();
   await expect.poll(() => page.evaluate(() => localStorage.getItem('gymverse_draft_v1'))).toBeNull();
+});
+
+test('pagehide and hidden visibility preserve drafts when workout inputs exist or are unmounted', async ({ page }) => {
+  const pageErrors = [];
+  page.on('pageerror', error => pageErrors.push(error.message));
+  await startPushA1(page);
+  await page.locator('#weight_0').fill('42.5');
+  await page.locator('#reps_0').fill('9');
+  await expect.poll(() => page.evaluate(() => JSON.parse(localStorage.getItem('gymverse_draft_v1') || '{"items":[]}').items))
+    .toContainEqual(expect.objectContaining({ weight: '42.5', reps: '9', step: 0, setNumber: 1 }));
+
+  await page.evaluate(() => {
+    Object.defineProperty(document, 'visibilityState', { configurable: true, value: 'hidden' });
+    document.dispatchEvent(new Event('visibilitychange'));
+    window.dispatchEvent(new PageTransitionEvent('pagehide'));
+  });
+  const savedDraft = await page.evaluate(() => JSON.parse(localStorage.getItem('gymverse_draft_v1')));
+  expect(savedDraft.items).toContainEqual(expect.objectContaining({ weight: '42.5', reps: '9' }));
+
+  await page.evaluate(() => {
+    document.querySelector('#weight_0')?.remove();
+    document.querySelector('#reps_0')?.remove();
+    window.dispatchEvent(new PageTransitionEvent('pagehide'));
+  });
+  expect(await page.evaluate(() => JSON.parse(localStorage.getItem('gymverse_draft_v1')))).toEqual(savedDraft);
+  expect(await page.evaluate(() => localStorage.getItem('gymverse_active'))).not.toBeNull();
+  expect(pageErrors).toEqual([]);
+
+  await page.reload();
+  await page.getByRole('button', { name: 'Wznów' }).click();
+  await expect(page.locator('#weight_0')).toHaveValue('42.5');
+  await expect(page.locator('#reps_0')).toHaveValue('9');
+});
+
+test('pagehide without an active workout leaves training storage unchanged', async ({ page }) => {
+  const before = await page.evaluate(() => Object.fromEntries(Object.keys(localStorage).sort().map(key => [key, localStorage.getItem(key)])));
+  const pageErrors = [];
+  page.on('pageerror', error => pageErrors.push(error.message));
+  await page.evaluate(() => {
+    Object.defineProperty(document, 'visibilityState', { configurable: true, value: 'hidden' });
+    document.dispatchEvent(new Event('visibilitychange'));
+    window.dispatchEvent(new PageTransitionEvent('pagehide'));
+  });
+  const after = await page.evaluate(() => Object.fromEntries(Object.keys(localStorage).sort().map(key => [key, localStorage.getItem(key)])));
+  expect(after).toEqual(before);
+  expect(pageErrors).toEqual([]);
+});
+
+test('pagehide saves the last input snapshot when the workout form is unmounted before debounce', async ({ page }) => {
+  const pageErrors = [];
+  page.on('pageerror', error => pageErrors.push(error.message));
+  await startPushA1(page);
+  await page.locator('#weight_0').fill('37.5');
+  await page.locator('#reps_0').fill('11');
+  await page.evaluate(() => {
+    document.querySelector('#weight_0')?.remove();
+    document.querySelector('#reps_0')?.remove();
+    window.dispatchEvent(new PageTransitionEvent('pagehide'));
+  });
+  const draft = await page.evaluate(() => JSON.parse(localStorage.getItem('gymverse_draft_v1') || '{"items":[]}'));
+  expect(draft.items).toContainEqual(expect.objectContaining({ weight: '37.5', reps: '11', step: 0, setNumber: 1 }));
+  expect(await page.evaluate(() => localStorage.getItem('gymverse_active'))).not.toBeNull();
+  expect(pageErrors).toEqual([]);
 });
 
 test('weight changed by a programmatic button is drafted and restored after reload', async ({ page }) => {

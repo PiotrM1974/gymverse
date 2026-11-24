@@ -1,0 +1,10 @@
+{
+  "synthetic": true,
+  "sourceCommit": "7d32975ec834903bf96987218bafdd67b8e0f9cf",
+  "sourcePath": "index.html",
+  "method": "Original exportData function executed with synthetic in-memory inputs and captured deliverFile output; no private data",
+  "exporterSha256": "d03a3a9b62192314a398de606c703b172ae1e7b570a8d039cc63906bf3911832",
+  "filename": "gymverse_backup_2026-11-24.json",
+  "mime": "application/json",
+  "limitations": "Original v4 exporter does not include active session, draft or app settings. This historical fixture intentionally contains no variantId or stable row IDs."
+}
