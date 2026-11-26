@@ -9,10 +9,12 @@ describe('profile model migration and isolation', () => {
     expect(state.activeProfileId).toBe('legacy-default-profile');
     expect(updates[PROFILE_STORAGE_KEY]).toEqual(state);
     expect(state.onboardingRequired).toBe(false);
+    expect(state.legacyUpgradePending).toBe(true);
   });
   it('marks a brand-new local store for optional profile setup', () => {
     const initialized = bootstrapProfileState({});
     expect(initialized.state.onboardingRequired).toBe(true);
+    expect(initialized.state.legacyUpgradePending).toBe(false);
     expect(initialized.updates[PROFILE_STORAGE_KEY]).toEqual(initialized.state);
   });
   it('is idempotent when profiles have already been initialized', () => {
@@ -78,6 +80,25 @@ describe('profile model migration and isolation', () => {
     expect(result.profile.attributes).toMatchObject({ age: 42, equipment: ['machines'] });
     expect(result.profile.data).toEqual({});
     expect(() => updateProfile(state, state.activeProfileId, { name: '', age: null })).toThrow('PROFILE_NAME_REQUIRED');
+  });
+  it('preserves the legacy upgrade notice until the same profile is explicitly updated', () => {
+    const migrated = bootstrapProfileState(legacy).state;
+    migrated.profiles[0].planPrograms = { schemaVersion: 1, assignedProgramId: 'pg_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', programs: [{ id: 'pg_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', title: 'Program przypisany', dayPlanIds: ['legacy-plan-01'] }] };
+    const edited = updateProfile(migrated, migrated.activeProfileId, { name: 'Mój profil', age: 44 });
+    expect(edited.profile.id).toBe('legacy-default-profile');
+    expect(edited.profile.data).toEqual(legacy);
+    expect(edited.state.profiles).toHaveLength(1);
+    expect(edited.profile.planPrograms).toEqual(migrated.profiles[0].planPrograms);
+    expect(edited.state.legacyUpgradePending).toBe(false);
+    expect(bootstrapProfileState({ ...legacy, [PROFILE_STORAGE_KEY]: JSON.stringify(edited.state) }).state.legacyUpgradePending).toBe(false);
+  });
+  it('dismisses a legacy notice without changing any profile or workout data', async () => {
+    const { dismissLegacyUpgradeNotice } = await import('../../src/features/profiles/profile-model.js');
+    const migrated = bootstrapProfileState(legacy).state;
+    const dismissed = dismissLegacyUpgradeNotice(migrated);
+    expect(dismissed.legacyUpgradePending).toBe(false);
+    expect(dismissed.profiles).toEqual(migrated.profiles);
+    expect(dismissLegacyUpgradeNotice(dismissed)).toEqual(dismissed);
   });
   it('stores the requested experience bands and optional return-after-break information', () => {
     const state = bootstrapProfileState({}).state;

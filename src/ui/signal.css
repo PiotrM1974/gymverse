@@ -457,12 +457,17 @@ body, button, input, select, textarea, option, summary { font-family:var(--signa
 #view-plans #profileHeading { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap; }
 #view-plans .profile-box .profile-label { grid-column:1; font-size:13px; font-weight:600; color:var(--text-muted); }
 #view-plans .profile-box #profileSelect { grid-column:2; height:44px; min-height:44px; padding:8px 10px; font-size:14px; font-weight:600; background:var(--card-bg); border-radius:10px; }
+#view-plans .profile-box .profile-quick-actions { grid-column:1/-1; display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; }
+#view-plans .profile-box .profile-quick-actions[hidden] { display:none; }
+#view-plans .profile-box .profile-quick-actions button { min-width:0; min-height:42px; margin:0; padding:8px 10px; font-size:13px; }
 #view-plans .profile-box #profileManage { grid-column:3; min-width:0; }
 #view-plans .profile-box #profileManage > summary { min-height:44px; color:var(--accent-text); font-size:13px; font-weight:600; letter-spacing:0; white-space:nowrap; }
 #view-plans .profile-box #profileManage > summary::before { content:none; }
 #view-plans .profile-box #profileManage[open] { grid-column:1/-1; }
 #view-plans .profile-box #profileManage[open] > summary { border-bottom:1px solid var(--border); }
 #view-plans .profile-box #profileManage > button { width:100%; }
+.legacy-upgrade-welcome h2 { margin:10px 0; font:600 clamp(1.4rem,6vw,1.8rem)/1.15 'Manrope',system-ui,sans-serif; letter-spacing:-.02em; }
+.legacy-upgrade-welcome p { line-height:1.5; }
 #view-plans .plan-grid { gap:10px; margin:0 0 16px; }
 #view-plans .plan-card, #view-plans .plan-card.next { display:grid; grid-template-columns:minmax(0,1fr); align-items:stretch; gap:7px; min-height:0; padding:14px 15px 13px; border:1px solid var(--border); border-radius:16px; background:var(--card-bg); box-shadow:0 2px 8px rgb(17 35 60 / 4%); transition:transform .15s ease, box-shadow .15s ease; }
 #view-plans .plan-card.next { border-inline-start:4px solid var(--yellow); padding-inline-start:12px; }

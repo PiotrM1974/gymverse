@@ -275,10 +275,11 @@ select.select-custom, input.select-custom { width: 100%; background: var(--card-
 
   <!-- WIDOK 1: WYBÓR PLANU -->
   <div id="view-plans" class="view-section active">
-    <section id="stage6Welcome" class="stage6-welcome" hidden aria-labelledby="stage6WelcomeTitle"><span class="stage6-kicker">TWÓJ TRENING ZACZYNA SIĘ TUTAJ</span><h1 id="stage6WelcomeTitle">Witaj w GymNastika</h1><p>Twój trening, Twoje tempo. Dane pozostają na tym urządzeniu.</p><button class="btn-primary" data-act="stage6CreateProfile">Utwórz nowy profil</button><button class="btn-secondary" data-act="stage6Restore">Przywróć dane z kopii</button></section>
+    <section id="stage6Welcome" class="stage6-welcome" hidden aria-labelledby="stage6WelcomeTitle"><span class="stage6-kicker">TWÓJ TRENING ZACZYNA SIĘ TUTAJ</span><h1 id="stage6WelcomeTitle">Witaj w GymNastika</h1><p>Twój trening, Twoje tempo. Dane pozostają na tym urządzeniu.</p><button class="btn-primary" data-act="stage6CreateProfile">Utwórz profil</button><button class="btn-secondary" data-act="stage6Restore">Przywróć dane z kopii</button><button class="btn-link" data-act="skipOnboarding">Pomiń na razie</button></section>
+    <section id="legacyUpgradeWelcome" class="stage6-welcome legacy-upgrade-welcome" hidden aria-labelledby="legacyUpgradeWelcomeTitle"><span class="stage6-kicker">GYMNASTIKA 2.0</span><h2 id="legacyUpgradeWelcomeTitle">Witaj ponownie w GymNastika!</h2><p>Wykryliśmy dane z wcześniejszej wersji aplikacji. Możesz teraz uzupełnić swój profil, aby korzystać z nowych funkcji GymNastika 2.0.</p><button class="btn-primary" data-act="editProfile">Uzupełnij profil</button><button class="btn-secondary" data-act="dismissLegacyUpgrade">Kontynuuj bez zmian</button></section>
     <p class="screen-eyebrow">Plan Push / Pull</p>
     <h1 class="screen-title">Wybierz trening</h1>
-    <section class="profile-box" aria-labelledby="profileHeading"><h2 id="profileHeading">Aktywny profil</h2><label class="profile-label" for="profileSelect">Profil</label><select id="profileSelect" class="select-custom" aria-label="Aktywny profil"></select><details id="profileManage"><summary>Ustawienia</summary><button class="btn-secondary" data-act="switchProfile">Przełącz profil</button><button class="btn-secondary" data-act="exportProfile">Eksportuj ten profil</button><button class="btn-secondary" data-act="importProfile">Importuj profil</button><input id="profileImportFile" type="file" accept="application/json,.json" hidden><details style="margin-top:12px"><summary>Dodaj profil</summary><label for="newProfileName">Nazwa profilu</label><input id="newProfileName" class="select-custom" maxlength="60" autocomplete="name"><label for="newProfileAge">Wiek (opcjonalnie)</label><input id="newProfileAge" class="select-custom" type="number" min="1" max="120"><label for="newProfileSex">Płeć (opcjonalnie)</label><select id="newProfileSex" class="select-custom"><option value="">Nie podano</option><option value="female">Kobieta</option><option value="male">Mężczyzna</option><option value="other">Inna / wolę nie określać</option></select><label for="newProfileHeight">Wzrost cm (opcjonalnie)</label><input id="newProfileHeight" class="select-custom" type="number" min="80" max="250"><label for="newProfileWeight">Masa kg (opcjonalnie)</label><input id="newProfileWeight" class="select-custom" type="number" min="20" max="400" step="0.1"><label for="newProfileExperience">Doświadczenie (opcjonalnie)</label><select id="newProfileExperience" class="select-custom"><option value="">Nie podano</option><option value="beginner">Początkujące</option><option value="intermediate">Średnie</option><option value="advanced">Zaawansowane</option></select><label for="newProfileEquipment">Dostępny sprzęt (opcjonalnie)</label><select id="newProfileEquipment" class="select-custom" multiple size="5"><option value="bodyweight">Masa ciała</option><option value="dumbbells">Hantle</option><option value="barbell">Sztanga</option><option value="bench">Ławka</option><option value="cables">Wyciągi</option><option value="machines">Maszyny</option><option value="bands">Gumy</option><option value="pullup_bar">Drążek</option></select><label for="newProfileRestrictions">Ruchy do pominięcia (opcjonalnie)</label><select id="newProfileRestrictions" class="select-custom" multiple size="4"><option value="overhead_press">Wyciskanie nad głową</option><option value="deep_knee_flexion">Głębokie ugięcie kolana</option><option value="hip_hinge">Skłon / zawias biodrowy</option><option value="floor_exercises">Ćwiczenia na podłodze</option></select><button class="btn-primary" data-act="createProfile">Utwórz profil</button></details><p class="small muted">Profile i treningi są przechowywane lokalnie na tym urządzeniu.</p></details></section>
+    <section class="profile-box" aria-labelledby="profileHeading"><h2 id="profileHeading">Aktywny profil</h2><label class="profile-label" for="profileSelect">Profil</label><select id="profileSelect" class="select-custom" aria-label="Aktywny profil"></select><div class="profile-quick-actions"><button class="btn-secondary" data-act="editProfile">Edytuj profil</button><button class="btn-secondary" data-act="addProfile">Dodaj profil</button></div><details id="profileManage"><summary>Więcej ustawień</summary><button class="btn-secondary" data-act="switchProfile">Przełącz profil</button><button class="btn-secondary" data-act="exportProfile">Eksportuj ten profil</button><button class="btn-secondary" data-act="importProfile">Importuj profil</button><input id="profileImportFile" type="file" accept="application/json,.json" hidden><details style="margin-top:12px"><summary>Dodaj profil</summary><label for="newProfileName">Nazwa profilu</label><input id="newProfileName" class="select-custom" maxlength="60" autocomplete="name"><label for="newProfileAge">Wiek (opcjonalnie)</label><input id="newProfileAge" class="select-custom" type="number" min="1" max="120"><label for="newProfileSex">Płeć (opcjonalnie)</label><select id="newProfileSex" class="select-custom"><option value="">Nie podano</option><option value="female">Kobieta</option><option value="male">Mężczyzna</option><option value="other">Inna / wolę nie określać</option></select><label for="newProfileHeight">Wzrost cm (opcjonalnie)</label><input id="newProfileHeight" class="select-custom" type="number" min="80" max="250"><label for="newProfileWeight">Masa kg (opcjonalnie)</label><input id="newProfileWeight" class="select-custom" type="number" min="20" max="400" step="0.1"><label for="newProfileExperience">Doświadczenie (opcjonalnie)</label><select id="newProfileExperience" class="select-custom"><option value="">Nie podano</option><option value="beginner">Początkujące</option><option value="intermediate">Średnie</option><option value="advanced">Zaawansowane</option></select><label for="newProfileEquipment">Dostępny sprzęt (opcjonalnie)</label><select id="newProfileEquipment" class="select-custom" multiple size="5"><option value="bodyweight">Masa ciała</option><option value="dumbbells">Hantle</option><option value="barbell">Sztanga</option><option value="bench">Ławka</option><option value="cables">Wyciągi</option><option value="machines">Maszyny</option><option value="bands">Gumy</option><option value="pullup_bar">Drążek</option><option value="dip_bars">Poręcze</option></select><label for="newProfileRestrictions">Ruchy do pominięcia (opcjonalnie)</label><select id="newProfileRestrictions" class="select-custom" multiple size="4"><option value="overhead_press">Wyciskanie nad głową</option><option value="deep_knee_flexion">Głębokie ugięcie kolana</option><option value="hip_hinge">Skłon / zawias biodrowy</option><option value="floor_exercises">Ćwiczenia na podłodze</option></select><button class="btn-primary" data-act="createProfile">Utwórz profil</button></details><p class="small muted">Profile i treningi są przechowywane lokalnie na tym urządzeniu.</p></details></section>
     <div id="resumeBox"></div>
     <div id="deloadBox"></div>
     <div id="weekStrip"></div>
@@ -1266,6 +1267,8 @@ function renderProfilePicker() {
   const activeProfile = PROFILE_STATE.profiles.find(profile => profile.id === PROFILE_STATE.activeProfileId);
   const onboarding = PROFILE_STATE.onboardingRequired === true;
   $('stage6Welcome').hidden = !onboarding;
+  const legacyWelcome = $('legacyUpgradeWelcome');
+  if (legacyWelcome) legacyWelcome.hidden = onboarding || PROFILE_STATE.legacyUpgradePending !== true;
   document.body.classList.toggle('stage6-onboarding', onboarding);
   if (!onboarding) document.body.classList.remove('stage6-profile-entry');
   $('profileHeading').textContent = onboarding ? 'Witaj w GymNastika!' : 'Aktywny profil';
@@ -1309,6 +1312,8 @@ function renderProfilePicker() {
       deleteButton.insertAdjacentElement('afterend', legacyImportButton);
     }
     select.hidden = onboarding;
+    const quickActions = document.querySelector('.profile-quick-actions');
+    if (quickActions) quickActions.hidden = onboarding;
     const profileLabel = document.querySelector('label[for="profileSelect"]');
     if (profileLabel) profileLabel.hidden = onboarding;
     document.querySelector('[data-act="switchProfile"]').hidden = onboarding;
@@ -4086,6 +4091,14 @@ const ACTIONS = {
   profileNext: profileWizardNext,
   profileBack: () => setProfileWizardStep(PROFILE_WIZARD_STEP - 1),
   profileCancel: cancelProfileWizard,
+  addProfile: () => {
+    if (PROFILE_STATE?.profiles.length >= 20) { toast('Możesz utworzyć maksymalnie 20 profili.'); return; }
+    PROFILE_EDIT_ID = null; clearProfileWizardFields(); PROFILE_GOAL_TOUCHED = false;
+    $('profileManage').open = true; $('profileFormDetails').open = true;
+    $('profileFormDetails').querySelector('summary').textContent = 'Dodaj profil';
+    $('profileFormDetails').querySelector('[data-act="createProfile"]').textContent = 'Utwórz profil';
+    setProfileWizardStep(1); $('newProfileName').focus(); $('profileFormDetails').scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  },
   stage6BackWelcome: () => { document.body.classList.remove('stage6-profile-entry'); window.scrollTo(0, 0); },
   stage6Restore: () => ACTIONS.importBtn(),
   stage6OpenChoices: () => switchView('view-plan-choices'),
@@ -4161,8 +4174,19 @@ const ACTIONS = {
     }
     $('profileFormDetails').querySelector('summary').textContent = 'Edytuj bieżący profil';
     $('profileFormDetails').querySelector('[data-act="createProfile"]').textContent = 'Zapisz zmiany profilu';
+    $('profileManage').open = true;
     $('profileFormDetails').open = true;
     setProfileWizardStep(1);
+    $('profileFormDetails').scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    $('newProfileName').focus();
+  },
+  dismissLegacyUpgrade: async () => {
+    if (PROFILE_STATE?.legacyUpgradePending !== true) return;
+    const { dismissLegacyUpgradeNotice } = await import('./src/features/profiles/profile-model.js');
+    const next = dismissLegacyUpgradeNotice(PROFILE_STATE);
+    try { await transactProfileUpdates({ gymverse_profiles_v1: next }); }
+    catch (_) { toast('Nie udało się zapisać ustawienia. Dane nie zostały zmienione. Spróbuj ponownie.'); return; }
+    PROFILE_STATE = next; renderProfilePicker();
   },
   deleteProfile: async () => {
     if (active) { toast('Najpierw zakończ lub porzuć aktywny trening.'); return; }

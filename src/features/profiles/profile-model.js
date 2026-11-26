@@ -42,7 +42,7 @@ function normalizeAttributes(input = {}) {
 }
 
 function validateProfileState(value) {
-  if (!record(value) || value.schemaVersion !== 1 || (value.onboardingRequired != null && typeof value.onboardingRequired !== 'boolean') || !Array.isArray(value.profiles) || value.profiles.length < 1 || value.profiles.length > 20) throw new Error('PROFILE_STATE_INVALID');
+  if (!record(value) || value.schemaVersion !== 1 || (value.onboardingRequired != null && typeof value.onboardingRequired !== 'boolean') || (value.legacyUpgradePending != null && typeof value.legacyUpgradePending !== 'boolean') || !Array.isArray(value.profiles) || value.profiles.length < 1 || value.profiles.length > 20) throw new Error('PROFILE_STATE_INVALID');
   const ids = new Set();
   for (const profile of value.profiles) {
     if (!record(profile) || !PROFILE_ID.test(profile.id) || ids.has(profile.id) || typeof profile.name !== 'string' || !profile.name.trim() || profile.name.length > 60 || !record(profile.data) || Object.keys(profile.data).some(key => !APP_KEYS.includes(key))) throw new Error('PROFILE_RECORD_INVALID');
@@ -68,7 +68,8 @@ export function bootstrapProfileState(snapshot, options = {}) {
   const prior = readProfileState(snapshot);
   if (prior) return { state: prior, updates: {} };
   const id = options.id || 'legacy-default-profile';
-  const state = { schemaVersion: 1, activeProfileId: id, onboardingRequired: Object.keys(snapshot).length === 0, profiles: [{ id, name: 'Mój profil', createdAt: options.createdAt || new Date(0).toISOString(), data: clone(snapshot) }] };
+  const hasLegacyData = Object.keys(snapshot).length > 0;
+  const state = { schemaVersion: 1, activeProfileId: id, onboardingRequired: !hasLegacyData, legacyUpgradePending: hasLegacyData, profiles: [{ id, name: 'Mój profil', createdAt: options.createdAt || new Date(0).toISOString(), data: clone(snapshot) }] };
   validateProfileState(state);
   return { state, updates: { [PROFILE_STATE_KEY]: state } };
 }
@@ -94,8 +95,14 @@ export function updateProfile(state, profileId, input) {
   const attributesInput = { ...input };
   if (!Object.hasOwn(attributesInput, 'trainingGoal') && Object.hasOwn(current.attributes || {}, 'trainingGoal')) attributesInput.trainingGoal = current.attributes.trainingGoal;
   const profile = { ...clone(current), name, attributes: normalizeAttributes(attributesInput) };
-  const next = { ...clone(state), onboardingRequired: false, profiles: state.profiles.map(item => item.id === profileId ? profile : clone(item)) };
+  const next = { ...clone(state), onboardingRequired: false, legacyUpgradePending: false, profiles: state.profiles.map(item => item.id === profileId ? profile : clone(item)) };
   return { state: next, profile: clone(profile) };
+}
+
+export function dismissLegacyUpgradeNotice(state) {
+  validateProfileState(state);
+  if (state.legacyUpgradePending !== true) return clone(state);
+  return { ...clone(state), legacyUpgradePending: false };
 }
 
 export function switchProfile(state, currentSnapshot, targetId) {
