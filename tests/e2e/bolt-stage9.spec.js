@@ -10,13 +10,13 @@ async function boot(page,count=3){
   localStorage.setItem('gymverse_profiles_v1',JSON.stringify({schemaVersion:1,activeProfileId:'stage9-profile',profiles:[{id:'stage9-profile',name:'Profil syntetyczny',attributes:{},data:{},planPrograms:{schemaVersion:1,assignedProgramId:id,programs:[{id,title:'Pierwotny program',dayPlanIds:days.map(day=>day.id)}]}}]}));
  },{id:programId,count});
  await page.goto('/',{waitUntil:'domcontentloaded'});
- await expect(page.locator('#migrateDataButton')).toBeVisible();
+ await expect.poll(()=>page.evaluate(()=>!!window.__gymverseTestHarness)).toBe(true);
 }
 
 test('starting day from program persists its original context in active session and history',async({page})=>{
  page.on('dialog',dialog=>dialog.accept());await boot(page);
- await page.locator('#assignedProgram [data-act="stage6Ready"]').click();
- await page.locator('#stage6PlanList [data-act="programPreview"][data-id="'+programId+'"]').click();
+
+ await page.locator('#view-plans [data-act="programPreview"][data-id="'+programId+'"]').click();await page.locator('[data-act="programDay"][data-id="day-one"]').click();
  await page.locator('[data-act="programDay"][data-id="day-two"]').click();
  await page.locator('[data-act="programStart"]').click();
  await expect.poll(()=>page.evaluate(()=>Boolean(JSON.parse(localStorage.getItem('gymverse_active'))?.sessionContext))).toBe(true);
@@ -37,7 +37,7 @@ test('starting day from program persists its original context in active session 
   registry.profiles[0].planPrograms.assignedProgramId=null;
   await store.transact({gymverse_profiles_v1:registry});
  });
- await page.reload({waitUntil:'domcontentloaded'});await expect(page.locator('#migrateDataButton')).toBeVisible();
+ await page.reload({waitUntil:'domcontentloaded'});await expect.poll(()=>page.evaluate(()=>!!window.__gymverseTestHarness)).toBe(true);
  await page.locator('.header-nav [data-view="view-history"]').click();
  await page.locator('[data-history-scope="programId"]').selectOption(programId);
  await expect(page.locator('.hist-card')).toContainText('Program podczas treningu: Pierwotny program · Dzień 2');
@@ -46,22 +46,25 @@ test('starting day from program persists its original context in active session 
 
 test('standalone start and old session stay distinct even when their day currently belongs to a six-day program',async({page})=>{
  page.on('dialog',dialog=>dialog.accept());await boot(page,6);
+ // Start while the day is standalone, then attach it: history must retain its original context.
+ await page.evaluate(async()=>{const store=window.__gymverseTestHarness.getStore(),registry=store.get('gymverse_profiles_v1');registry.profiles[0].planPrograms.programs[0].dayPlanIds=registry.profiles[0].planPrograms.programs[0].dayPlanIds.filter(id=>id!=='day-two');await store.transact({gymverse_profiles_v1:registry});});
+ await page.reload({waitUntil:'domcontentloaded'});await expect.poll(()=>page.evaluate(()=>!!window.__gymverseTestHarness)).toBe(true);
  await page.locator('[data-act="startPlan"][data-plan="day-two"]').click();
  await expect.poll(()=>page.evaluate(()=>Boolean(JSON.parse(localStorage.getItem('gymverse_active'))?.sessionContext))).toBe(true);
  expect(await page.evaluate(()=>JSON.parse(localStorage.getItem('gymverse_active')).sessionContext)).toEqual({kind:'standalone',profileId:'stage9-profile',dayPlanId:'day-two'});
  await page.locator('#weight_0').fill('42.5');await page.locator('#reps_0').fill('8');await page.locator('#btnDone_0').click();await page.locator('[data-act="finish"]').click();
- await page.evaluate(async()=>{const store=window.__gymverseTestHarness.getStore();const history=store.get('gymverse_history');history.push({id:'old-session',planId:'day-two',planTitle:'Dzień 2',date:'2026-01-01T10:00:00.000Z',details:[{id:'old-set',exerciseId:'bench_flat',weight:30,reps:8,setNumber:1}]});await store.transact({gymverse_history:history});});
- await page.reload({waitUntil:'domcontentloaded'});await expect(page.locator('#migrateDataButton')).toBeVisible();await page.locator('.header-nav [data-view="view-history"]').click();
+ await page.evaluate(async()=>{const store=window.__gymverseTestHarness.getStore();const registry=store.get('gymverse_profiles_v1');registry.profiles[0].planPrograms.programs[0].dayPlanIds.splice(1,0,'day-two');await store.transact({gymverse_profiles_v1:registry});const history=store.get('gymverse_history');history.push({id:'old-session',planId:'day-two',planTitle:'Dzień 2',date:'2026-01-01T10:00:00.000Z',details:[{id:'old-set',exerciseId:'bench_flat',weight:30,reps:8,setNumber:1}]});await store.transact({gymverse_history:history});});
+ await page.reload({waitUntil:'domcontentloaded'});await expect.poll(()=>page.evaluate(()=>!!window.__gymverseTestHarness)).toBe(true);await page.locator('.header-nav [data-view="view-history"]').click();
  await expect(page.locator('.hist-card')).toHaveCount(2);await expect(page.locator('.hist-card').filter({hasText:'Trening samodzielny'})).toHaveCount(1);await expect(page.locator('.hist-card').filter({hasText:'Program nieustalony'})).toHaveCount(1);
  await page.locator('[data-history-scope="programId"]').selectOption(programId);await expect(page.locator('.hist-card')).toHaveCount(0);
 });
 
 test('program start rejects a stale preview changed by another tab and releases the shared lock',async({page,context})=>{
  page.on('dialog',dialog=>dialog.accept());await boot(page);
- await page.locator('#assignedProgram [data-act="stage6Ready"]').click();
- await page.locator('#stage6PlanList [data-act="programPreview"][data-id="'+programId+'"]').click();
+
+ await page.locator('#view-plans [data-act="programPreview"][data-id="'+programId+'"]').click();await page.locator('[data-act="programDay"][data-id="day-one"]').click();
  const second=await context.newPage();await second.goto('/',{waitUntil:'domcontentloaded'});
- await expect(second.locator('#migrateDataButton')).toBeVisible();
+ await expect.poll(()=>second.evaluate(()=>!!window.__gymverseTestHarness)).toBe(true);
  await second.evaluate(async()=>{
   const store=window.__gymverseTestHarness.getStore();
   const registry=store.get('gymverse_profiles_v1');
@@ -73,9 +76,9 @@ test('program start rejects a stale preview changed by another tab and releases 
  await expect(page.locator('#toast')).toContainText('Program lub jego dzień zmienił się');
  const after=await second.evaluate(()=>({active:localStorage.getItem('gymverse_active'),history:localStorage.getItem('gymverse_history')}));
  expect(after).toEqual(before);
- await page.reload({waitUntil:'domcontentloaded'});await expect(page.locator('#migrateDataButton')).toBeVisible();
- await page.locator('#assignedProgram [data-act="stage6Ready"]').click();
- await page.locator('#stage6PlanList [data-act="programPreview"][data-id="'+programId+'"]').click();
+ await page.reload({waitUntil:'domcontentloaded'});await expect.poll(()=>page.evaluate(()=>!!window.__gymverseTestHarness)).toBe(true);
+
+ await page.locator('#view-plans [data-act="programPreview"][data-id="'+programId+'"]').click();await page.locator('[data-act="programDay"][data-id="day-one"]').click();
  await page.locator('[data-act="programStart"]').click();
  await expect.poll(()=>page.evaluate(()=>JSON.parse(localStorage.getItem('gymverse_active'))?.sessionContext?.programTitle)).toBe('Zmieniony w drugiej karcie');
  await second.close();
@@ -83,8 +86,8 @@ test('program start rejects a stale preview changed by another tab and releases 
 
 test('program day action and historical labels fit Signal light and dark at mobile widths',async({page})=>{
  page.on('dialog',dialog=>dialog.accept());await boot(page);
- await page.locator('#assignedProgram [data-act="stage6Ready"]').click();
- await page.locator('#stage6PlanList [data-act="programPreview"][data-id="'+programId+'"]').click();
+
+ await page.locator('#view-plans [data-act="programPreview"][data-id="'+programId+'"]').click();await page.locator('[data-act="programDay"][data-id="day-one"]').click();
  await page.locator('[data-act="programDay"][data-id="day-two"]').click();
  for(const theme of ['light','dark'])for(const width of [320,375,390,430]){
   await page.setViewportSize({width,height:850});
@@ -96,8 +99,8 @@ test('program day action and historical labels fit Signal light and dark at mobi
 
 test('program context survives RIR, exercise swap, reload and session completion',async({page})=>{
  page.on('dialog',dialog=>dialog.accept());await boot(page);
- await page.locator('#assignedProgram [data-act="stage6Ready"]').click();
- await page.locator('#stage6PlanList [data-act="programPreview"][data-id="'+programId+'"]').click();
+
+ await page.locator('#view-plans [data-act="programPreview"][data-id="'+programId+'"]').click();await page.locator('[data-act="programDay"][data-id="day-one"]').click();
  await page.locator('[data-act="programStart"]').click();
  await expect.poll(()=>page.evaluate(()=>JSON.parse(localStorage.getItem('gymverse_active'))?.sessionContext?.kind)).toBe('program');
  const original=await page.evaluate(()=>JSON.parse(localStorage.getItem('gymverse_active')).sessionContext);

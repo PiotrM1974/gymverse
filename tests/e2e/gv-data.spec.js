@@ -42,7 +42,9 @@ const seedEditableState = async page => {
   });
   await page.reload();
   await page.waitForFunction(() => !!window.__gymverseTestHarness);
+  await page.locator('#backupMenuToggle').click();
   await expect(page.locator('#migrateDataButton')).toBeVisible();
+  await page.locator('#backupMenuToggle').click();
 };
 
 const activateThenFailIndexedDb = page => page.evaluate(async () => {

@@ -89,7 +89,7 @@ describe('service worker cache safety', () => {
     let installation;
     harness.listeners.install({ waitUntil: promise => { installation = promise; } });
     await installation;
-    expect(harness.opened).toContain('gymverse-v56');
+    expect(harness.opened).toContain('gymverse-v57');
     expect(harness.added).toContain('src/features/plans/progression.js');
     expect(harness.added).toContain('src/ui/signal.css');
     expect(harness.added).toContain('src/ui/fonts/manrope-latin-variable.woff2');
@@ -102,6 +102,7 @@ describe('service worker cache safety', () => {
     expect(harness.added).toContain('src/features/profiles/profile-model.js');
     expect(harness.added).toContain('src/features/plans/synchronization.js');
     expect(harness.added).toContain('src/features/plans/program-editor.js');
+    expect(harness.added).toContain('src/features/plans/plan-merge.js');
     expect(harness.added).toContain('src/features/plans/program-drafts.js');
     expect(harness.added).toContain('src/features/plans/program-editor-ui.js');
     expect(harness.added).toContain('src/features/plans/generator.js');
@@ -135,7 +136,7 @@ describe('service worker cache safety', () => {
       let installation;
       harness.listeners.install({ waitUntil: promise => { installation = promise; } });
       await installation;
-      expect(harness.opened).toContain('gymverse-v56');
+      expect(harness.opened).toContain('gymverse-v57');
       expect(harness.added).toContain('src/features/plans/progression.js');
       expect(harness.added).toContain('src/data/exercise-presentations/release-registry.json');
       expect(harness.added.filter(url => url.startsWith('src/data/exercise-images/selected/technique/'))).toHaveLength(68);
@@ -175,7 +176,7 @@ describe('service worker cache safety', () => {
     let installation;
     harness.listeners.install({ waitUntil: promise => { installation = promise; } });
     await expect(installation).rejects.toThrow('failed to cache');
-      expect(harness.opened).toContain('gymverse-v56');
+      expect(harness.opened).toContain('gymverse-v57');
     expect(harness.deleted).toEqual([]);
     expect(harness.skipWaitingCalls).toBe(0);
   });
