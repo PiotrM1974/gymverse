@@ -1,0 +1,2312 @@
+{
+  "presentationContractVersion": 1,
+  "status": "local-candidate",
+  "records": [
+    {
+      "exerciseId": "lat_raise_stand",
+      "variantId": "default",
+      "status": "local-candidate",
+      "positions": {
+        "lower": "left",
+        "raised": "right"
+      },
+      "bySex": {
+        "male": {
+          "technique": {
+            "path": "src/data/exercise-images/selected/technique/lat_raise_stand__default-male.webp",
+            "mimeType": "image/webp",
+            "width": 768,
+            "height": 512,
+            "sizeBytes": 41516,
+            "sha256": "c2ce327fd70a00267c8b2fb8cd93d0f0e981e8a411b4d93a941d40b4df9cabb1",
+            "altText": "Męska plansza unoszenia hantli bokiem: pozycja DÓŁ po lewej, GÓRA po prawej",
+            "status": "local-candidate"
+          },
+          "thumbnail": {
+            "path": "src/data/exercise-images/selected/thumbnails/lat_raise_stand__default-male.webp",
+            "mimeType": "image/webp",
+            "width": 256,
+            "height": 256,
+            "sizeBytes": 7368,
+            "sha256": "cd303cca889de0f8437be5e6482be299e4efccd3f4bcd763b602588d84b72f1e",
+            "altText": "Miniatura męskiej sylwetki unoszącej hantle bokiem w pozycji DÓŁ",
+            "status": "local-candidate"
+          }
+        },
+        "female": {
+          "technique": {
+            "path": "src/data/exercise-images/selected/technique/lat_raise_stand__default-female.webp",
+            "mimeType": "image/webp",
+            "width": 768,
+            "height": 512,
+            "sizeBytes": 37360,
+            "sha256": "3c7775065a3994473dd06a9ae5d48b3c17fc5db22eac7bc8552666eeb8c71efe",
+            "altText": "Żeńska plansza unoszenia hantli bokiem: pozycja DÓŁ po lewej, GÓRA po prawej",
+            "status": "local-candidate"
+          },
+          "thumbnail": {
+            "path": "src/data/exercise-images/selected/thumbnails/lat_raise_stand__default-female.webp",
+            "mimeType": "image/webp",
+            "width": 256,
+            "height": 256,
+            "sizeBytes": 5824,
+            "sha256": "e656f596005673bd184a24e54c0efa5082797846bd0f7ec2e54c01064bbe30dc",
+            "altText": "Miniatura żeńskiej sylwetki unoszącej hantle bokiem w pozycji DÓŁ",
+            "status": "local-candidate"
+          }
+        }
+      },
+      "musclePresentation": {
+        "kind": "atlas",
+        "exerciseId": "lat_raise_stand"
+      }
+    },
+    {
+      "exerciseId": "db_bench",
+      "variantId": "default",
+      "status": "local-candidate",
+      "positions": {
+        "lower": "left",
+        "raised": "right"
+      },
+      "bySex": {
+        "male": {
+          "technique": {
+            "path": "src/data/exercise-images/selected/technique/db_bench__default-male.webp",
+            "width": 768,
+            "height": 512,
+            "sizeBytes": 21616,
+            "sha256": "99e1be65fe2848da285409b217f83c835b7edd38a1af62e8633209ec5450d493",
+            "mimeType": "image/webp",
+            "altText": "Męska plansza wyciskania hantli na ławce płaskiej: DÓŁ po lewej, GÓRA po prawej",
+            "status": "local-candidate"
+          },
+          "thumbnail": {
+            "path": "src/data/exercise-images/selected/thumbnails/db_bench__default-male.webp",
+            "width": 256,
+            "height": 256,
+            "sizeBytes": 4302,
+            "sha256": "72f8dec0cbfdb87b20f9c8149e6a04ba65cbd16493ac82d006b50bd91e18e470",
+            "mimeType": "image/webp",
+            "altText": "Miniatura męskiej sylwetki podczas wyciskania hantli na ławce płaskiej w pozycji DÓŁ",
+            "status": "local-candidate"
+          }
+        },
+        "female": {
+          "technique": {
+            "path": "src/data/exercise-images/selected/technique/db_bench__default-female.webp",
+            "width": 768,
+            "height": 512,
+            "sizeBytes": 20278,
+            "sha256": "d3d0270f226fe5c614fa3c068b83439861966f33139d0ae4394c24303d6b73a7",
+            "mimeType": "image/webp",
+            "altText": "Żeńska plansza wyciskania hantli na ławce płaskiej: DÓŁ po lewej, GÓRA po prawej",
+            "status": "local-candidate"
+          },
+          "thumbnail": {
+            "path": "src/data/exercise-images/selected/thumbnails/db_bench__default-female.webp",
+            "width": 256,
+            "height": 256,
+            "sizeBytes": 4102,
+            "sha256": "8fafcb94bb0ae7ba7b26a2db1a91cba477928040363de0433e7ef86edab56391",
+            "mimeType": "image/webp",
+            "altText": "Miniatura żeńskiej sylwetki podczas wyciskania hantli na ławce płaskiej w pozycji DÓŁ",
+            "status": "local-candidate"
+          }
+        }
+      },
+      "musclePresentation": {
+        "kind": "atlas",
+        "exerciseId": "db_bench"
+      }
+    },
+    {
+      "exerciseId": "lat_pulldown_wide",
+      "variantId": "default",
+      "status": "local-candidate",
+      "positions": {
+        "lower": "left",
+        "raised": "right"
+      },
+      "bySex": {
+        "male": {
+          "technique": {
+            "path": "src/data/exercise-images/selected/technique/lat_pulldown_wide__default-male.webp",
+            "width": 768,
+            "height": 512,
+            "sizeBytes": 27522,
+            "sha256": "c571d350c81f7c1a04b4e49d149943393778899f2a4b149e44ee9c9ab424939d",
+            "mimeType": "image/webp",
+            "altText": "Męska plansza ściągania drążka wyciągu górnego: DÓŁ po lewej, GÓRA po prawej",
+            "status": "local-candidate"
+          },
+          "thumbnail": {
+            "path": "src/data/exercise-images/selected/thumbnails/lat_pulldown_wide__default-male.webp",
+            "width": 256,
+            "height": 256,
+            "sizeBytes": 5380,
+            "sha256": "0872a16401aa6bd586ac89ef799aa3daabfe059a4c362963bdf0ab966d3b6204",
+            "mimeType": "image/webp",
+            "altText": "Miniatura męskiej sylwetki podczas ściągania drążka wyciągu górnego w pozycji DÓŁ",
+            "status": "local-candidate"
+          }
+        },
+        "female": {
+          "technique": {
+            "path": "src/data/exercise-images/selected/technique/lat_pulldown_wide__default-female.webp",
+            "width": 768,
+            "height": 512,
+            "sizeBytes": 27184,
+            "sha256": "fced8e767389710b3e8096e9c3220943e0b02f755b8f1108c7e01903715a3276",
+            "mimeType": "image/webp",
+            "altText": "Żeńska plansza ściągania drążka wyciągu górnego: DÓŁ po lewej, GÓRA po prawej",
+            "status": "local-candidate"
+          },
+          "thumbnail": {
+            "path": "src/data/exercise-images/selected/thumbnails/lat_pulldown_wide__default-female.webp",
+            "width": 256,
+            "height": 256,
+            "sizeBytes": 5340,
+            "sha256": "f531795b869bb7c92308b8719cba427b4b7cd5c80165edaf45b8511bf4adaeef",
+            "mimeType": "image/webp",
+            "altText": "Miniatura żeńskiej sylwetki podczas ściągania drążka wyciągu górnego w pozycji DÓŁ",
+            "status": "local-candidate"
+          }
+        }
+      },
+      "musclePresentation": {
+        "kind": "atlas",
+        "exerciseId": "lat_pulldown_wide"
+      }
+    },
+    {
+      "exerciseId": "leg_press",
+      "variantId": "default",
+      "status": "local-candidate",
+      "positions": {
+        "lower": "left",
+        "raised": "right"
+      },
+      "bySex": {
+        "male": {
+          "technique": {
+            "path": "src/data/exercise-images/selected/technique/leg_press__default-male.webp",
+            "width": 768,
+            "height": 512,
+            "sizeBytes": 34938,
+            "sha256": "df5dc4e616b82bf54b02c2ff702cee481e32c0cd41a65848182f7e7c7cfb3d37",
+            "mimeType": "image/webp",
+            "altText": "Męska plansza wypychania nóg na suwnicy: DÓŁ po lewej, GÓRA po prawej",
+            "status": "local-candidate"
+          },
+          "thumbnail": {
+            "path": "src/data/exercise-images/selected/thumbnails/leg_press__default-male.webp",
+            "width": 256,
+            "height": 256,
+            "sizeBytes": 6752,
+            "sha256": "e7ee0d69a850b917ae2c132ad30b128a6594b36e1f166ae356ad8b669d41b539",
+            "mimeType": "image/webp",
+            "altText": "Miniatura męskiej sylwetki podczas wypychania nóg na suwnicy w pozycji DÓŁ",
+            "status": "local-candidate"
+          }
+        },
+        "female": {
+          "technique": {
+            "path": "src/data/exercise-images/selected/technique/leg_press__default-female.webp",
+            "width": 768,
+            "height": 512,
+            "sizeBytes": 33052,
+            "sha256": "0beae2206a8c055d4806dac1738d0e8016d91b7195bdfd3bad57df47181a9221",
+            "mimeType": "image/webp",
+            "altText": "Żeńska plansza wypychania nóg na suwnicy: DÓŁ po lewej, GÓRA po prawej",
+            "status": "local-candidate"
+          },
+          "thumbnail": {
+            "path": "src/data/exercise-images/selected/thumbnails/leg_press__default-female.webp",
+            "width": 256,
+            "height": 256,
+            "sizeBytes": 6454,
+            "sha256": "b027b9a686ec93e0cc7f11eca41ede1b6ee3a926464b97c2ab943a09c025213a",
+            "mimeType": "image/webp",
+            "altText": "Miniatura żeńskiej sylwetki podczas wypychania nóg na suwnicy w pozycji DÓŁ",
+            "status": "local-candidate"
+          }
+        }
+      },
+      "musclePresentation": {
+        "kind": "atlas",
+        "exerciseId": "leg_press"
+      }
+    },
+    {
+      "exerciseId": "bench_flat",
+      "variantId": "default",
+      "status": "local-candidate",
+      "positions": {
+        "lower": "left",
+        "raised": "right"
+      },
+      "labels": {
+        "lower": "DÓŁ",
+        "raised": "GÓRA"
+      },
+      "copy": {
+        "lower": "Pozycja DÓŁ: sztanga przy klatce, łokcie zgięte.",
+        "raised": "Pozycja GÓRA: sztanga nad klatką, ramiona wyprostowane.",
+        "details": "Plecy i głowa pozostają podparte na płaskiej ławce, a stopy na podłożu.",
+        "thumbnail": "Miniatura pokazuje pozycję DÓŁ."
+      },
+      "bySex": {
+        "male": {
+          "technique": {
+            "path": "src/data/exercise-images/selected/technique/bench_flat__default-male.webp",
+            "mimeType": "image/webp",
+            "width": 768,
+            "height": 512,
+            "sizeBytes": 27380,
+            "sha256": "f438ca8637b22cef6cdda4b62372c64da5cc6e66ae8e0c94272a671ebaed7f6f",
+            "altText": "Męska plansza bench_flat: DÓŁ po lewej, GÓRA po prawej",
+            "status": "local-candidate"
+          },
+          "thumbnail": {
+            "path": "src/data/exercise-images/selected/thumbnails/bench_flat__default-male.webp",
+            "mimeType": "image/webp",
+            "width": 256,
+            "height": 256,
+            "sizeBytes": 5410,
+            "sha256": "94b8beeede27bf2367023d4aaead22ced18709793da153a7d93934d94047ab80",
+            "altText": "Miniatura: męska sylwetka, DÓŁ",
+            "status": "local-candidate"
+          }
+        },
+        "female": {
+          "technique": {
+            "path": "src/data/exercise-images/selected/technique/bench_flat__default-female.webp",
+            "mimeType": "image/webp",
+            "width": 768,
+            "height": 512,
+            "sizeBytes": 25950,
+            "sha256": "b222d395481e36a341b361d25ab08b397eb016e73589189af1d422cd9ba61023",
+            "altText": "Żeńska plansza bench_flat: DÓŁ po lewej, GÓRA po prawej",
+            "status": "local-candidate"
+          },
+          "thumbnail": {
+            "path": "src/data/exercise-images/selected/thumbnails/bench_flat__default-female.webp",
+            "mimeType": "image/webp",
+            "width": 256,
+            "height": 256,
+            "sizeBytes": 5244,
+            "sha256": "9677a6ad8dd652779cd249dfd3163f97b31e02b064303c979a81623f0d1e23f2",
+            "altText": "Miniatura: żeńska sylwetka, DÓŁ",
+            "status": "local-candidate"
+          }
+        }
+      },
+      "musclePresentation": {
+        "kind": "atlas",
+        "exerciseId": "bench_flat"
+      }
+    },
+    {
+      "exerciseId": "db_incline",
+      "variantId": "default",
+      "status": "local-candidate",
+      "positions": {
+        "lower": "left",
+        "raised": "right"
+      },
+      "labels": {
+        "lower": "DÓŁ",
+        "raised": "GÓRA"
+      },
+      "copy": {
+        "lower": "Pozycja DÓŁ: hantle przy górnej części klatki, łokcie zgięte.",
+        "raised": "Pozycja GÓRA: hantle nad klatką, ramiona wyprostowane.",
+        "details": "Ławka ma dodatni skos około 30°; plecy i głowa pozostają podparte, a stopy na podłożu.",
+        "thumbnail": "Miniatura pokazuje pozycję DÓŁ."
+      },
+      "bySex": {
+        "male": {
+          "technique": {
+            "path": "src/data/exercise-images/selected/technique/db_incline__default-male.webp",
+            "mimeType": "image/webp",
+            "width": 768,
+            "height": 512,
+            "sizeBytes": 25848,
+            "sha256": "4458bc014e4886d6ef37adc940d87fd0c966941b36dbb1e7f02b3943f2711e0e",
+            "altText": "Męska plansza db_incline: DÓŁ po lewej, GÓRA po prawej",
+            "status": "local-candidate"
+          },
+          "thumbnail": {
+            "path": "src/data/exercise-images/selected/thumbnails/db_incline__default-male.webp",
+            "mimeType": "image/webp",
+            "width": 256,
+            "height": 256,
+            "sizeBytes": 5348,
+            "sha256": "0b0ee3c5cd57989cb9f0ac7823ec6e852020a1f4ff7c5613c4ea58d5d21df2cf",
+            "altText": "Miniatura: męska sylwetka, DÓŁ",
+            "status": "local-candidate"
+          }
+        },
+        "female": {
+          "technique": {
+            "path": "src/data/exercise-images/selected/technique/db_incline__default-female.webp",
+            "mimeType": "image/webp",
+            "width": 768,
+            "height": 512,
+            "sizeBytes": 25284,
+            "sha256": "8d810b8b4aa622ddb7f48b398d69ba3f65fc954a71c368751058b7977cf9ab0b",
+            "altText": "Żeńska plansza db_incline: DÓŁ po lewej, GÓRA po prawej",
+            "status": "local-candidate"
+          },
+          "thumbnail": {
+            "path": "src/data/exercise-images/selected/thumbnails/db_incline__default-female.webp",
+            "mimeType": "image/webp",
+            "width": 256,
+            "height": 256,
+            "sizeBytes": 4910,
+            "sha256": "40863c3642a53783a57fb226fc5369dfb41fed87e963cf1218d075dbf78cfe32",
+            "altText": "Miniatura: żeńska sylwetka, DÓŁ",
+            "status": "local-candidate"
+          }
+        }
+      },
+      "musclePresentation": {
+        "kind": "atlas",
+        "exerciseId": "db_incline"
+      }
+    },
+    {
+      "exerciseId": "tri_rope",
+      "variantId": "default",
+      "status": "local-candidate",
+      "positions": {
+        "lower": "left",
+        "raised": "right"
+      },
+      "labels": {
+        "lower": "DÓŁ",
+        "raised": "GÓRA"
+      },
+      "copy": {
+        "lower": "Pozycja DÓŁ: lina przy biodrach, łokcie wyprostowane.",
+        "raised": "Pozycja GÓRA: dłonie na wysokości klatki, łokcie zgięte.",
+        "details": "Ramiona pozostają blisko tułowia; lina jest połączona z górnym wyciągiem w obu kadrach.",
+        "thumbnail": "Miniatura pokazuje pozycję DÓŁ."
+      },
+      "bySex": {
+        "male": {
+          "technique": {
+            "path": "src/data/exercise-images/selected/technique/tri_rope__default-male.webp",
+            "mimeType": "image/webp",
+            "width": 768,
+            "height": 512,
+            "sizeBytes": 31032,
+            "sha256": "ca0ade4a557844112ee8fc5e6af413cff50a22046225d35179b08a7c72a8a349",
+            "altText": "Męska plansza tri_rope: DÓŁ po lewej, GÓRA po prawej",
+            "status": "local-candidate"
+          },
+          "thumbnail": {
+            "path": "src/data/exercise-images/selected/thumbnails/tri_rope__default-male.webp",
+            "mimeType": "image/webp",
+            "width": 256,
+            "height": 256,
+            "sizeBytes": 6000,
+            "sha256": "fde12a8c5fe08a491abfbf27d4741a270749bbac8ca539277560e394e1cfb244",
+            "altText": "Miniatura: męska sylwetka, DÓŁ",
+            "status": "local-candidate"
+          }
+        },
+        "female": {
+          "technique": {
+            "path": "src/data/exercise-images/selected/technique/tri_rope__default-female.webp",
+            "mimeType": "image/webp",
+            "width": 768,
+            "height": 512,
+            "sizeBytes": 29416,
+            "sha256": "fcfcc48f6aa604e68d241d7091bf6ed294118ff9e80dbd8cab573747d7d5e56f",
+            "altText": "Żeńska plansza tri_rope: DÓŁ po lewej, GÓRA po prawej",
+            "status": "local-candidate"
+          },
+          "thumbnail": {
+            "path": "src/data/exercise-images/selected/thumbnails/tri_rope__default-female.webp",
+            "mimeType": "image/webp",
+            "width": 256,
+            "height": 256,
+            "sizeBytes": 5788,
+            "sha256": "c52e0b3aea7ecca624230240ef360f8f0eb62e46485f66dac272ece9fdf6cbbd",
+            "altText": "Miniatura: żeńska sylwetka, DÓŁ",
+            "status": "local-candidate"
+          }
+        }
+      },
+      "musclePresentation": {
+        "kind": "atlas",
+        "exerciseId": "tri_rope"
+      }
+    },
+    {
+      "exerciseId": "row_v",
+      "variantId": "default",
+      "status": "local-candidate",
+      "positions": {
+        "lower": "left",
+        "raised": "right"
+      },
+      "labels": {
+        "lower": "ODDALONE",
+        "raised": "PRZY BRZUCHU"
+      },
+      "copy": {
+        "lower": "Uchwyt V oddalony od tułowia, ramiona wyciągnięte.",
+        "raised": "Uchwyt V przy brzuchu, łokcie cofnięte.",
+        "details": "Siedzenie i stopy pozostają podparte, tułów stabilny, a uchwyt połączony z dolnym wyciągiem.",
+        "thumbnail": "Miniatura pokazuje uchwyt oddalony od tułowia."
+      },
+      "bySex": {
+        "male": {
+          "technique": {
+            "path": "src/data/exercise-images/selected/technique/row_v__default-male.webp",
+            "mimeType": "image/webp",
+            "width": 768,
+            "height": 512,
+            "sizeBytes": 20462,
+            "sha256": "5729f6bb68b31c218dc3b47e2045bafb6047ec2a11814f48bcb6027688bff0ed",
+            "altText": "Męska plansza row_v: ODDALONE po lewej, PRZY BRZUCHU po prawej",
+            "status": "local-candidate"
+          },
+          "thumbnail": {
+            "path": "src/data/exercise-images/selected/thumbnails/row_v__default-male.webp",
+            "mimeType": "image/webp",
+            "width": 256,
+            "height": 256,
+            "sizeBytes": 4380,
+            "sha256": "3f4232188da8c6a458fa8261acef348238bcb0d679f7e093cf6384d94c1e045d",
+            "altText": "Miniatura: męska sylwetka, ODDALONE",
+            "status": "local-candidate"
+          }
+        },
+        "female": {
+          "technique": {
+            "path": "src/data/exercise-images/selected/technique/row_v__default-female.webp",
+            "mimeType": "image/webp",
+            "width": 768,
+            "height": 512,
+            "sizeBytes": 20184,
+            "sha256": "1ff45789cd56e923a32a108e92204f4ec2fc1dc143515d7bc88d3d5e283d99e3",
+            "altText": "Żeńska plansza row_v: ODDALONE po lewej, PRZY BRZUCHU po prawej",
+            "status": "local-candidate"
+          },
+          "thumbnail": {
+            "path": "src/data/exercise-images/selected/thumbnails/row_v__default-female.webp",
+            "mimeType": "image/webp",
+            "width": 256,
+            "height": 256,
+            "sizeBytes": 4336,
+            "sha256": "76b62e9d94537e2ddcb01782981f4a2d57b4d7a3defad8855b27e068b6420cf3",
+            "altText": "Miniatura: żeńska sylwetka, ODDALONE",
+            "status": "local-candidate"
+          }
+        }
+      },
+      "musclePresentation": {
+        "kind": "atlas",
+        "exerciseId": "row_v"
+      }
+    },
+    {
+      "exerciseId": "rear_delt",
+      "variantId": "default",
+      "status": "local-candidate",
+      "positions": {
+        "lower": "left",
+        "raised": "right"
+      },
+      "labels": {
+        "lower": "DÓŁ",
+        "raised": "GÓRA"
+      },
+      "copy": {
+        "lower": "Pozycja DÓŁ: hantle pod barkami, tułów pochylony.",
+        "raised": "Pozycja GÓRA: ramiona uniesione na boki, tułów nadal stabilny.",
+        "details": "Oba kadry pokazują odwrotne rozpiętki w opadzie tułowia, bez podparcia ławką.",
+        "thumbnail": "Miniatura pokazuje pozycję DÓŁ."
+      },
+      "bySex": {
+        "male": {
+          "technique": {
+            "path": "src/data/exercise-images/selected/technique/rear_delt__default-male.webp",
+            "mimeType": "image/webp",
+            "width": 768,
+            "height": 512,
+            "sizeBytes": 21820,
+            "sha256": "718936d9ccb57b9708ce72910dcb0b68ed5d5d1a39a20f694cb49291131e828b",
+            "altText": "Męska plansza rear_delt: DÓŁ po lewej, GÓRA po prawej",
+            "status": "local-candidate"
+          },
+          "thumbnail": {
+            "path": "src/data/exercise-images/selected/thumbnails/rear_delt__default-male.webp",
+            "mimeType": "image/webp",
+            "width": 256,
+            "height": 256,
+            "sizeBytes": 4428,
+            "sha256": "e38cbcff7bd668776c8254c4e28ea1c362889fbdb4d0d20130839d0c31f7905e",
+            "altText": "Miniatura: męska sylwetka, DÓŁ",
+            "status": "local-candidate"
+          }
+        },
+        "female": {
+          "technique": {
+            "path": "src/data/exercise-images/selected/technique/rear_delt__default-female.webp",
+            "mimeType": "image/webp",
+            "width": 768,
+            "height": 512,
+            "sizeBytes": 20974,
+            "sha256": "0d20015dabb4b4100434939f0a7c65c1015c0bdbee57d55c545445aa475795b0",
+            "altText": "Żeńska plansza rear_delt: DÓŁ po lewej, GÓRA po prawej",
+            "status": "local-candidate"
+          },
+          "thumbnail": {
+            "path": "src/data/exercise-images/selected/thumbnails/rear_delt__default-female.webp",
+            "mimeType": "image/webp",
+            "width": 256,
+            "height": 256,
+            "sizeBytes": 4422,
+            "sha256": "c7783fdad7230b0e3dfb584e3567e11db2dafe8965c52354d05eff26fed58174",
+            "altText": "Miniatura: żeńska sylwetka, DÓŁ",
+            "status": "local-candidate"
+          }
+        }
+      },
+      "musclePresentation": {
+        "kind": "atlas",
+        "exerciseId": "rear_delt"
+      }
+    },
+    {
+      "exerciseId": "biceps_preacher",
+      "variantId": "default",
+      "status": "local-candidate",
+      "positions": {
+        "lower": "left",
+        "raised": "right"
+      },
+      "labels": {
+        "lower": "DÓŁ",
+        "raised": "GÓRA"
+      },
+      "copy": {
+        "lower": "Pozycja DÓŁ: ręce na poduszce modlitewnika, łokcie niemal wyprostowane.",
+        "raised": "Pozycja GÓRA: uchwyt uniesiony przez zgięcie łokci.",
+        "details": "Ta sama zatwierdzona wizualnie maszyna jest pokazana także przy tricepsie. Dla bicepsa kadry mają odwrotną kolejność.",
+        "thumbnail": "Miniatura pokazuje pozycję DÓŁ."
+      },
+      "bySex": {
+        "male": {
+          "technique": {
+            "path": "src/data/exercise-images/selected/technique/biceps_preacher__default-male.webp",
+            "mimeType": "image/webp",
+            "width": 768,
+            "height": 512,
+            "sizeBytes": 28158,
+            "sha256": "0ff916dcfc4cc86f44a964f85527cb9c2c71879b0d0a4d988504e5e8ba64a5d8",
+            "altText": "Męska plansza biceps_preacher: DÓŁ po lewej, GÓRA po prawej",
+            "status": "local-candidate"
+          },
+          "thumbnail": {
+            "path": "src/data/exercise-images/selected/thumbnails/biceps_preacher__default-male.webp",
+            "mimeType": "image/webp",
+            "width": 256,
+            "height": 256,
+            "sizeBytes": 5450,
+            "sha256": "ccc057141454e6137127d49d968942ca3f74ead9c31330e4f0d927420579db0b",
+            "altText": "Miniatura: męska sylwetka, DÓŁ",
+            "status": "local-candidate"
+          }
+        },
+        "female": {
+          "technique": {
+            "path": "src/data/exercise-images/selected/technique/biceps_preacher__default-female.webp",
+            "mimeType": "image/webp",
+            "width": 768,
+            "height": 512,
+            "sizeBytes": 25202,
+            "sha256": "2976b9044744c829a88cde9b11838e70f81a6884feb02cb6f0110c4d689e5659",
+            "altText": "Żeńska plansza biceps_preacher: DÓŁ po lewej, GÓRA po prawej",
+            "status": "local-candidate"
+          },
+          "thumbnail": {
+            "path": "src/data/exercise-images/selected/thumbnails/biceps_preacher__default-female.webp",
+            "mimeType": "image/webp",
+            "width": 256,
+            "height": 256,
+            "sizeBytes": 5112,
+            "sha256": "1893612c78dd5893471ae2d12c1e9467f99ee8445311f16e933f2d749f4eeda0",
+            "altText": "Miniatura: żeńska sylwetka, DÓŁ",
+            "status": "local-candidate"
+          }
+        }
+      },
+      "musclePresentation": {
+        "kind": "atlas",
+        "exerciseId": "biceps_preacher"
+      }
+    },
+    {
+      "exerciseId": "leg_curl",
+      "variantId": "default",
+      "status": "local-candidate",
+      "positions": {
+        "lower": "left",
+        "raised": "right"
+      },
+      "labels": {
+        "lower": "DÓŁ",
+        "raised": "GÓRA"
+      },
+      "copy": {
+        "lower": "Pozycja DÓŁ: nogi niemal wyprostowane, wałek przy dolnej części podudzi.",
+        "raised": "Pozycja GÓRA: kolana zgięte, wałek uniesiony w kierunku pośladków.",
+        "details": "Klatka piersiowa, biodra i uda pozostają podparte na maszynie.",
+        "thumbnail": "Miniatura pokazuje pozycję DÓŁ."
+      },
+      "bySex": {
+        "male": {
+          "technique": {
+            "path": "src/data/exercise-images/selected/technique/leg_curl__default-male.webp",
+            "mimeType": "image/webp",
+            "width": 768,
+            "height": 512,
+            "sizeBytes": 24234,
+            "sha256": "1c8a3ab109583c5f342a1529d58e74a3abbf0fe946d753fb053062138d26a50f",
+            "altText": "Męska plansza leg_curl: DÓŁ po lewej, GÓRA po prawej",
+            "status": "local-candidate"
+          },
+          "thumbnail": {
+            "path": "src/data/exercise-images/selected/thumbnails/leg_curl__default-male.webp",
+            "mimeType": "image/webp",
+            "width": 256,
+            "height": 256,
+            "sizeBytes": 4796,
+            "sha256": "adb7e2e4110ca6ba7e7e0f44d3d5a665c225bd5b44b9d5fd7ae4593b0500edfe",
+            "altText": "Miniatura: męska sylwetka, DÓŁ",
+            "status": "local-candidate"
+          }
+        },
+        "female": {
+          "technique": {
+            "path": "src/data/exercise-images/selected/technique/leg_curl__default-female.webp",
+            "mimeType": "image/webp",
+            "width": 768,
+            "height": 512,
+            "sizeBytes": 22570,
+            "sha256": "210f1d947a5d95c1e893782a345230982f657c98f2ab0327d3f9032279e59deb",
+            "altText": "Żeńska plansza leg_curl: DÓŁ po lewej, GÓRA po prawej",
+            "status": "local-candidate"
+          },
+          "thumbnail": {
+            "path": "src/data/exercise-images/selected/thumbnails/leg_curl__default-female.webp",
+            "mimeType": "image/webp",
+            "width": 256,
+            "height": 256,
+            "sizeBytes": 4648,
+            "sha256": "cf9cbf45a933ae0b1483e7125c2cd8cff69c9425034e67a267ea927956b7dc8e",
+            "altText": "Miniatura: żeńska sylwetka, DÓŁ",
+            "status": "local-candidate"
+          }
+        }
+      },
+      "musclePresentation": {
+        "kind": "atlas",
+        "exerciseId": "leg_curl"
+      }
+    },
+    {
+      "exerciseId": "lat_pulldown_neutral",
+      "variantId": "default",
+      "status": "local-candidate",
+      "positions": {
+        "lower": "left",
+        "raised": "right"
+      },
+      "labels": {
+        "lower": "DÓŁ",
+        "raised": "GÓRA"
+      },
+      "copy": {
+        "lower": "Pozycja DÓŁ: wąski uchwyt neutralny przy górnej części klatki.",
+        "raised": "Pozycja GÓRA: uchwyt nad głową, ramiona uniesione.",
+        "details": "Uda pozostają pod wałkami, a stopy na podłożu w obu pozycjach.",
+        "thumbnail": "Miniatura pokazuje pozycję DÓŁ."
+      },
+      "bySex": {
+        "male": {
+          "technique": {
+            "path": "src/data/exercise-images/selected/technique/lat_pulldown_neutral__default-male.webp",
+            "mimeType": "image/webp",
+            "width": 768,
+            "height": 512,
+            "sizeBytes": 30208,
+            "sha256": "bf7bb497c88f2ff21f41988a6cef7bf690ad57a945fb00b889d46338cff11efb",
+            "altText": "Męska plansza lat_pulldown_neutral: DÓŁ po lewej, GÓRA po prawej",
+            "status": "local-candidate"
+          },
+          "thumbnail": {
+            "path": "src/data/exercise-images/selected/thumbnails/lat_pulldown_neutral__default-male.webp",
+            "mimeType": "image/webp",
+            "width": 256,
+            "height": 256,
+            "sizeBytes": 5888,
+            "sha256": "314d6ad6c46ad82b3f4348c6a8539645474e774d53f200949bb71f4ea954fee5",
+            "altText": "Miniatura: męska sylwetka, DÓŁ",
+            "status": "local-candidate"
+          }
+        },
+        "female": {
+          "technique": {
+            "path": "src/data/exercise-images/selected/technique/lat_pulldown_neutral__default-female.webp",
+            "mimeType": "image/webp",
+            "width": 768,
+            "height": 512,
+            "sizeBytes": 28426,
+            "sha256": "a67cf9abeffc368aac465458db65addb12805b91cec365baddb20fba6b8f1302",
+            "altText": "Żeńska plansza lat_pulldown_neutral: DÓŁ po lewej, GÓRA po prawej",
+            "status": "local-candidate"
+          },
+          "thumbnail": {
+            "path": "src/data/exercise-images/selected/thumbnails/lat_pulldown_neutral__default-female.webp",
+            "mimeType": "image/webp",
+            "width": 256,
+            "height": 256,
+            "sizeBytes": 5684,
+            "sha256": "1050594c34e029fc76a645c912f17ac348b77304d63e7699cc804c7adf89fb5d",
+            "altText": "Miniatura: żeńska sylwetka, DÓŁ",
+            "status": "local-candidate"
+          }
+        }
+      },
+      "musclePresentation": {
+        "kind": "atlas",
+        "exerciseId": "lat_pulldown_neutral"
+      }
+    },
+    {
+      "exerciseId": "row_straight",
+      "variantId": "default",
+      "status": "local-candidate",
+      "positions": {
+        "lower": "left",
+        "raised": "right"
+      },
+      "labels": {
+        "lower": "ODDALONY",
+        "raised": "PRZY BRZUCHU"
+      },
+      "copy": {
+        "lower": "Krótki prosty drążek oddalony od tułowia, ręce wyciągnięte.",
+        "raised": "Krótki prosty drążek przy górnej części brzucha, łokcie cofnięte.",
+        "details": "Stanowisko jak przy przyciąganiu uchwytu V: tułów pozostaje stabilny, stopy na podnóżkach, a drążek jest połączony z dolnym wyciągiem. Dłonie trzymają go nachwytem.",
+        "thumbnail": "Miniatura pokazuje drążek oddalony od tułowia."
+      },
+      "bySex": {
+        "male": {
+          "technique": {
+            "path": "src/data/exercise-images/selected/technique/row_straight__default-male.webp",
+            "mimeType": "image/webp",
+            "width": 768,
+            "height": 512,
+            "sizeBytes": 19532,
+            "sha256": "05b6269e3768106e6e2806b1f9538b5b2fc8f8b91e3c47f5e5c0c1b88bc4e39e",
+            "altText": "Męska plansza row_straight: ODDALONY po lewej, PRZY BRZUCHU po prawej",
+            "status": "local-candidate"
+          },
+          "thumbnail": {
+            "path": "src/data/exercise-images/selected/thumbnails/row_straight__default-male.webp",
+            "mimeType": "image/webp",
+            "width": 256,
+            "height": 256,
+            "sizeBytes": 4312,
+            "sha256": "30fd4bf30c595d2fe851c0840e65229e0acd2c7bb0fe994cecf7db4c08771846",
+            "altText": "Miniatura: męska sylwetka, ODDALONY",
+            "status": "local-candidate"
+          }
+        },
+        "female": {
+          "technique": {
+            "path": "src/data/exercise-images/selected/technique/row_straight__default-female.webp",
+            "mimeType": "image/webp",
+            "width": 768,
+            "height": 512,
+            "sizeBytes": 19618,
+            "sha256": "55b5291535fa441244c1672fabdc44c78080722507eb9cafd697b97f99b38662",
+            "altText": "Żeńska plansza row_straight: ODDALONY po lewej, PRZY BRZUCHU po prawej",
+            "status": "local-candidate"
+          },
+          "thumbnail": {
+            "path": "src/data/exercise-images/selected/thumbnails/row_straight__default-female.webp",
+            "mimeType": "image/webp",
+            "width": 256,
+            "height": 256,
+            "sizeBytes": 4246,
+            "sha256": "47bd005402b73376cb69a7bc498a1a8ddc467c60a8f89a186f7468ba803c9c9a",
+            "altText": "Miniatura: żeńska sylwetka, ODDALONY",
+            "status": "local-candidate"
+          }
+        }
+      },
+      "musclePresentation": {
+        "kind": "atlas",
+        "exerciseId": "row_straight"
+      }
+    },
+    {
+      "exerciseId": "db_fly",
+      "variantId": "default",
+      "status": "local-candidate",
+      "positions": {
+        "lower": "left",
+        "raised": "right"
+      },
+      "labels": {
+        "lower": "ROZŁOŻONE",
+        "raised": "ZŁĄCZONE"
+      },
+      "copy": {
+        "lower": "Hantle rozłożone na boki, łokcie lekko zgięte.",
+        "raised": "Hantle zbliżone nad klatką, łokcie nadal lekko zgięte.",
+        "details": "Głowa, plecy i biodra pozostają podparte na płaskiej ławce, a stopy na podłożu.",
+        "thumbnail": "Miniatura pokazuje ramiona rozłożone na boki."
+      },
+      "bySex": {
+        "male": {
+          "technique": {
+            "path": "src/data/exercise-images/selected/technique/db_fly__default-male.webp",
+            "mimeType": "image/webp",
+            "width": 768,
+            "height": 512,
+            "sizeBytes": 22048,
+            "sha256": "c0eebf8d6d65a54611ff2528617ef6ed65cc903c050b388f593cafc06b277592",
+            "altText": "Męska plansza db_fly: ROZŁOŻONE po lewej, ZŁĄCZONE po prawej",
+            "status": "local-candidate"
+          },
+          "thumbnail": {
+            "path": "src/data/exercise-images/selected/thumbnails/db_fly__default-male.webp",
+            "mimeType": "image/webp",
+            "width": 256,
+            "height": 256,
+            "sizeBytes": 4374,
+            "sha256": "4e96f00e973d5d05c7b5da88ffb3b606b5bf9ae85f08896b7cd7d6bc1d7891ec",
+            "altText": "Miniatura: męska sylwetka, ROZŁOŻONE",
+            "status": "local-candidate"
+          }
+        },
+        "female": {
+          "technique": {
+            "path": "src/data/exercise-images/selected/technique/db_fly__default-female.webp",
+            "mimeType": "image/webp",
+            "width": 768,
+            "height": 512,
+            "sizeBytes": 18812,
+            "sha256": "b8afdb5bc85978a4aca33cc51486ee4b2167fc918d115eb49af0a608b73d67b2",
+            "altText": "Żeńska plansza db_fly: ROZŁOŻONE po lewej, ZŁĄCZONE po prawej",
+            "status": "local-candidate"
+          },
+          "thumbnail": {
+            "path": "src/data/exercise-images/selected/thumbnails/db_fly__default-female.webp",
+            "mimeType": "image/webp",
+            "width": 256,
+            "height": 256,
+            "sizeBytes": 3936,
+            "sha256": "d02b18ea59232a64e7033fa8bebab59b649f608cea3ee10e24986bda56011dcd",
+            "altText": "Miniatura: żeńska sylwetka, ROZŁOŻONE",
+            "status": "local-candidate"
+          }
+        }
+      },
+      "musclePresentation": {
+        "kind": "atlas",
+        "exerciseId": "db_fly"
+      }
+    },
+    {
+      "exerciseId": "db_fly",
+      "variantId": "incline",
+      "status": "local-candidate",
+      "positions": {
+        "lower": "left",
+        "raised": "right"
+      },
+      "labels": {
+        "lower": "ROZŁOŻONE",
+        "raised": "ZŁĄCZONE"
+      },
+      "copy": {
+        "lower": "Na lekko skośnej ławce hantle rozłożone na boki.",
+        "raised": "Hantle zbliżone nad górną częścią klatki.",
+        "details": "Wariant wykorzystuje ławkę z lekkim dodatnim skosem; biodra i plecy pozostają podparte.",
+        "thumbnail": "Miniatura pokazuje ramiona rozłożone na boki na skośnej ławce."
+      },
+      "bySex": {
+        "male": {
+          "technique": {
+            "path": "src/data/exercise-images/selected/technique/db_fly__incline-male.webp",
+            "mimeType": "image/webp",
+            "width": 768,
+            "height": 512,
+            "sizeBytes": 23108,
+            "sha256": "9b0d2d1b8a292576c6b6fb112a23ca9df99562fc59e72f9710d1b177695cfbc8",
+            "altText": "Męska plansza db_fly: ROZŁOŻONE po lewej, ZŁĄCZONE po prawej",
+            "status": "local-candidate"
+          },
+          "thumbnail": {
+            "path": "src/data/exercise-images/selected/thumbnails/db_fly__incline-male.webp",
+            "mimeType": "image/webp",
+            "width": 256,
+            "height": 256,
+            "sizeBytes": 4858,
+            "sha256": "8ea1e412015dd3d13b7e5fffa060b30703d3db7c6682be90e97fd528c43af1ca",
+            "altText": "Miniatura: męska sylwetka, ROZŁOŻONE",
+            "status": "local-candidate"
+          }
+        },
+        "female": {
+          "technique": {
+            "path": "src/data/exercise-images/selected/technique/db_fly__incline-female.webp",
+            "mimeType": "image/webp",
+            "width": 768,
+            "height": 512,
+            "sizeBytes": 22040,
+            "sha256": "e7a268b58ab9d588a90c568f8d2be3dd5f18a90ab7b0a1b859c75ea709dab10f",
+            "altText": "Żeńska plansza db_fly: ROZŁOŻONE po lewej, ZŁĄCZONE po prawej",
+            "status": "local-candidate"
+          },
+          "thumbnail": {
+            "path": "src/data/exercise-images/selected/thumbnails/db_fly__incline-female.webp",
+            "mimeType": "image/webp",
+            "width": 256,
+            "height": 256,
+            "sizeBytes": 4748,
+            "sha256": "ca73cbade6aef23a7d758073ac2d77b41cc25c1257d653d936eaab8fa5118296",
+            "altText": "Miniatura: żeńska sylwetka, ROZŁOŻONE",
+            "status": "local-candidate"
+          }
+        }
+      },
+      "musclePresentation": {
+        "kind": "atlas",
+        "exerciseId": "db_fly"
+      }
+    },
+    {
+      "exerciseId": "front_raise",
+      "variantId": "default",
+      "status": "local-candidate",
+      "positions": {
+        "lower": "left",
+        "raised": "right"
+      },
+      "labels": {
+        "lower": "DÓŁ",
+        "raised": "GÓRA"
+      },
+      "copy": {
+        "lower": "Hantle przed udami, ramiona opuszczone.",
+        "raised": "Hantle uniesione przed siebie do wysokości barków.",
+        "details": "Ćwiczenie wykonywane stojąc z dwoma hantlami; tułów pozostaje stabilny.",
+        "thumbnail": "Miniatura pokazuje pozycję DÓŁ."
+      },
+      "bySex": {
+        "male": {
+          "technique": {
+            "path": "src/data/exercise-images/selected/technique/front_raise__default-male.webp",
+            "mimeType": "image/webp",
+            "width": 768,
+            "height": 512,
+            "sizeBytes": 17144,
+            "sha256": "011caaf19715703cfabfdc41a0cbd027885eac6079a667977fa3ed00fc3a5ffd",
+            "altText": "Męska plansza front_raise: DÓŁ po lewej, GÓRA po prawej",
+            "status": "local-candidate"
+          },
+          "thumbnail": {
+            "path": "src/data/exercise-images/selected/thumbnails/front_raise__default-male.webp",
+            "mimeType": "image/webp",
+            "width": 256,
+            "height": 256,
+            "sizeBytes": 3696,
+            "sha256": "cb30e4199c56044c7f7a5e10b41dabde1c4a2884af4aea117cf1c0b2824c793a",
+            "altText": "Miniatura: męska sylwetka, DÓŁ",
+            "status": "local-candidate"
+          }
+        },
+        "female": {
+          "technique": {
+            "path": "src/data/exercise-images/selected/technique/front_raise__default-female.webp",
+            "mimeType": "image/webp",
+            "width": 768,
+            "height": 512,
+            "sizeBytes": 15588,
+            "sha256": "a72e6f677d3bee9f2b5295dbdcf84cdb6ffd460e2c6fac7d74cce41396cd9188",
+            "altText": "Żeńska plansza front_raise: DÓŁ po lewej, GÓRA po prawej",
+            "status": "local-candidate"
+          },
+          "thumbnail": {
+            "path": "src/data/exercise-images/selected/thumbnails/front_raise__default-female.webp",
+            "mimeType": "image/webp",
+            "width": 256,
+            "height": 256,
+            "sizeBytes": 3384,
+            "sha256": "d88173c076a2621735ae356011a097308827ef830d2b5903a5111289fef334ac",
+            "altText": "Miniatura: żeńska sylwetka, DÓŁ",
+            "status": "local-candidate"
+          }
+        }
+      },
+      "musclePresentation": {
+        "kind": "atlas",
+        "exerciseId": "front_raise"
+      }
+    },
+    {
+      "exerciseId": "lat_raise_seated",
+      "variantId": "default",
+      "status": "local-candidate",
+      "positions": {
+        "lower": "left",
+        "raised": "right"
+      },
+      "labels": {
+        "lower": "DÓŁ",
+        "raised": "GÓRA"
+      },
+      "copy": {
+        "lower": "Siedząc, hantle po bokach bioder.",
+        "raised": "Siedząc, ramiona uniesione na boki do wysokości barków.",
+        "details": "Stopy pozostają na podłożu, a tułów stabilny w obu kadrach.",
+        "thumbnail": "Miniatura pokazuje pozycję DÓŁ."
+      },
+      "bySex": {
+        "male": {
+          "technique": {
+            "path": "src/data/exercise-images/selected/technique/lat_raise_seated__default-male.webp",
+            "mimeType": "image/webp",
+            "width": 768,
+            "height": 512,
+            "sizeBytes": 25166,
+            "sha256": "e27d5ce67ca2d2d499fefe021009a0d958796a3f6a3222593618ca41880dfab2",
+            "altText": "Męska plansza lat_raise_seated: DÓŁ po lewej, GÓRA po prawej",
+            "status": "local-candidate"
+          },
+          "thumbnail": {
+            "path": "src/data/exercise-images/selected/thumbnails/lat_raise_seated__default-male.webp",
+            "mimeType": "image/webp",
+            "width": 256,
+            "height": 256,
+            "sizeBytes": 4708,
+            "sha256": "4e5199ad563f1403b9f8e49a0260cc22889b9a7fdad74285b381e0d15bf3c04b",
+            "altText": "Miniatura: męska sylwetka, DÓŁ",
+            "status": "local-candidate"
+          }
+        },
+        "female": {
+          "technique": {
+            "path": "src/data/exercise-images/selected/technique/lat_raise_seated__default-female.webp",
+            "mimeType": "image/webp",
+            "width": 768,
+            "height": 512,
+            "sizeBytes": 25304,
+            "sha256": "20aa4d7135b9c23c2b03a3145ac887f702aff7209d5c6bb67cbf93b72e2643bf",
+            "altText": "Żeńska plansza lat_raise_seated: DÓŁ po lewej, GÓRA po prawej",
+            "status": "local-candidate"
+          },
+          "thumbnail": {
+            "path": "src/data/exercise-images/selected/thumbnails/lat_raise_seated__default-female.webp",
+            "mimeType": "image/webp",
+            "width": 256,
+            "height": 256,
+            "sizeBytes": 4834,
+            "sha256": "9b76ed7eb6dd90dc8016d0092b57f6ccbac9acb5738b422701c109dd90379b79",
+            "altText": "Miniatura: żeńska sylwetka, DÓŁ",
+            "status": "local-candidate"
+          }
+        }
+      },
+      "musclePresentation": {
+        "kind": "atlas",
+        "exerciseId": "lat_raise_seated"
+      }
+    },
+    {
+      "exerciseId": "chest_machine",
+      "variantId": "default",
+      "status": "local-candidate",
+      "positions": {
+        "lower": "left",
+        "raised": "right"
+      },
+      "labels": {
+        "lower": "PRZY KLATCE",
+        "raised": "WYPCHNIĘTE"
+      },
+      "copy": {
+        "lower": "Uchwyty maszyny przy bokach klatki, łokcie zgięte.",
+        "raised": "Uchwyty wypchnięte przed tułów, ramiona niemal wyprostowane.",
+        "details": "Plecy i biodra są podparte, a stopy stoją na platformie maszyny talerzowej.",
+        "thumbnail": "Miniatura pokazuje uchwyty przy klatce."
+      },
+      "bySex": {
+        "male": {
+          "technique": {
+            "path": "src/data/exercise-images/selected/technique/chest_machine__default-male.webp",
+            "mimeType": "image/webp",
+            "width": 768,
+            "height": 512,
+            "sizeBytes": 38052,
+            "sha256": "8a318e734efd53d4d73290db8c8720e734cc492bf348b6a45274c088e8272c18",
+            "altText": "Męska plansza chest_machine: PRZY KLATCE po lewej, WYPCHNIĘTE po prawej",
+            "status": "local-candidate"
+          },
+          "thumbnail": {
+            "path": "src/data/exercise-images/selected/thumbnails/chest_machine__default-male.webp",
+            "mimeType": "image/webp",
+            "width": 256,
+            "height": 256,
+            "sizeBytes": 7368,
+            "sha256": "6bb54745b96fc268cd84e7007b55d225213bbb41777cace5db3125c20bc35afb",
+            "altText": "Miniatura: męska sylwetka, PRZY KLATCE",
+            "status": "local-candidate"
+          }
+        },
+        "female": {
+          "technique": {
+            "path": "src/data/exercise-images/selected/technique/chest_machine__default-female.webp",
+            "mimeType": "image/webp",
+            "width": 768,
+            "height": 512,
+            "sizeBytes": 36316,
+            "sha256": "f84f8531f1ca6fd1de8e215d108fde5a245ce96c9eb8133b6a2b7c9d6af819f1",
+            "altText": "Żeńska plansza chest_machine: PRZY KLATCE po lewej, WYPCHNIĘTE po prawej",
+            "status": "local-candidate"
+          },
+          "thumbnail": {
+            "path": "src/data/exercise-images/selected/thumbnails/chest_machine__default-female.webp",
+            "mimeType": "image/webp",
+            "width": 256,
+            "height": 256,
+            "sizeBytes": 7022,
+            "sha256": "409238c75605bab3df286b0cb8dc990d74efbd9511bb75c04fca92cab72d4041",
+            "altText": "Miniatura: żeńska sylwetka, PRZY KLATCE",
+            "status": "local-candidate"
+          }
+        }
+      },
+      "musclePresentation": {
+        "kind": "atlas",
+        "exerciseId": "chest_machine"
+      }
+    },
+    {
+      "exerciseId": "pec_deck",
+      "variantId": "default",
+      "status": "local-candidate",
+      "positions": {
+        "lower": "left",
+        "raised": "right"
+      },
+      "labels": {
+        "lower": "ROZŁOŻONE",
+        "raised": "ZŁĄCZONE"
+      },
+      "copy": {
+        "lower": "Ramiona rozłożone na boki, dłonie na pionowych drążkach.",
+        "raised": "Dwa drążki zbliżone przed klatką piersiową.",
+        "details": "Plecy są podparte; dłonie obejmują drążki chwytem neutralnym w obu pozycjach.",
+        "thumbnail": "Miniatura pokazuje ramiona rozłożone."
+      },
+      "bySex": {
+        "male": {
+          "technique": {
+            "path": "src/data/exercise-images/selected/technique/pec_deck__default-male.webp",
+            "mimeType": "image/webp",
+            "width": 768,
+            "height": 512,
+            "sizeBytes": 32362,
+            "sha256": "a78a93431aff91bdfd732278cdaf082384faf23c226657b378cc1971337e6db0",
+            "altText": "Męska plansza pec_deck: ROZŁOŻONE po lewej, ZŁĄCZONE po prawej",
+            "status": "local-candidate"
+          },
+          "thumbnail": {
+            "path": "src/data/exercise-images/selected/thumbnails/pec_deck__default-male.webp",
+            "mimeType": "image/webp",
+            "width": 256,
+            "height": 256,
+            "sizeBytes": 6640,
+            "sha256": "c4713bd8bc52884c4ef3ac6e331a2c0cef5c008dcac0dc33ad4469cfc67db91d",
+            "altText": "Miniatura: męska sylwetka, ROZŁOŻONE",
+            "status": "local-candidate"
+          }
+        },
+        "female": {
+          "technique": {
+            "path": "src/data/exercise-images/selected/technique/pec_deck__default-female.webp",
+            "mimeType": "image/webp",
+            "width": 768,
+            "height": 512,
+            "sizeBytes": 28682,
+            "sha256": "e634c5d38a9eebe1c6f36c32240f2c1c431bd551ba09c0017a50b494b7e9d542",
+            "altText": "Żeńska plansza pec_deck: ROZŁOŻONE po lewej, ZŁĄCZONE po prawej",
+            "status": "local-candidate"
+          },
+          "thumbnail": {
+            "path": "src/data/exercise-images/selected/thumbnails/pec_deck__default-female.webp",
+            "mimeType": "image/webp",
+            "width": 256,
+            "height": 256,
+            "sizeBytes": 6126,
+            "sha256": "1c7300242d28dbc5450b7521edca7fc23d02c97177a8557616bccc2864eafb3d",
+            "altText": "Miniatura: żeńska sylwetka, ROZŁOŻONE",
+            "status": "local-candidate"
+          }
+        }
+      },
+      "musclePresentation": {
+        "kind": "atlas",
+        "exerciseId": "pec_deck"
+      }
+    },
+    {
+      "exerciseId": "shoulder_press",
+      "variantId": "default",
+      "status": "local-candidate",
+      "positions": {
+        "lower": "left",
+        "raised": "right"
+      },
+      "labels": {
+        "lower": "DÓŁ",
+        "raised": "GÓRA"
+      },
+      "copy": {
+        "lower": "Uchwyty maszyny przy barkach, łokcie zgięte.",
+        "raised": "Uchwyty uniesione nad głowę, ramiona niemal wyprostowane.",
+        "details": "Plecy i biodra pozostają podparte na siedzisku maszyny.",
+        "thumbnail": "Miniatura pokazuje pozycję DÓŁ."
+      },
+      "bySex": {
+        "male": {
+          "technique": {
+            "path": "src/data/exercise-images/selected/technique/shoulder_press__default-male.webp",
+            "mimeType": "image/webp",
+            "width": 768,
+            "height": 512,
+            "sizeBytes": 34020,
+            "sha256": "532c3c062fe3db2aa9f575c5415e5c20e87bf58cc64a2ef47590fb73e0baef8d",
+            "altText": "Męska plansza shoulder_press: DÓŁ po lewej, GÓRA po prawej",
+            "status": "local-candidate"
+          },
+          "thumbnail": {
+            "path": "src/data/exercise-images/selected/thumbnails/shoulder_press__default-male.webp",
+            "mimeType": "image/webp",
+            "width": 256,
+            "height": 256,
+            "sizeBytes": 6466,
+            "sha256": "57bb529cac15f64fe89a994dd466a65905f142a589c0abc876f4a131776ff5bf",
+            "altText": "Miniatura: męska sylwetka, DÓŁ",
+            "status": "local-candidate"
+          }
+        },
+        "female": {
+          "technique": {
+            "path": "src/data/exercise-images/selected/technique/shoulder_press__default-female.webp",
+            "mimeType": "image/webp",
+            "width": 768,
+            "height": 512,
+            "sizeBytes": 32444,
+            "sha256": "620b85c4717817ad31d9fa8f11b15d85bfdf2d9a01a63e1df832398cf51100c8",
+            "altText": "Żeńska plansza shoulder_press: DÓŁ po lewej, GÓRA po prawej",
+            "status": "local-candidate"
+          },
+          "thumbnail": {
+            "path": "src/data/exercise-images/selected/thumbnails/shoulder_press__default-female.webp",
+            "mimeType": "image/webp",
+            "width": 256,
+            "height": 256,
+            "sizeBytes": 6178,
+            "sha256": "e2bd02e243f890b5af8bd36489aa7adb942c966b10c73c1546b608ef04afd030",
+            "altText": "Miniatura: żeńska sylwetka, DÓŁ",
+            "status": "local-candidate"
+          }
+        }
+      },
+      "musclePresentation": {
+        "kind": "atlas",
+        "exerciseId": "shoulder_press"
+      }
+    },
+    {
+      "exerciseId": "shoulder_press",
+      "variantId": "dumbbells",
+      "status": "local-candidate",
+      "positions": {
+        "lower": "left",
+        "raised": "right"
+      },
+      "labels": {
+        "lower": "DÓŁ",
+        "raised": "GÓRA"
+      },
+      "copy": {
+        "lower": "Dwa hantle przy barkach, łokcie zgięte.",
+        "raised": "Dwa hantle nad głową, ramiona niemal wyprostowane.",
+        "details": "Wariant z dwoma hantlami; plecy opierają się o ławkę, a stopy pozostają na podłożu.",
+        "thumbnail": "Miniatura pokazuje pozycję DÓŁ."
+      },
+      "bySex": {
+        "male": {
+          "technique": {
+            "path": "src/data/exercise-images/selected/technique/shoulder_press__dumbbells-male.webp",
+            "mimeType": "image/webp",
+            "width": 768,
+            "height": 512,
+            "sizeBytes": 37006,
+            "sha256": "81a5744b4c6358f4a8a9601cf3f406e633d1f62c7e9eba4d8cac70e550425ade",
+            "altText": "Męska plansza shoulder_press: DÓŁ po lewej, GÓRA po prawej",
+            "status": "local-candidate"
+          },
+          "thumbnail": {
+            "path": "src/data/exercise-images/selected/thumbnails/shoulder_press__dumbbells-male.webp",
+            "mimeType": "image/webp",
+            "width": 256,
+            "height": 256,
+            "sizeBytes": 6184,
+            "sha256": "85e510e9f5a0929f336b30f9979746f5fab14b646a0d59af734243a9a9ce951e",
+            "altText": "Miniatura: męska sylwetka, DÓŁ",
+            "status": "local-candidate"
+          }
+        },
+        "female": {
+          "technique": {
+            "path": "src/data/exercise-images/selected/technique/shoulder_press__dumbbells-female.webp",
+            "mimeType": "image/webp",
+            "width": 768,
+            "height": 512,
+            "sizeBytes": 42806,
+            "sha256": "514ddaab48e0571c2071124bf6473563d2d0ae9810a235a44364673801d577de",
+            "altText": "Żeńska plansza shoulder_press: DÓŁ po lewej, GÓRA po prawej",
+            "status": "local-candidate"
+          },
+          "thumbnail": {
+            "path": "src/data/exercise-images/selected/thumbnails/shoulder_press__dumbbells-female.webp",
+            "mimeType": "image/webp",
+            "width": 256,
+            "height": 256,
+            "sizeBytes": 6640,
+            "sha256": "c15324bc57573f1fd70baf18b6223e1058a24fc922ce4c234ebbe397f851e354",
+            "altText": "Miniatura: żeńska sylwetka, DÓŁ",
+            "status": "local-candidate"
+          }
+        }
+      },
+      "musclePresentation": {
+        "kind": "atlas",
+        "exerciseId": "shoulder_press"
+      }
+    },
+    {
+      "exerciseId": "face_pull",
+      "variantId": "default",
+      "status": "local-candidate",
+      "positions": {
+        "lower": "left",
+        "raised": "right"
+      },
+      "labels": {
+        "lower": "ODDALONA",
+        "raised": "PRZY TWARZY"
+      },
+      "copy": {
+        "lower": "Lina oddalona od twarzy, ramiona wyciągnięte.",
+        "raised": "Lina przy twarzy, łokcie uniesione na boki.",
+        "details": "Postać stoi przodem do wyciągu. Lina jest połączona z bloczkiem na wysokości oczu; tułów pozostaje stabilny.",
+        "thumbnail": "Miniatura pokazuje linę oddaloną od twarzy."
+      },
+      "bySex": {
+        "male": {
+          "technique": {
+            "path": "src/data/exercise-images/selected/technique/face_pull__default-male.webp",
+            "mimeType": "image/webp",
+            "width": 768,
+            "height": 512,
+            "sizeBytes": 54628,
+            "sha256": "40af70e2e6ddc3460957105daac0dc1ae7c4e4cff42652559e3795256feb7c6d",
+            "altText": "Męska plansza face_pull: ODDALONA po lewej, PRZY TWARZY po prawej",
+            "status": "local-candidate"
+          },
+          "thumbnail": {
+            "path": "src/data/exercise-images/selected/thumbnails/face_pull__default-male.webp",
+            "mimeType": "image/webp",
+            "width": 256,
+            "height": 256,
+            "sizeBytes": 7454,
+            "sha256": "e74de09ac3cbcbb668ea8bb5ad595c0fbbfca630585e907f9d2cc00a3ca096be",
+            "altText": "Miniatura: męska sylwetka, ODDALONA",
+            "status": "local-candidate"
+          }
+        },
+        "female": {
+          "technique": {
+            "path": "src/data/exercise-images/selected/technique/face_pull__default-female.webp",
+            "mimeType": "image/webp",
+            "width": 768,
+            "height": 512,
+            "sizeBytes": 44318,
+            "sha256": "5919099065a92ef4c87e26ef9edf209b2852aaa01747adb08493e4105e673eb1",
+            "altText": "Żeńska plansza face_pull: ODDALONA po lewej, PRZY TWARZY po prawej",
+            "status": "local-candidate"
+          },
+          "thumbnail": {
+            "path": "src/data/exercise-images/selected/thumbnails/face_pull__default-female.webp",
+            "mimeType": "image/webp",
+            "width": 256,
+            "height": 256,
+            "sizeBytes": 6546,
+            "sha256": "889ef034afe109f8a1d4abf47259914b3a7ccc411dfb2deeeee5b46cedfa2a0b",
+            "altText": "Miniatura: żeńska sylwetka, ODDALONA",
+            "status": "local-candidate"
+          }
+        }
+      },
+      "musclePresentation": {
+        "kind": "atlas",
+        "exerciseId": "face_pull"
+      }
+    },
+    {
+      "exerciseId": "lat_raise_cable",
+      "variantId": "default",
+      "status": "local-candidate",
+      "positions": {
+        "lower": "left",
+        "raised": "right"
+      },
+      "labels": {
+        "lower": "DÓŁ",
+        "raised": "GÓRA"
+      },
+      "copy": {
+        "lower": "Dłoń dalsza od wyciągu trzyma uchwyt przy biodrze.",
+        "raised": "Ta sama ręka uniesiona bokiem do wysokości barku.",
+        "details": "Linka biegnie przed tułowiem do dolnego bloczka; postawa pozostaje stabilna.",
+        "thumbnail": "Miniatura pokazuje pozycję DÓŁ."
+      },
+      "bySex": {
+        "male": {
+          "technique": {
+            "path": "src/data/exercise-images/selected/technique/lat_raise_cable__default-male.webp",
+            "mimeType": "image/webp",
+            "width": 768,
+            "height": 512,
+            "sizeBytes": 30596,
+            "sha256": "83ce2466329e3729bf58eaaa0eea2762877e5cce000459244b9c0462661e3cda",
+            "altText": "Męska plansza lat_raise_cable: DÓŁ po lewej, GÓRA po prawej",
+            "status": "local-candidate"
+          },
+          "thumbnail": {
+            "path": "src/data/exercise-images/selected/thumbnails/lat_raise_cable__default-male.webp",
+            "mimeType": "image/webp",
+            "width": 256,
+            "height": 256,
+            "sizeBytes": 5812,
+            "sha256": "aad38af11a00111c9392a72ca4baf7eae28642e54031e40804e0dd08d9b38032",
+            "altText": "Miniatura: męska sylwetka, DÓŁ",
+            "status": "local-candidate"
+          }
+        },
+        "female": {
+          "technique": {
+            "path": "src/data/exercise-images/selected/technique/lat_raise_cable__default-female.webp",
+            "mimeType": "image/webp",
+            "width": 768,
+            "height": 512,
+            "sizeBytes": 30760,
+            "sha256": "3f864ee6d15bcb80131842e88e77d14f0ac797c39fbd77b12717f11749efd3f1",
+            "altText": "Żeńska plansza lat_raise_cable: DÓŁ po lewej, GÓRA po prawej",
+            "status": "local-candidate"
+          },
+          "thumbnail": {
+            "path": "src/data/exercise-images/selected/thumbnails/lat_raise_cable__default-female.webp",
+            "mimeType": "image/webp",
+            "width": 256,
+            "height": 256,
+            "sizeBytes": 5888,
+            "sha256": "44ca0c27cdff4fd373c75cd9a7c1364d6d64a2c6cdbe85b5fa2242bcf07466d6",
+            "altText": "Miniatura: żeńska sylwetka, DÓŁ",
+            "status": "local-candidate"
+          }
+        }
+      },
+      "musclePresentation": {
+        "kind": "atlas",
+        "exerciseId": "lat_raise_cable"
+      }
+    },
+    {
+      "exerciseId": "hammer_curl",
+      "variantId": "default",
+      "status": "local-candidate",
+      "positions": {
+        "lower": "left",
+        "raised": "right"
+      },
+      "labels": {
+        "lower": "DÓŁ",
+        "raised": "GÓRA"
+      },
+      "copy": {
+        "lower": "Dwa hantle po bokach tułowia, chwyt neutralny.",
+        "raised": "Jeden hantel uniesiony przez zgięcie łokcia, drugi pozostaje opuszczony.",
+        "details": "Plansza pokazuje ruch naprzemienny; powtórzenia liczy się na rękę.",
+        "thumbnail": "Miniatura pokazuje pozycję DÓŁ."
+      },
+      "bySex": {
+        "male": {
+          "technique": {
+            "path": "src/data/exercise-images/selected/technique/hammer_curl__default-male.webp",
+            "mimeType": "image/webp",
+            "width": 768,
+            "height": 512,
+            "sizeBytes": 17938,
+            "sha256": "2fdbc8961c85b010827e8a906eac61b396a4ca9bfd23ab09fccf0c96c05b6618",
+            "altText": "Męska plansza hammer_curl: DÓŁ po lewej, GÓRA po prawej",
+            "status": "local-candidate"
+          },
+          "thumbnail": {
+            "path": "src/data/exercise-images/selected/thumbnails/hammer_curl__default-male.webp",
+            "mimeType": "image/webp",
+            "width": 256,
+            "height": 256,
+            "sizeBytes": 4068,
+            "sha256": "34ae7a8549fb72deb10618eb2e40eae52c9101564f9ff4deac53ccff34009f95",
+            "altText": "Miniatura: męska sylwetka, DÓŁ",
+            "status": "local-candidate"
+          }
+        },
+        "female": {
+          "technique": {
+            "path": "src/data/exercise-images/selected/technique/hammer_curl__default-female.webp",
+            "mimeType": "image/webp",
+            "width": 768,
+            "height": 512,
+            "sizeBytes": 18906,
+            "sha256": "d6f0522dfeec6cd23f2f4d7d7215a20e7908124d2c3889ee8463e488bad9e6f0",
+            "altText": "Żeńska plansza hammer_curl: DÓŁ po lewej, GÓRA po prawej",
+            "status": "local-candidate"
+          },
+          "thumbnail": {
+            "path": "src/data/exercise-images/selected/thumbnails/hammer_curl__default-female.webp",
+            "mimeType": "image/webp",
+            "width": 256,
+            "height": 256,
+            "sizeBytes": 4262,
+            "sha256": "7d0a1a192894b3239a2085b77c3ff6d978ac544d76c5b2b1a75f7cd20b2174a9",
+            "altText": "Miniatura: żeńska sylwetka, DÓŁ",
+            "status": "local-candidate"
+          }
+        }
+      },
+      "musclePresentation": {
+        "kind": "atlas",
+        "exerciseId": "hammer_curl"
+      }
+    },
+    {
+      "exerciseId": "cable_curl",
+      "variantId": "default",
+      "status": "local-candidate",
+      "positions": {
+        "lower": "left",
+        "raised": "right"
+      },
+      "labels": {
+        "lower": "DÓŁ",
+        "raised": "GÓRA"
+      },
+      "copy": {
+        "lower": "Prosty drążek dolnego wyciągu przy udach.",
+        "raised": "Drążek uniesiony w kierunku klatki przez zgięcie łokci.",
+        "details": "Postać stoi naprzeciw dolnego bloczka; drążek pozostaje połączony z linką w obu kadrach.",
+        "thumbnail": "Miniatura pokazuje pozycję DÓŁ."
+      },
+      "bySex": {
+        "male": {
+          "technique": {
+            "path": "src/data/exercise-images/selected/technique/cable_curl__default-male.webp",
+            "mimeType": "image/webp",
+            "width": 768,
+            "height": 512,
+            "sizeBytes": 35386,
+            "sha256": "a6bc887cb66d39dba7df3a54cf745c7ca72769b3cbf6a08977edaea427baadfc",
+            "altText": "Męska plansza cable_curl: DÓŁ po lewej, GÓRA po prawej",
+            "status": "local-candidate"
+          },
+          "thumbnail": {
+            "path": "src/data/exercise-images/selected/thumbnails/cable_curl__default-male.webp",
+            "mimeType": "image/webp",
+            "width": 256,
+            "height": 256,
+            "sizeBytes": 5978,
+            "sha256": "f52183600b511217554c234681b1449ed161fc794614e6d192aead4ec74a168c",
+            "altText": "Miniatura: męska sylwetka, DÓŁ",
+            "status": "local-candidate"
+          }
+        },
+        "female": {
+          "technique": {
+            "path": "src/data/exercise-images/selected/technique/cable_curl__default-female.webp",
+            "mimeType": "image/webp",
+            "width": 768,
+            "height": 512,
+            "sizeBytes": 34118,
+            "sha256": "9d23eac7e2f1858d1affaba1f74f940f8242994e9d0e526347fb38f7569c4519",
+            "altText": "Żeńska plansza cable_curl: DÓŁ po lewej, GÓRA po prawej",
+            "status": "local-candidate"
+          },
+          "thumbnail": {
+            "path": "src/data/exercise-images/selected/thumbnails/cable_curl__default-female.webp",
+            "mimeType": "image/webp",
+            "width": 256,
+            "height": 256,
+            "sizeBytes": 5780,
+            "sha256": "b3cdc8dfd02721a12ae17ea08dd582b80186f62b4937a90387d821568e7dfbd2",
+            "altText": "Miniatura: żeńska sylwetka, DÓŁ",
+            "status": "local-candidate"
+          }
+        }
+      },
+      "musclePresentation": {
+        "kind": "atlas",
+        "exerciseId": "cable_curl"
+      }
+    },
+    {
+      "exerciseId": "tri_overhead",
+      "variantId": "default",
+      "status": "local-candidate",
+      "positions": {
+        "lower": "left",
+        "raised": "right"
+      },
+      "labels": {
+        "lower": "DÓŁ",
+        "raised": "GÓRA"
+      },
+      "copy": {
+        "lower": "Jeden hantel trzymany oburącz za głową, łokcie zgięte.",
+        "raised": "Ten sam hantel nad głową, łokcie wyprostowane.",
+        "details": "Jedna hantla w obu dłoniach, bez ruchu tułowia.",
+        "thumbnail": "Miniatura pokazuje pozycję DÓŁ."
+      },
+      "bySex": {
+        "male": {
+          "technique": {
+            "path": "src/data/exercise-images/selected/technique/tri_overhead__default-male.webp",
+            "mimeType": "image/webp",
+            "width": 768,
+            "height": 512,
+            "sizeBytes": 15106,
+            "sha256": "10ac484a92d1db1fc7e1977f380a649cad3b262bc4a1d72c72fdb26e23d9431b",
+            "altText": "Męska plansza tri_overhead: DÓŁ po lewej, GÓRA po prawej",
+            "status": "local-candidate"
+          },
+          "thumbnail": {
+            "path": "src/data/exercise-images/selected/thumbnails/tri_overhead__default-male.webp",
+            "mimeType": "image/webp",
+            "width": 256,
+            "height": 256,
+            "sizeBytes": 3428,
+            "sha256": "147ae0aba7d2f97edb71caed800f64d0d25fe6881ea9323b46c8179df06d60db",
+            "altText": "Miniatura: męska sylwetka, DÓŁ",
+            "status": "local-candidate"
+          }
+        },
+        "female": {
+          "technique": {
+            "path": "src/data/exercise-images/selected/technique/tri_overhead__default-female.webp",
+            "mimeType": "image/webp",
+            "width": 768,
+            "height": 512,
+            "sizeBytes": 14112,
+            "sha256": "0506b37be99c964b061bec8dfd54f07b63b1a8f275057dcca68ebdcd89f0ecee",
+            "altText": "Żeńska plansza tri_overhead: DÓŁ po lewej, GÓRA po prawej",
+            "status": "local-candidate"
+          },
+          "thumbnail": {
+            "path": "src/data/exercise-images/selected/thumbnails/tri_overhead__default-female.webp",
+            "mimeType": "image/webp",
+            "width": 256,
+            "height": 256,
+            "sizeBytes": 3284,
+            "sha256": "c214baa0400d9e3f7853b1a3a361d267b4c9e1747500f05d34f6cd41ac45bc23",
+            "altText": "Miniatura: żeńska sylwetka, DÓŁ",
+            "status": "local-candidate"
+          }
+        }
+      },
+      "musclePresentation": {
+        "kind": "atlas",
+        "exerciseId": "tri_overhead"
+      }
+    },
+    {
+      "exerciseId": "row_machine",
+      "variantId": "default",
+      "status": "local-candidate",
+      "positions": {
+        "lower": "left",
+        "raised": "right"
+      },
+      "labels": {
+        "lower": "ODDALONE",
+        "raised": "PRZY TUŁOWIU"
+      },
+      "copy": {
+        "lower": "Uchwyt wyciągu oddalony, ramiona wyprostowane.",
+        "raised": "Uchwyt przy dolnej części tułowia, łokcie cofnięte.",
+        "details": "Siedzenie i stopy pozostają podparte, tułów stabilny, a uchwyt połączony z dolnym bloczkiem.",
+        "thumbnail": "Miniatura pokazuje uchwyt oddalony."
+      },
+      "bySex": {
+        "male": {
+          "technique": {
+            "path": "src/data/exercise-images/selected/technique/row_machine__default-male.webp",
+            "mimeType": "image/webp",
+            "width": 768,
+            "height": 512,
+            "sizeBytes": 24334,
+            "sha256": "e45e8d705256900657c7d7b68edc21648469a9676a1d3903e3ae2c6fd632fd0a",
+            "altText": "Męska plansza row_machine: ODDALONE po lewej, PRZY TUŁOWIU po prawej",
+            "status": "local-candidate"
+          },
+          "thumbnail": {
+            "path": "src/data/exercise-images/selected/thumbnails/row_machine__default-male.webp",
+            "mimeType": "image/webp",
+            "width": 256,
+            "height": 256,
+            "sizeBytes": 5056,
+            "sha256": "7d3d608005d9549e5fefa7c27bc26790baf64a64f51669d02d6a116f3c0066c4",
+            "altText": "Miniatura: męska sylwetka, ODDALONE",
+            "status": "local-candidate"
+          }
+        },
+        "female": {
+          "technique": {
+            "path": "src/data/exercise-images/selected/technique/row_machine__default-female.webp",
+            "mimeType": "image/webp",
+            "width": 768,
+            "height": 512,
+            "sizeBytes": 22548,
+            "sha256": "3db0b91cb06d0ce0de8f1f785c905ac6769fa7517b3d5efbbe3b2e5e437732c4",
+            "altText": "Żeńska plansza row_machine: ODDALONE po lewej, PRZY TUŁOWIU po prawej",
+            "status": "local-candidate"
+          },
+          "thumbnail": {
+            "path": "src/data/exercise-images/selected/thumbnails/row_machine__default-female.webp",
+            "mimeType": "image/webp",
+            "width": 256,
+            "height": 256,
+            "sizeBytes": 4860,
+            "sha256": "0eae5a9a50da835dba179374b45aa26c654e34229c552f60419215487e690dbd",
+            "altText": "Miniatura: żeńska sylwetka, ODDALONE",
+            "status": "local-candidate"
+          }
+        }
+      },
+      "musclePresentation": {
+        "kind": "atlas",
+        "exerciseId": "row_machine"
+      }
+    },
+    {
+      "exerciseId": "leg_extension",
+      "variantId": "default",
+      "status": "local-candidate",
+      "positions": {
+        "lower": "left",
+        "raised": "right"
+      },
+      "labels": {
+        "lower": "DÓŁ",
+        "raised": "GÓRA"
+      },
+      "copy": {
+        "lower": "Kolana zgięte, wałek przy przedniej części podudzi.",
+        "raised": "Kolana prawie wyprostowane, wałek uniesiony wraz z nogami.",
+        "details": "Plecy i uda pozostają podparte na siedzisku maszyny.",
+        "thumbnail": "Miniatura pokazuje pozycję DÓŁ."
+      },
+      "bySex": {
+        "male": {
+          "technique": {
+            "path": "src/data/exercise-images/selected/technique/leg_extension__default-male.webp",
+            "mimeType": "image/webp",
+            "width": 768,
+            "height": 512,
+            "sizeBytes": 35612,
+            "sha256": "dbe00d5e5d34c64891ca6415c9c5bd6586aa380bcac6bf60fd6ea512c999e440",
+            "altText": "Męska plansza leg_extension: DÓŁ po lewej, GÓRA po prawej",
+            "status": "local-candidate"
+          },
+          "thumbnail": {
+            "path": "src/data/exercise-images/selected/thumbnails/leg_extension__default-male.webp",
+            "mimeType": "image/webp",
+            "width": 256,
+            "height": 256,
+            "sizeBytes": 6924,
+            "sha256": "15648dad49aeccc3d8bdeb38267bbd084244426b44b5ed017f69d7c8dc47c0b1",
+            "altText": "Miniatura: męska sylwetka, DÓŁ",
+            "status": "local-candidate"
+          }
+        },
+        "female": {
+          "technique": {
+            "path": "src/data/exercise-images/selected/technique/leg_extension__default-female.webp",
+            "mimeType": "image/webp",
+            "width": 768,
+            "height": 512,
+            "sizeBytes": 38516,
+            "sha256": "7c50c3e780ba7673d446edbe9c87db96aa01ac3c61d2c48600cd756ee320620d",
+            "altText": "Żeńska plansza leg_extension: DÓŁ po lewej, GÓRA po prawej",
+            "status": "local-candidate"
+          },
+          "thumbnail": {
+            "path": "src/data/exercise-images/selected/thumbnails/leg_extension__default-female.webp",
+            "mimeType": "image/webp",
+            "width": 256,
+            "height": 256,
+            "sizeBytes": 7290,
+            "sha256": "85df599dbf70d8f95bf914f578cd404a08ea2d183fbb1e966d51ed004cd50754",
+            "altText": "Miniatura: żeńska sylwetka, DÓŁ",
+            "status": "local-candidate"
+          }
+        }
+      },
+      "musclePresentation": {
+        "kind": "atlas",
+        "exerciseId": "leg_extension"
+      }
+    },
+    {
+      "exerciseId": "tri_overhead",
+      "variantId": "rope",
+      "status": "local-candidate",
+      "positions": {
+        "lower": "left",
+        "raised": "right"
+      },
+      "labels": {
+        "lower": "DÓŁ",
+        "raised": "GÓRA"
+      },
+      "copy": {
+        "lower": "Lina dolnego wyciągu za głową, łokcie zgięte.",
+        "raised": "Lina nad głową, łokcie wyprostowane.",
+        "details": "Wariant używa liny połączonej z dolnym wyciągiem; stopy ustawione stabilnie, tułów pozostaje wyprostowany.",
+        "thumbnail": "Miniatura pokazuje pozycję DÓŁ."
+      },
+      "bySex": {
+        "male": {
+          "technique": {
+            "path": "src/data/exercise-images/selected/technique/tri_overhead__rope-male.webp",
+            "mimeType": "image/webp",
+            "width": 768,
+            "height": 512,
+            "sizeBytes": 28488,
+            "sha256": "48966d366aafee921b3a4c650df286da4e3c36e6c974dc79e025908e8460ef51",
+            "altText": "Męska plansza tri_overhead: DÓŁ po lewej, GÓRA po prawej",
+            "status": "local-candidate"
+          },
+          "thumbnail": {
+            "path": "src/data/exercise-images/selected/thumbnails/tri_overhead__rope-male.webp",
+            "mimeType": "image/webp",
+            "width": 256,
+            "height": 256,
+            "sizeBytes": 5854,
+            "sha256": "ca43b6dc8c9c1873af41ef45a2b55f962c32eb52f6e6197a1bb7a0a92dd75e4f",
+            "altText": "Miniatura: męska sylwetka, DÓŁ",
+            "status": "local-candidate"
+          }
+        },
+        "female": {
+          "technique": {
+            "path": "src/data/exercise-images/selected/technique/tri_overhead__rope-female.webp",
+            "mimeType": "image/webp",
+            "width": 768,
+            "height": 512,
+            "sizeBytes": 28730,
+            "sha256": "bb86e5960c7bf07aedd269882c4e8cdd52fe4ba437a651dc69281b957b632f34",
+            "altText": "Żeńska plansza tri_overhead: DÓŁ po lewej, GÓRA po prawej",
+            "status": "local-candidate"
+          },
+          "thumbnail": {
+            "path": "src/data/exercise-images/selected/thumbnails/tri_overhead__rope-female.webp",
+            "mimeType": "image/webp",
+            "width": 256,
+            "height": 256,
+            "sizeBytes": 5766,
+            "sha256": "e21b0a3febf35f3ae7b5487851c12cf8159a1eb6e7985cc9158affbee0a96339",
+            "altText": "Miniatura: żeńska sylwetka, DÓŁ",
+            "status": "local-candidate"
+          }
+        }
+      },
+      "musclePresentation": {
+        "kind": "atlas",
+        "exerciseId": "tri_overhead"
+      }
+    },
+    {
+      "exerciseId": "smith_squat",
+      "variantId": "default",
+      "status": "local-candidate",
+      "positions": {
+        "lower": "left",
+        "raised": "right"
+      },
+      "labels": {
+        "lower": "DÓŁ",
+        "raised": "GÓRA"
+      },
+      "copy": {
+        "lower": "Przysiad ze sztangą prowadzoną po szynach Smitha.",
+        "raised": "Pozycja stojąca ze sztangą wyżej na tych samych szynach.",
+        "details": "Stopy pozostają na podłożu, a sztanga przesuwa się po dwóch prowadnicach.",
+        "thumbnail": "Miniatura pokazuje pozycję DÓŁ."
+      },
+      "bySex": {
+        "male": {
+          "technique": {
+            "path": "src/data/exercise-images/selected/technique/smith_squat__default-male.webp",
+            "mimeType": "image/webp",
+            "width": 768,
+            "height": 512,
+            "sizeBytes": 36288,
+            "sha256": "bd03dc111d44cd00e0ef2ce2bb0c5f44d3aaf7551d5fc6fb001c0cbc14ca821d",
+            "altText": "Męska plansza smith_squat: DÓŁ po lewej, GÓRA po prawej",
+            "status": "local-candidate"
+          },
+          "thumbnail": {
+            "path": "src/data/exercise-images/selected/thumbnails/smith_squat__default-male.webp",
+            "mimeType": "image/webp",
+            "width": 256,
+            "height": 256,
+            "sizeBytes": 7102,
+            "sha256": "d22345a08b2f796b3bbc3a3f9a3ce436b6b57566e9f261350a93246b21cd51bc",
+            "altText": "Miniatura: męska sylwetka, DÓŁ",
+            "status": "local-candidate"
+          }
+        },
+        "female": {
+          "technique": {
+            "path": "src/data/exercise-images/selected/technique/smith_squat__default-female.webp",
+            "mimeType": "image/webp",
+            "width": 768,
+            "height": 512,
+            "sizeBytes": 37820,
+            "sha256": "74a44346a00510a30b38257b63dbb322f58c698b8c494d472f174a07cae70eb0",
+            "altText": "Żeńska plansza smith_squat: DÓŁ po lewej, GÓRA po prawej",
+            "status": "local-candidate"
+          },
+          "thumbnail": {
+            "path": "src/data/exercise-images/selected/thumbnails/smith_squat__default-female.webp",
+            "mimeType": "image/webp",
+            "width": 256,
+            "height": 256,
+            "sizeBytes": 7532,
+            "sha256": "56f83ced43cb8145a1f732725f6dffdddab2612a84a56de20b6dce2d5b9f447a",
+            "altText": "Miniatura: żeńska sylwetka, DÓŁ",
+            "status": "local-candidate"
+          }
+        }
+      },
+      "musclePresentation": {
+        "kind": "atlas",
+        "exerciseId": "smith_squat"
+      }
+    },
+    {
+      "exerciseId": "pullup",
+      "variantId": "default",
+      "status": "local-candidate",
+      "positions": {
+        "lower": "left",
+        "raised": "right"
+      },
+      "labels": {
+        "lower": "ZWIS",
+        "raised": "PODCIĄGNIĘCIE"
+      },
+      "copy": {
+        "lower": "Zwis na drążku nachwytem, ramiona prawie wyprostowane.",
+        "raised": "Podciągnięcie z brodą nad drążkiem.",
+        "details": "Stopy pozostają nad podłożem, a chwyt na tym samym drążku.",
+        "thumbnail": "Miniatura pokazuje zwis."
+      },
+      "bySex": {
+        "male": {
+          "technique": {
+            "path": "src/data/exercise-images/selected/technique/pullup__default-male.webp",
+            "mimeType": "image/webp",
+            "width": 768,
+            "height": 512,
+            "sizeBytes": 23038,
+            "sha256": "0c69e13af7f17ecacd741fccf53becf44cc64d05975efeb8220577308853e265",
+            "altText": "Męska plansza pullup: ZWIS po lewej, PODCIĄGNIĘCIE po prawej",
+            "status": "local-candidate"
+          },
+          "thumbnail": {
+            "path": "src/data/exercise-images/selected/thumbnails/pullup__default-male.webp",
+            "mimeType": "image/webp",
+            "width": 256,
+            "height": 256,
+            "sizeBytes": 4880,
+            "sha256": "79a059c2c6d960d9cd38a8f7a80563527838dcd4aae2a47810560815581747dd",
+            "altText": "Miniatura: męska sylwetka, ZWIS",
+            "status": "local-candidate"
+          }
+        },
+        "female": {
+          "technique": {
+            "path": "src/data/exercise-images/selected/technique/pullup__default-female.webp",
+            "mimeType": "image/webp",
+            "width": 768,
+            "height": 512,
+            "sizeBytes": 24476,
+            "sha256": "6d1f8e80c321a8003e4675bfad51bc75902744a0bf06fb16f14490a05c32f697",
+            "altText": "Żeńska plansza pullup: ZWIS po lewej, PODCIĄGNIĘCIE po prawej",
+            "status": "local-candidate"
+          },
+          "thumbnail": {
+            "path": "src/data/exercise-images/selected/thumbnails/pullup__default-female.webp",
+            "mimeType": "image/webp",
+            "width": 256,
+            "height": 256,
+            "sizeBytes": 5072,
+            "sha256": "15e3f14e6bcdd2661197a4b2db76b819c54e9cfb871e122f8930b88c754e260b",
+            "altText": "Miniatura: żeńska sylwetka, ZWIS",
+            "status": "local-candidate"
+          }
+        }
+      },
+      "musclePresentation": {
+        "kind": "atlas",
+        "exerciseId": "pullup"
+      }
+    },
+    {
+      "exerciseId": "dips",
+      "variantId": "default",
+      "status": "local-candidate",
+      "positions": {
+        "lower": "left",
+        "raised": "right"
+      },
+      "labels": {
+        "lower": "DÓŁ",
+        "raised": "GÓRA"
+      },
+      "copy": {
+        "lower": "Ciało opuszczone między poręczami, łokcie zgięte.",
+        "raised": "Ciało uniesione nad poręczami, ramiona wyprostowane.",
+        "details": "Dłonie obejmują dwie stałe poręcze, a stopy nie dotykają podłoża.",
+        "thumbnail": "Miniatura pokazuje pozycję DÓŁ."
+      },
+      "bySex": {
+        "male": {
+          "technique": {
+            "path": "src/data/exercise-images/selected/technique/dips__default-male.webp",
+            "mimeType": "image/webp",
+            "width": 768,
+            "height": 512,
+            "sizeBytes": 23578,
+            "sha256": "e9965ec6aa3bf04a815f387ab641b439651924b60e9e0d6c6fe5afc90c9c4b8f",
+            "altText": "Męska plansza dips: DÓŁ po lewej, GÓRA po prawej",
+            "status": "local-candidate"
+          },
+          "thumbnail": {
+            "path": "src/data/exercise-images/selected/thumbnails/dips__default-male.webp",
+            "mimeType": "image/webp",
+            "width": 256,
+            "height": 256,
+            "sizeBytes": 4712,
+            "sha256": "14913daae6f99ccc1d0eb94379330a3dc00f38dc2ff3d8cc4758a8533000add3",
+            "altText": "Miniatura: męska sylwetka, DÓŁ",
+            "status": "local-candidate"
+          }
+        },
+        "female": {
+          "technique": {
+            "path": "src/data/exercise-images/selected/technique/dips__default-female.webp",
+            "mimeType": "image/webp",
+            "width": 768,
+            "height": 512,
+            "sizeBytes": 22182,
+            "sha256": "65163a47bdcd9c333d2471fa071d4e92f53fa8998a4af9ec553c206e8db7ba5d",
+            "altText": "Żeńska plansza dips: DÓŁ po lewej, GÓRA po prawej",
+            "status": "local-candidate"
+          },
+          "thumbnail": {
+            "path": "src/data/exercise-images/selected/thumbnails/dips__default-female.webp",
+            "mimeType": "image/webp",
+            "width": 256,
+            "height": 256,
+            "sizeBytes": 4572,
+            "sha256": "a520c5aacf8d09f2a214fe76c91d3fd65b240e056873a4a5b38a084505bd272a",
+            "altText": "Miniatura: żeńska sylwetka, DÓŁ",
+            "status": "local-candidate"
+          }
+        }
+      },
+      "musclePresentation": {
+        "kind": "atlas",
+        "exerciseId": "dips"
+      }
+    },
+    {
+      "exerciseId": "pushup",
+      "variantId": "default",
+      "status": "local-candidate",
+      "positions": {
+        "lower": "left",
+        "raised": "right"
+      },
+      "labels": {
+        "lower": "DÓŁ",
+        "raised": "GÓRA"
+      },
+      "copy": {
+        "lower": "Klatka blisko podłoża, łokcie zgięte.",
+        "raised": "Ciało wyżej, łokcie wyprostowane.",
+        "details": "Dłonie i palce stóp pozostają na podłożu, a tułów, biodra i nogi tworzą linię.",
+        "thumbnail": "Miniatura pokazuje pozycję DÓŁ."
+      },
+      "bySex": {
+        "male": {
+          "technique": {
+            "path": "src/data/exercise-images/selected/technique/pushup__default-male.webp",
+            "mimeType": "image/webp",
+            "width": 768,
+            "height": 512,
+            "sizeBytes": 16310,
+            "sha256": "68e5165b40dc0e22351f7658920251306509aee173b263d2a5b241974aabf656",
+            "altText": "Męska plansza pushup: DÓŁ po lewej, GÓRA po prawej",
+            "status": "local-candidate"
+          },
+          "thumbnail": {
+            "path": "src/data/exercise-images/selected/thumbnails/pushup__default-male.webp",
+            "mimeType": "image/webp",
+            "width": 256,
+            "height": 256,
+            "sizeBytes": 3128,
+            "sha256": "44fd92cbc89e809ec196ae1babac39f3b095e9952587cf63f034c20a133a6aca",
+            "altText": "Miniatura: męska sylwetka, DÓŁ",
+            "status": "local-candidate"
+          }
+        },
+        "female": {
+          "technique": {
+            "path": "src/data/exercise-images/selected/technique/pushup__default-female.webp",
+            "mimeType": "image/webp",
+            "width": 768,
+            "height": 512,
+            "sizeBytes": 14464,
+            "sha256": "12a65d7d87a2e585c476a60ab634cbe337779d61a7e1a4f665f1283962f0903f",
+            "altText": "Żeńska plansza pushup: DÓŁ po lewej, GÓRA po prawej",
+            "status": "local-candidate"
+          },
+          "thumbnail": {
+            "path": "src/data/exercise-images/selected/thumbnails/pushup__default-female.webp",
+            "mimeType": "image/webp",
+            "width": 256,
+            "height": 256,
+            "sizeBytes": 2964,
+            "sha256": "ece09f0445781be1e9b7ac5e08b047b029d4b185508b74d9bc838e6184db68a1",
+            "altText": "Miniatura: żeńska sylwetka, DÓŁ",
+            "status": "local-candidate"
+          }
+        }
+      },
+      "musclePresentation": {
+        "kind": "atlas",
+        "exerciseId": "pushup"
+      }
+    },
+    {
+      "exerciseId": "tri_machine",
+      "variantId": "default",
+      "status": "local-candidate",
+      "positions": {
+        "lower": "left",
+        "raised": "right"
+      },
+      "labels": {
+        "lower": "START",
+        "raised": "KONIEC"
+      },
+      "copy": {
+        "lower": "START: łokcie zgięte, dłonie przy twarzy.",
+        "raised": "KONIEC: przedramiona skierowane do przodu, łokcie prawie wyprostowane.",
+        "details": "Siedzenie, podpora górnych części ramion i rama pozostają nieruchome. Uchwyty poruszają się wraz z dźwignią maszyny.",
+        "thumbnail": "Miniatura pokazuje pozycję START."
+      },
+      "bySex": {
+        "male": {
+          "technique": {
+            "path": "src/data/exercise-images/selected/technique/tri_machine__default-male.webp",
+            "mimeType": "image/webp",
+            "width": 768,
+            "height": 512,
+            "sizeBytes": 27800,
+            "sha256": "312636d78811522edc49790e7308b5df70643adcacbae0a610dc0ea804bd6952",
+            "altText": "Męska plansza tri_machine: START po lewej, KONIEC po prawej",
+            "status": "local-candidate"
+          },
+          "thumbnail": {
+            "path": "src/data/exercise-images/selected/thumbnails/tri_machine__default-male.webp",
+            "mimeType": "image/webp",
+            "width": 256,
+            "height": 256,
+            "sizeBytes": 5460,
+            "sha256": "f232d6e1a404b825f3936f7625922f2794986d4a98c64e7c82b120e4a0555a92",
+            "altText": "Miniatura: męska sylwetka, START",
+            "status": "local-candidate"
+          }
+        },
+        "female": {
+          "technique": {
+            "path": "src/data/exercise-images/selected/technique/tri_machine__default-female.webp",
+            "mimeType": "image/webp",
+            "width": 768,
+            "height": 512,
+            "sizeBytes": 25130,
+            "sha256": "c4375a938b3445036f5d8e690fbe8f5ad100f2b3e2511eb719642a5d58f11492",
+            "altText": "Żeńska plansza tri_machine: START po lewej, KONIEC po prawej",
+            "status": "local-candidate"
+          },
+          "thumbnail": {
+            "path": "src/data/exercise-images/selected/thumbnails/tri_machine__default-female.webp",
+            "mimeType": "image/webp",
+            "width": 256,
+            "height": 256,
+            "sizeBytes": 5150,
+            "sha256": "35b4f4e6bea5edbbb61ed0481e5fafe5d8d03fa99ff99357b437f648dcd80f05",
+            "altText": "Miniatura: żeńska sylwetka, START",
+            "status": "local-candidate"
+          }
+        }
+      },
+      "musclePresentation": {
+        "kind": "atlas",
+        "exerciseId": "tri_machine"
+      }
+    }
+  ]
+}

@@ -1,9 +1,11 @@
+import { DRAFT_KEY as PROGRAM_DRAFT_KEY, validateWorkingDrafts } from './features/plans/program-drafts.js';
+import { validateSessionContext } from './features/plans/history-context.js';
 const LEGACY_KEYS = new Set([
   'gymverse_schema', 'gymverse_history', 'gymverse_active', 'gymverse_plans',
   'gymverse_custom', 'gymverse_body', 'gymverse_last_weights', 'gymverse_rest',
   'gymverse_bar', 'gymverse_last_backup', 'gymverse_deload_until',
   'gymverse_deload_start', 'gymverse_deload_snooze', 'gymverse_goal',
-  'gymverse_history_backup_v1', 'gymverse_draft_v1'
+  'gymverse_history_backup_v1', 'gymverse_draft_v1', 'gymverse_profiles_v1', PROGRAM_DRAFT_KEY
 ]);
 
 function canonical(value) {
@@ -116,12 +118,13 @@ export async function inspectLegacySnapshot(snapshot, validationOptions = {}) {
     counts.sessions = snapshot.gymverse_history.length;
     snapshot.gymverse_history.forEach(session => {
       if (!isPlainObject(session) || !Array.isArray(session.details)) { add(anomalies, 'INVALID_SESSION'); return; }
+      if (!validateSessionContext(session.sessionContext,session.planId)) add(anomalies, 'SESSION_CONTEXT_INVALID');
       session.details.forEach(set => {
         counts.sets += 1;
         if (!isPlainObject(set) || typeof set.exerciseId !== 'string' || (Object.hasOwn(set, 'variantId') && (typeof set.variantId !== 'string' || !set.variantId.trim())) || !Number.isFinite(Number(set.weight)) || Number(set.weight) < 0 || !Number.isInteger(Number(set.reps)) || Number(set.reps) <= 0) add(anomalies, 'INVALID_SERIES');
         else if (validationOptions.strictExerciseCatalog) {
           const exerciseId = (validationOptions.exerciseIdMap || {})[set.exerciseId] || set.exerciseId;
-          if (!Object.hasOwn(exerciseCatalog, exerciseId)) add(anomalies, 'EXERCISE_UNKNOWN');
+          if (!Object.hasOwn(exerciseCatalog, exerciseId)) { if (set.unmappedExercise !== true) add(anomalies, 'EXERCISE_UNKNOWN'); }
           else if (Number(set.weight) === 0 && !bodyweightExercises.has(exerciseId)) add(anomalies, 'SERIES_WEIGHT_MODE_INVALID');
         }
       });
@@ -148,6 +151,7 @@ export async function inspectLegacySnapshot(snapshot, validationOptions = {}) {
   if (snapshot.gymverse_active != null && !isPlainObject(snapshot.gymverse_active)) add(anomalies, 'ACTIVE_NOT_OBJECT');
   if (isPlainObject(snapshot.gymverse_active)) {
     const active = snapshot.gymverse_active;
+    if (!validateSessionContext(active.sessionContext,active.planId)) add(anomalies, 'SESSION_CONTEXT_INVALID');
     if (Array.isArray(active.exercises) && active.exercises.some(exercise => !isPlainObject(exercise) || typeof exercise.key !== 'string' || (Object.hasOwn(exercise, 'variantId') && (typeof exercise.variantId !== 'string' || !exercise.variantId.trim())))) add(anomalies, 'ACTIVE_EXERCISES_INVALID');
     if (Array.isArray(active.sets) && active.sets.some(set => !isPlainObject(set) || (Object.hasOwn(set, 'variantId') && (typeof set.variantId !== 'string' || !set.variantId.trim())))) add(anomalies, 'ACTIVE_SETS_INVALID');
   }
@@ -157,6 +161,23 @@ export async function inspectLegacySnapshot(snapshot, validationOptions = {}) {
     else counts.drafts = drafts.items.length;
   }
 
+  if (snapshot[PROGRAM_DRAFT_KEY] != null) {
+    try { validateWorkingDrafts(snapshot[PROGRAM_DRAFT_KEY]); counts.drafts += snapshot[PROGRAM_DRAFT_KEY].items.length; } catch (_) { add(anomalies, 'PROGRAM_DRAFT_INVALID'); }
+  }
+  if (snapshot.gymverse_profiles_v1 != null) {
+    try {
+      const { readProfileState } = await import('./features/profiles/profile-model.js');
+      const { validatePlanPrograms } = await import('./features/plans/programs.js');
+      const registry = readProfileState({ gymverse_profiles_v1: JSON.stringify(snapshot.gymverse_profiles_v1) });
+      for (const profile of registry.profiles) {
+        if (Object.values(profile.data).some(value => typeof value !== 'string')) throw new Error('PROFILE_DATA_INVALID');
+        const data = Object.fromEntries(Object.entries(profile.data).map(([key, value]) => [key, JSON.parse(value)]));
+        if (profile.planPrograms) validatePlanPrograms(profile.planPrograms, profile.id === registry.activeProfileId ? (snapshot.gymverse_plans || []) : (data.gymverse_plans || []));
+        const checked = await inspectLegacySnapshot(data, validationOptions);
+        if (!checked.ok) throw new Error('PROFILE_DATA_INVALID');
+      }
+    } catch (_) { add(anomalies, 'PROFILE_DATA_INVALID'); }
+  }
   const bytes = new TextEncoder().encode(canonical(snapshot));
   const digest = await globalThis.crypto.subtle.digest('SHA-256', bytes);
   const sha256 = Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, '0')).join('');
@@ -170,6 +191,30 @@ const RUNTIME_RECORDS = 'runtimeRecords';
 const META = 'meta';
 const INTERPRETATIONS = 'legacyInterpretations';
 const CUSTOM_MEDIA = 'customMedia';
+
+function auxiliaryProfileId(value) {
+  if (value == null || value === '') return null;
+  if (typeof value !== 'string' || !/^[a-z0-9][a-z0-9_-]{7,63}$/i.test(value)) throw new Error('AUXILIARY_PROFILE_ID_INVALID');
+  return value;
+}
+
+function auxiliaryPointerKey(kind, profileId) {
+  return profileId ? `${kind}:${profileId}` : kind;
+}
+
+async function activeAuxiliaryPointer(meta, kind, profileId) {
+  const scoped = await requestValue(meta.get(auxiliaryPointerKey(kind, profileId)));
+  if (scoped || profileId !== 'legacy-default-profile') return scoped;
+  return requestValue(meta.get(kind));
+}
+
+function auxiliaryBatchId(batchId, profileId) {
+  return profileId ? `${profileId}:${batchId}` : batchId;
+}
+
+function newAuxiliaryBatchToken() {
+  return globalThis.crypto?.randomUUID?.() || `local-${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
+}
 
 function openDatabase(factory) {
   return new Promise((resolve, reject) => {
@@ -300,12 +345,12 @@ export async function createRuntimeStore(options = {}) {
     return pointer;
   };
 
-  const persistIndexedSnapshot = async (snapshotOverride = null) => {
+  const persistIndexedSnapshot = async (snapshotOverride = null, expectedRevision = revision) => {
     const database = await activeDatabase();
     try {
       const snapshot = snapshotOverride || await adapter.exportSnapshot();
       const digest = await runtimeDigest(snapshot);
-      const nextRevision = revision + 1;
+      const nextRevision = expectedRevision + 1;
       const tx = database.transaction([RUNTIME_RECORDS, META], 'readwrite');
       const records = tx.objectStore(RUNTIME_RECORDS);
       const meta = tx.objectStore(META);
@@ -313,7 +358,7 @@ export async function createRuntimeStore(options = {}) {
       let pointer = null;
       meta.get(RUNTIME_REVISION).onsuccess = event => {
         const currentRevision = event.target.result && Number(event.target.result.value) || 0;
-        if (currentRevision !== revision) { conflict = true; tx.abort(); return; }
+        if (currentRevision !== expectedRevision) { conflict = true; tx.abort(); return; }
         meta.get(RUNTIME_POINTER).onsuccess = pointerEvent => {
           pointer = pointerEvent.target.result;
           if (!pointer) { tx.abort(); return; }
@@ -362,6 +407,11 @@ export async function createRuntimeStore(options = {}) {
       for (const [key, value] of cache) result[key] = value && value.__gymverseRaw !== undefined ? value.__gymverseRaw : JSON.stringify(value);
       return result;
     },
+    async refreshSnapshot() {
+      await persistQueue.catch(error=>{if(error.message!=='CROSS_TAB_CONFLICT')throw error;});
+      if (mode === 'indexeddb') await refreshFromDatabase();
+      return adapter.exportSnapshot();
+    },
     setFailureHandler(handler) { onFailure = typeof handler === 'function' ? handler : () => {}; },
     async flush() { return persistQueue; },
     storage: {
@@ -393,10 +443,13 @@ export async function createRuntimeStore(options = {}) {
       const nextSnapshot = await adapter.exportSnapshot();
       for (const [key, value] of Object.entries(updates)) value === null ? delete nextSnapshot[key] : nextSnapshot[key] = JSON.stringify(value);
       const digest = await runtimeDigest(nextSnapshot);
-      const batchId = auxiliary.batchId || digest;
-      const interpretations = (auxiliary.interpretations || []).map(normalizeInterpretation);
-      const media = auxiliary.media || [];
-      if (new Set(interpretations.map(item => item.id)).size !== interpretations.length || new Set(media.map(item => item.name)).size !== media.length) throw new Error('RESTORE_AUXILIARY_DUPLICATE');
+      const profileId = auxiliaryProfileId(auxiliary.profileId);
+      const groups = [{ profileId, interpretations: (auxiliary.interpretations || []).map(normalizeInterpretation), media: auxiliary.media || [] }, ...(auxiliary.profileAuxiliaries || []).map(item => ({
+        profileId: auxiliaryProfileId(item.profileId), interpretations: (item.interpretations || []).map(normalizeInterpretation), media: item.media || []
+      }))];
+      const groupIds = groups.map(item => item.profileId);
+      if (groups.slice(1).some(group => !group.profileId) || new Set(groupIds).size !== groupIds.length || groups.some(group => new Set(group.interpretations.map(item => item.id)).size !== group.interpretations.length || new Set(group.media.map(item => item.name)).size !== group.media.length)) throw new Error('RESTORE_AUXILIARY_DUPLICATE');
+      const batches = groups.map(group => ({ ...group, batchId: auxiliaryBatchId(auxiliary.batchId || digest, group.profileId) }));
       const database = await activeDatabase();
       let committed = false;
       try {
@@ -414,12 +467,14 @@ export async function createRuntimeStore(options = {}) {
             records.getAll().onsuccess = recordsEvent => {
               recordsEvent.target.result.filter(record => record.generation === pointer.generation).forEach(record => records.delete(record.id));
               for (const [key, raw] of Object.entries(nextSnapshot)) records.put({ id: `${pointer.generation}:${key}`, generation: pointer.generation, raw });
-              interpretations.forEach(item => tx.objectStore(INTERPRETATIONS).put({ ...item, id: `${batchId}:${item.id}`, originalId: item.id, batchId }));
-              media.forEach(item => tx.objectStore(CUSTOM_MEDIA).put({ id: `${batchId}:${item.name}`, originalName: item.name, name: item.name, bytes: item.bytes, batchId }));
+              for (const group of batches) {
+                group.interpretations.forEach(item => tx.objectStore(INTERPRETATIONS).put({ ...item, id: `${group.batchId}:${item.id}`, originalId: item.id, batchId: group.batchId }));
+                group.media.forEach(item => tx.objectStore(CUSTOM_MEDIA).put({ id: `${group.batchId}:${item.name}`, originalName: item.name, name: item.name, bytes: item.bytes, batchId: group.batchId }));
+                meta.put({ key: auxiliaryPointerKey('activeInterpretationBatch', group.profileId), batchId: group.batchId });
+                meta.put({ key: auxiliaryPointerKey('activeCustomMediaBatch', group.profileId), batchId: group.batchId });
+              }
               meta.put({ key: RUNTIME_REVISION, value: nextRevision });
               meta.put({ ...pointer, sha256: digest, count: Object.keys(nextSnapshot).length });
-              meta.put({ key: 'activeInterpretationBatch', batchId });
-              meta.put({ key: 'activeCustomMediaBatch', batchId });
             };
           };
         };
@@ -440,19 +495,21 @@ export async function createRuntimeStore(options = {}) {
           requestValue(verifyTx.objectStore(CUSTOM_MEDIA).getAll())
         ]);
         await transactionDone(verifyTx);
-        const verifiedInterpretations = allInterpretations.filter(item => item.batchId === batchId);
-        const verifiedMedia = allMedia.filter(item => item.batchId === batchId);
-        if (verifiedInterpretations.length !== interpretations.length || verifiedInterpretations.some(item => {
-          const expected = interpretations.find(row => row.id === item.originalId);
-          if (!expected) return true;
-          const { id: storedId, originalId, batchId: storedBatchId, ...rest } = item;
-          const actual = { id: originalId, ...rest };
-          return canonical(actual) !== canonical(expected);
-        }) || verifiedMedia.length !== media.length || verifiedMedia.some(item => {
-          const expected = media.find(row => row.name === item.name);
-          return !expected || item.bytes.byteLength !== expected.bytes.byteLength || item.bytes.some((byte, index) => byte !== expected.bytes[index]);
-        })) throw new Error('RESTORE_AUXILIARY_READBACK_MISMATCH');
-        return { status: 'restored', keys: Object.keys(nextSnapshot).length, revision };
+        for (const group of batches) {
+          const verifiedInterpretations = allInterpretations.filter(item => item.batchId === group.batchId);
+          const verifiedMedia = allMedia.filter(item => item.batchId === group.batchId);
+          if (verifiedInterpretations.length !== group.interpretations.length || verifiedInterpretations.some(item => {
+            const expected = group.interpretations.find(row => row.id === item.originalId);
+            if (!expected) return true;
+            const { id: storedId, originalId, batchId: storedBatchId, ...rest } = item;
+            const actual = { id: originalId, ...rest };
+            return canonical(actual) !== canonical(expected);
+          }) || verifiedMedia.length !== group.media.length || verifiedMedia.some(item => {
+            const expected = group.media.find(row => row.name === item.name);
+            return !expected || item.bytes.byteLength !== expected.bytes.byteLength || item.bytes.some((byte, index) => byte !== expected.bytes[index]);
+          })) throw new Error('RESTORE_AUXILIARY_READBACK_MISMATCH');
+        }
+        return { status: 'restored', keys: Object.keys(nextSnapshot).length, revision, profileAuxiliaries: groups.length };
       } catch (error) {
         if (error.message === 'CROSS_TAB_CONFLICT') throw error;
         blocked = true;
@@ -546,16 +603,17 @@ export async function createRuntimeStore(options = {}) {
       const operation = persistQueue.catch(() => {}).then(async () => {
         if (blocked) throw new Error('ACTIVE_DATABASE_UNAVAILABLE');
         if (writePaused) throw new Error('MIGRATION_IN_PROGRESS');
+        const expectedRevision = revision;
         const snapshot = await adapter.exportSnapshot();
         for (const [key, value] of Object.entries(updates)) value === null ? delete snapshot[key] : snapshot[key] = JSON.stringify(value);
-        const result = await persistIndexedSnapshot(snapshot);
+        const result = await persistIndexedSnapshot(snapshot, expectedRevision);
         cache.clear();
         Object.entries(snapshot).forEach(([key, raw]) => cache.set(key, parseRuntimeValue(raw)));
         return result;
       }).catch(error => {
+        if (error.message === 'CROSS_TAB_CONFLICT') throw error;
         blocked = true;
         onFailure(error);
-        if (error.message === 'CROSS_TAB_CONFLICT') throw error;
         throw new Error('ACTIVE_DATABASE_UNAVAILABLE', { cause: error });
       });
       persistQueue = operation;
@@ -736,6 +794,7 @@ function sanitizeRestoredActive(active) {
     return out;
   };
   const safe = stripPush(active);
+  delete safe.restState;
   if (safe.timer && isPlainObject(safe.timer)) {
     safe.timer.status = 'idle';
     safe.timer.endsAt = null;
@@ -750,6 +809,13 @@ function sanitizeRestoredActive(active) {
 export async function restoreLegacyV4(storage, parsed, options = {}) {
   if (options.confirmed !== true) throw new Error('RESTORE_CONFIRMATION_REQUIRED');
   if (typeof options.restoreActive !== 'boolean' || typeof options.restoreDrafts !== 'boolean') throw new Error('RESTORE_SESSION_CHOICES_REQUIRED');
+  const rawProfiles = storage.getItem('gymverse_profiles_v1');
+  if (rawProfiles) {
+    const { readProfileState } = await import('./features/profiles/profile-model.js');
+    const registry = readProfileState({gymverse_profiles_v1:rawProfiles});
+    const profile = registry.profiles.find(item => item.id === registry.activeProfileId);
+    if (profile?.planPrograms?.programs.length) throw new Error('LEGACY_RESTORE_PROGRAMS_PROTECTED');
+  }
   let snapshot = normalizeV4Export(parsed);
   const inspection = await inspectLegacySnapshot(snapshot, options.validationOptions || {});
   if (!inspection.ok) {
@@ -762,10 +828,11 @@ export async function restoreLegacyV4(storage, parsed, options = {}) {
   else if (snapshot.gymverse_active) snapshot.gymverse_active = sanitizeRestoredActive(snapshot.gymverse_active);
   if (!options.restoreDrafts) delete snapshot.gymverse_draft_v1;
   const keys = ['gymverse_schema', 'gymverse_history', 'gymverse_last_weights', 'gymverse_body', 'gymverse_plans', 'gymverse_custom', 'gymverse_active', 'gymverse_draft_v1'];
+  const profileId = auxiliaryProfileId(options.profileId);
   const runtime = storage && storage.__gymverseRuntimeStore;
   if (runtime && runtime.mode === 'indexeddb') {
     const updates = Object.fromEntries(keys.map(key => [key, Object.hasOwn(snapshot, key) ? snapshot[key] : null]));
-    const result = await runtime.restoreSnapshot(updates, { interpretations: [], media: [] });
+    const result = await runtime.restoreSnapshot(updates, { interpretations: [], media: [], profileId });
     return { status: 'restored', counts: inspection.counts, revision: result.revision };
   }
   const before = new Map(keys.map(key => [key, storage.getItem(key)]));
@@ -778,7 +845,7 @@ export async function restoreLegacyV4(storage, parsed, options = {}) {
       if (storage.getItem(key) !== value) throw new Error('RESTORE_READBACK_FAILED');
     }
     const indexedDBFactory = options.indexedDB || globalThis.indexedDB;
-    if (indexedDBFactory) await replaceAuxiliaryBatch([], [], inspection.sha256, indexedDBFactory);
+    if (indexedDBFactory) await replaceAuxiliaryBatch([], [], inspection.sha256, indexedDBFactory, profileId);
     return { status: 'restored', counts: inspection.counts };
   } catch (error) {
     error.rollbackErrors = [];
@@ -830,6 +897,7 @@ function normalizeInterpretation(item) {
 export async function saveLegacyInterpretation(record, options = {}) {
   const factory = options.indexedDB || globalThis.indexedDB;
   if (!factory) throw new Error('INDEXEDDB_UNSUPPORTED');
+  const profileId = auxiliaryProfileId(options.profileId);
   const input = { ...record, id: record && record.id || globalThis.crypto.randomUUID() };
   const normalized = normalizeInterpretation(input);
   const db = await openDatabase(factory);
@@ -837,10 +905,20 @@ export async function saveLegacyInterpretation(record, options = {}) {
     const transaction = db.transaction([INTERPRETATIONS, META], 'readwrite');
     const store = transaction.objectStore(INTERPRETATIONS);
     const meta = transaction.objectStore(META);
-    const active = await requestValue(meta.get('activeInterpretationBatch'));
-    const batchId = active && active.batchId || 'local';
-    store.put({ ...normalized, batchId });
-    if (!active) meta.put({ key: 'activeInterpretationBatch', batchId });
+    const pointerKey = auxiliaryPointerKey('activeInterpretationBatch', profileId);
+    const [scopedPointer, globalPointer, allRecords] = await Promise.all([
+      requestValue(meta.get(pointerKey)),
+      profileId ? requestValue(meta.get('activeInterpretationBatch')) : Promise.resolve(null),
+      profileId ? requestValue(store.getAll()) : Promise.resolve([])
+    ]);
+    const fallbackPointer = !scopedPointer && profileId === 'legacy-default-profile' ? globalPointer : null;
+    const batchId = scopedPointer?.batchId || (profileId ? auxiliaryBatchId(newAuxiliaryBatchToken(), profileId) : globalPointer?.batchId || 'local');
+    if (fallbackPointer) allRecords.filter(item => item.batchId === fallbackPointer.batchId).forEach(item => {
+      const originalId = item.originalId || item.id;
+      store.put({ ...item, id: `${batchId}:${originalId}`, originalId, batchId });
+    });
+    store.put({ ...normalized, id: `${batchId}:${normalized.id}`, originalId: normalized.id, batchId });
+    meta.put({ key: pointerKey, batchId });
     await transactionDone(transaction);
     return normalized;
   } finally { db.close(); }
@@ -849,6 +927,7 @@ export async function saveLegacyInterpretation(record, options = {}) {
 /** Read only the active interpretation set; staged/abandoned sets remain inactive. */
 export async function readLegacyInterpretations(options = {}) {
   const factory = options.indexedDB || globalThis.indexedDB;
+  const profileId = auxiliaryProfileId(options.profileId);
   if (!factory) return [];
   if (typeof factory.databases === 'function') {
     const databases = await factory.databases();
@@ -858,7 +937,7 @@ export async function readLegacyInterpretations(options = {}) {
   try {
     const tx = db.transaction([INTERPRETATIONS, META], 'readonly');
     const [pointer, records] = await Promise.all([
-      requestValue(tx.objectStore(META).get('activeInterpretationBatch')),
+      activeAuxiliaryPointer(tx.objectStore(META), 'activeInterpretationBatch', profileId),
       requestValue(tx.objectStore(INTERPRETATIONS).getAll())
     ]);
     await transactionDone(tx);
@@ -870,6 +949,7 @@ export async function readLegacyInterpretations(options = {}) {
 /** Read only image blobs attached to the active, verified backup generation. */
 export async function readCustomMedia(options = {}) {
   const factory = options.indexedDB || globalThis.indexedDB;
+  const profileId = auxiliaryProfileId(options.profileId);
   if (!factory) return [];
   if (typeof factory.databases === 'function') {
     const databases = await factory.databases();
@@ -879,7 +959,7 @@ export async function readCustomMedia(options = {}) {
   try {
     const tx = db.transaction([CUSTOM_MEDIA, META], 'readonly');
     const [pointer, records] = await Promise.all([
-      requestValue(tx.objectStore(META).get('activeCustomMediaBatch')),
+      activeAuxiliaryPointer(tx.objectStore(META), 'activeCustomMediaBatch', profileId),
       requestValue(tx.objectStore(CUSTOM_MEDIA).getAll())
     ]);
     await transactionDone(tx);
@@ -897,8 +977,10 @@ export async function requestStoragePersistence(storageManager = globalThis.navi
   } catch (_) { return 'best-effort'; }
 }
 
-async function replaceAuxiliaryBatch(records, media, batchId, factory = globalThis.indexedDB) {
+async function replaceAuxiliaryBatch(records, media, batchId, factory = globalThis.indexedDB, profileId = null) {
   if (!factory) throw new Error('INDEXEDDB_UNSUPPORTED');
+  profileId = auxiliaryProfileId(profileId);
+  batchId = auxiliaryBatchId(batchId, profileId);
   const normalized = records.map(normalizeInterpretation);
   const db = await openDatabase(factory);
   try {
@@ -916,9 +998,57 @@ async function replaceAuxiliaryBatch(records, media, batchId, factory = globalTh
         verifiedMedia.some((record, index) => !record || record.batchId !== batchId || record.name !== media[index].name || record.bytes.byteLength !== media[index].bytes.byteLength || record.bytes.some((byte, offset) => byte !== media[index].bytes[offset]))) throw new Error('AUXILIARY_READBACK_MISMATCH');
     const pointerTx = db.transaction(META, 'readwrite');
     const meta = pointerTx.objectStore(META);
-    meta.put({ key: 'activeInterpretationBatch', batchId });
-    meta.put({ key: 'activeCustomMediaBatch', batchId });
+    meta.put({ key: auxiliaryPointerKey('activeInterpretationBatch', profileId), batchId });
+    meta.put({ key: auxiliaryPointerKey('activeCustomMediaBatch', profileId), batchId });
     await transactionDone(pointerTx);
+  } finally { db.close(); }
+}
+
+/** Replace one profile's auxiliary set only after validating all media and interpretations. */
+export async function replaceProfileAuxiliary(profileId, auxiliary = {}, options = {}) {
+  profileId = auxiliaryProfileId(profileId);
+  if (!profileId) throw new Error('AUXILIARY_PROFILE_ID_INVALID');
+  if (!isPlainObject(auxiliary) || !Array.isArray(auxiliary.interpretations || []) || !Array.isArray(auxiliary.media || [])) throw new Error('PROFILE_AUXILIARY_INVALID');
+  const interpretations = (auxiliary.interpretations || []).map(normalizeInterpretation);
+  const media = auxiliary.media || [];
+  if (new Set(interpretations.map(item => item.id)).size !== interpretations.length || new Set(media.map(item => item.name)).size !== media.length) throw new Error('PROFILE_AUXILIARY_DUPLICATE');
+  let totalBytes = 0;
+  media.forEach(item => {
+    if (!item || typeof item.name !== 'string' || !validateArchiveName(item.name) || !item.name.startsWith('custom-media/')) throw new Error('MEDIA_NAME_INVALID');
+    if (!(item.bytes instanceof Uint8Array) || item.bytes.byteLength > MAX_ENTRY_BYTES) throw new Error('MEDIA_SIZE_INVALID');
+    validateImage(item.name, item.bytes);
+    totalBytes += item.bytes.byteLength;
+  });
+  if (totalBytes > MAX_ARCHIVE_BYTES) throw new Error('MEDIA_SIZE_INVALID');
+  await replaceAuxiliaryBatch(interpretations, media, options.batchId || newAuxiliaryBatchToken(), options.indexedDB || globalThis.indexedDB, profileId);
+  return { interpretations: interpretations.length, media: media.length };
+}
+
+/** Remove a deleted profile's scoped auxiliary batches without touching other profiles or legacy data. */
+export async function deleteProfileAuxiliary(profileId, options = {}) {
+  profileId = auxiliaryProfileId(profileId);
+  if (!profileId) throw new Error('AUXILIARY_PROFILE_ID_INVALID');
+  const factory = options.indexedDB || globalThis.indexedDB;
+  if (!factory) return { deleted: 0 };
+  if (typeof factory.databases === 'function') {
+    const databases = await factory.databases();
+    if (!databases.some(item => item.name === DB_NAME)) return { deleted: 0 };
+  }
+  const db = await openDatabase(factory);
+  try {
+    const prefix = `${profileId}:`;
+    const tx = db.transaction([INTERPRETATIONS, CUSTOM_MEDIA, META], 'readwrite');
+    const interpretations = tx.objectStore(INTERPRETATIONS);
+    const media = tx.objectStore(CUSTOM_MEDIA);
+    const [allInterpretations, allMedia] = await Promise.all([requestValue(interpretations.getAll()), requestValue(media.getAll())]);
+    let deleted = 0;
+    allInterpretations.filter(item => item.batchId?.startsWith(prefix)).forEach(item => { interpretations.delete(item.id); deleted += 1; });
+    allMedia.filter(item => item.batchId?.startsWith(prefix)).forEach(item => { media.delete(item.id); deleted += 1; });
+    const meta = tx.objectStore(META);
+    meta.delete(auxiliaryPointerKey('activeInterpretationBatch', profileId));
+    meta.delete(auxiliaryPointerKey('activeCustomMediaBatch', profileId));
+    await transactionDone(tx);
+    return { deleted };
   } finally { db.close(); }
 }
 
@@ -927,7 +1057,8 @@ function validateArchiveName(name) {
   const parts = name.split('/');
   if (parts.some(part => !part || part === '.' || part === '..' || part.includes(':'))) return false;
   if (V5_FILES.has(name)) return true;
-  return /^custom-media\/[A-Za-z0-9][A-Za-z0-9._-]{0,119}\.(?:png|jpe?g|webp)$/i.test(name);
+  return /^custom-media\/[A-Za-z0-9][A-Za-z0-9._-]{0,119}\.(?:png|jpe?g|webp)$/i.test(name) ||
+    /^custom-media\/profiles\/[a-z0-9][a-z0-9_-]{7,63}\/[A-Za-z0-9][A-Za-z0-9._-]{0,119}\.(?:png|jpe?g|webp)$/i.test(name);
 }
 
 function validateImage(name, bytes) {
@@ -952,22 +1083,48 @@ export async function createBackupV5(snapshot, options = {}) {
   }
   const { data, settings } = splitSnapshot(identifiedSnapshot);
   const interpretations = (options.legacyInterpretations || []).map(normalizeInterpretation);
-  const dataBytes = utf8(canonical({ storage: data, legacyInterpretations: interpretations }));
-  const settingsBytes = utf8(canonical(settings));
   const media = options.customMedia || [];
-  if (!Array.isArray(media) || media.length > MAX_ENTRIES - 4) throw new Error('MEDIA_COUNT_INVALID');
+  const requestedProfileAuxiliaries = options.profileAuxiliaries || [];
+  if (!Array.isArray(media) || !Array.isArray(requestedProfileAuxiliaries)) throw new Error('MEDIA_COUNT_INVALID');
   const mediaEntries = [];
+  const profileAuxiliaries = [];
   let mediaBytes = 0;
-  for (const item of media) {
-    if (!item || !validateArchiveName(item.name) || !item.name.startsWith('custom-media/')) throw new Error('MEDIA_NAME_INVALID');
+  const profileIds = new Set();
+  const addMedia = async (item, archiveName) => {
+    if (!item || !validateArchiveName(archiveName) || !archiveName.startsWith('custom-media/')) throw new Error('MEDIA_NAME_INVALID');
     const bytes = item.bytes instanceof Uint8Array ? item.bytes : item.bytes instanceof Blob ? new Uint8Array(await item.bytes.arrayBuffer()) : null;
     if (!bytes || bytes.byteLength > MAX_ENTRY_BYTES) throw new Error('MEDIA_SIZE_INVALID');
-    validateImage(item.name, bytes);
+    validateImage(archiveName, bytes);
     mediaBytes += bytes.byteLength;
-    if (mediaBytes > MAX_ARCHIVE_BYTES - dataBytes.byteLength - settingsBytes.byteLength) throw new Error('MEDIA_SIZE_INVALID');
-    mediaEntries.push({ name: item.name, bytes });
+    if (mediaBytes > MAX_ARCHIVE_BYTES) throw new Error('MEDIA_SIZE_INVALID');
+    mediaEntries.push({ name: archiveName, bytes });
+  };
+  for (const item of media) {
+    if (!item || !validateArchiveName(item.name) || !item.name.startsWith('custom-media/') || item.name.startsWith('custom-media/profiles/')) throw new Error('MEDIA_NAME_INVALID');
+    await addMedia(item, item.name);
   }
-  if (new Set(mediaEntries.map(item => item.name)).size !== mediaEntries.length) throw new Error('MEDIA_DUPLICATE');
+  for (const auxiliary of requestedProfileAuxiliaries) {
+    const profileId = auxiliaryProfileId(auxiliary?.profileId);
+    if (!profileId || profileIds.has(profileId) || !Array.isArray(auxiliary.interpretations || []) || !Array.isArray(auxiliary.media || [])) throw new Error('PROFILE_AUXILIARY_INVALID');
+    const snapshotProfiles = data.gymverse_profiles_v1?.profiles;
+    if (!Array.isArray(snapshotProfiles) || !snapshotProfiles.some(item => item?.id === profileId) || data.gymverse_profiles_v1?.activeProfileId === profileId) throw new Error('PROFILE_AUXILIARY_INVALID');
+    profileIds.add(profileId);
+    const profileInterpretations = (auxiliary.interpretations || []).map(normalizeInterpretation);
+    const names = new Set();
+    const profileMedia = [];
+    for (const item of auxiliary.media || []) {
+      if (!item || typeof item.name !== 'string' || !item.name.startsWith('custom-media/') || item.name.startsWith('custom-media/profiles/') || !validateArchiveName(item.name) || names.has(item.name)) throw new Error('MEDIA_NAME_INVALID');
+      names.add(item.name);
+      const archiveName = `custom-media/profiles/${profileId}/${item.name.slice('custom-media/'.length)}`;
+      await addMedia(item, archiveName);
+      profileMedia.push({ name: item.name, archiveName });
+    }
+    profileAuxiliaries.push({ profileId, interpretations: profileInterpretations, media: profileMedia });
+  }
+  if (mediaEntries.length > MAX_ENTRIES - 4 || new Set(mediaEntries.map(item => item.name)).size !== mediaEntries.length) throw new Error('MEDIA_DUPLICATE');
+  const dataBytes = utf8(canonical({ storage: data, legacyInterpretations: interpretations, ...(profileAuxiliaries.length ? { profileAuxiliaries } : {}) }));
+  const settingsBytes = utf8(canonical(settings));
+  if (mediaBytes > MAX_ARCHIVE_BYTES - dataBytes.byteLength - settingsBytes.byteLength) throw new Error('MEDIA_SIZE_INVALID');
   const files = ['data.json', 'settings.json', ...mediaEntries.map(item => item.name)].sort();
   const checksummedBytes = { 'data.json': dataBytes, 'settings.json': settingsBytes };
   mediaEntries.forEach(item => { checksummedBytes[item.name] = item.bytes; });
@@ -977,6 +1134,7 @@ export async function createBackupV5(snapshot, options = {}) {
   };
   const manifest = {
     app: 'gymverse', version: 5, createdAt: options.createdAt || new Date().toISOString(),
+    exportType: 'full-application', scope: 'all-local-profiles',
     schema: 'legacy-storage-snapshot', files,
     counts: { ...inspection.counts, legacyInterpretations: interpretations.length }
   };
@@ -1027,11 +1185,33 @@ export async function previewBackupV5(blob, validationOptions = {}) {
     for (const name of payloadNames) {
       if (!/^[a-f0-9]{64}$/.test(checksums.files[name]) || await sha256Hex(payloads.get(name)) !== checksums.files[name]) throw new Error('CHECKSUM_MISMATCH');
     }
-    if (!isPlainObject(dataPayload) || !isPlainObject(dataPayload.storage) || Object.keys(dataPayload).some(key => !['storage', 'legacyInterpretations'].includes(key)) || !Array.isArray(dataPayload.legacyInterpretations)) throw new Error('DATA_SCHEMA_INVALID');
+    if (!isPlainObject(dataPayload) || !isPlainObject(dataPayload.storage) || Object.keys(dataPayload).some(key => !['storage', 'legacyInterpretations', 'profileAuxiliaries'].includes(key)) || !Array.isArray(dataPayload.legacyInterpretations) || (dataPayload.profileAuxiliaries !== undefined && !Array.isArray(dataPayload.profileAuxiliaries))) throw new Error('DATA_SCHEMA_INVALID');
     const data = dataPayload.storage;
     if (Object.keys(data).some(key => !LEGACY_KEYS.has(key) || SETTINGS_KEYS.has(key))) throw new Error('DATA_SCHEMA_INVALID');
     if (!isPlainObject(settings) || Object.keys(settings).some(key => !SETTINGS_KEYS.has(key))) throw new Error('SETTINGS_SCHEMA_INVALID');
     const interpretations = dataPayload.legacyInterpretations.map(normalizeInterpretation);
+    const profileIds = new Set();
+    const profileAuxiliaries = (dataPayload.profileAuxiliaries || []).map(auxiliary => {
+      const profileId = auxiliaryProfileId(auxiliary?.profileId);
+      if (!profileId || profileIds.has(profileId) || !Array.isArray(auxiliary.interpretations) || !Array.isArray(auxiliary.media)) throw new Error('PROFILE_AUXILIARY_INVALID');
+      if (dataPayload.storage.gymverse_profiles_v1?.activeProfileId === profileId) throw new Error('PROFILE_AUXILIARY_INVALID');
+      if (!dataPayload.storage.gymverse_profiles_v1?.profiles?.some(item => item?.id === profileId)) throw new Error('PROFILE_AUXILIARY_INVALID');
+      profileIds.add(profileId);
+      const profileInterpretations = auxiliary.interpretations.map(normalizeInterpretation);
+      if (new Set(profileInterpretations.map(item => item.id)).size !== profileInterpretations.length) throw new Error('PROFILE_AUXILIARY_DUPLICATE');
+      const profileMedia = auxiliary.media.map(item => {
+        const archiveName = item?.archiveName;
+        if (typeof item?.name !== 'string' || !item.name.startsWith('custom-media/') || item.name.startsWith('custom-media/profiles/') || !validateArchiveName(item.name) || !archiveName || !archiveName.startsWith(`custom-media/profiles/${profileId}/`) || !validateArchiveName(archiveName) || archiveName !== `custom-media/profiles/${profileId}/${item.name.slice('custom-media/'.length)}`) throw new Error('PROFILE_AUXILIARY_INVALID');
+        const bytes = payloads.get(archiveName);
+        if (!bytes) throw new Error('PROFILE_AUXILIARY_INVALID');
+        return { name: item.name, bytes };
+      });
+      if (new Set(profileMedia.map(item => item.name)).size !== profileMedia.length) throw new Error('PROFILE_AUXILIARY_DUPLICATE');
+      return { profileId, interpretations: profileInterpretations, media: profileMedia };
+    });
+    const referencedProfileMedia = new Set((dataPayload.profileAuxiliaries || []).flatMap(item => (item.media || []).map(mediaItem => mediaItem.archiveName)));
+    const archivedProfileMedia = Array.from(payloads.keys()).filter(name => name.startsWith('custom-media/profiles/'));
+    if (archivedProfileMedia.length !== referencedProfileMedia.size || archivedProfileMedia.some(name => !referencedProfileMedia.has(name))) throw new Error('PROFILE_AUXILIARY_INVALID');
     const snapshot = addStableIdentifiers({ ...data, ...settings });
     const inspection = await inspectLegacySnapshot(snapshot, validationOptions);
     if (!inspection.ok) {
@@ -1041,9 +1221,14 @@ export async function previewBackupV5(blob, validationOptions = {}) {
     }
     const counts = { ...inspection.counts, legacyInterpretations: interpretations.length };
     if (manifest.counts && canonical(manifest.counts) !== canonical(counts)) throw new Error('MANIFEST_COUNTS_MISMATCH');
-    const media = Array.from(payloads.entries()).filter(([name]) => name.startsWith('custom-media/')).map(([name, bytes]) => ({ name, bytes }));
+    const media = Array.from(payloads.entries()).filter(([name]) => name.startsWith('custom-media/') && !name.startsWith('custom-media/profiles/')).map(([name, bytes]) => ({ name, bytes }));
     const mediaDigests = await Promise.all(media.map(async item => ({ name: item.name, sha256: await sha256Hex(item.bytes) })));
-    return Object.freeze({ ok: true, version: 5, schema: manifest.schema, sha256: await sha256Hex(utf8(canonical({ snapshot, interpretations, media: mediaDigests }))), counts, schemaKeys: inspection.schemaKeys, snapshot, interpretations, media });
+    const profileAuxiliaryDigests = await Promise.all(profileAuxiliaries.map(async item => ({
+      profileId: item.profileId,
+      interpretations: item.interpretations,
+      media: await Promise.all(item.media.map(async mediaItem => ({ name: mediaItem.name, sha256: await sha256Hex(mediaItem.bytes) })))
+    })));
+    return Object.freeze({ ok: true, version: 5, schema: manifest.schema, sha256: await sha256Hex(utf8(canonical({ snapshot, interpretations, media: mediaDigests, ...(profileAuxiliaries.length ? { profileAuxiliaries: profileAuxiliaryDigests } : {}) }))), counts, schemaKeys: inspection.schemaKeys, snapshot, interpretations, media, profileAuxiliaries });
   } finally {
     await reader.close();
   }
@@ -1055,11 +1240,40 @@ export async function restoreBackupV5(storage, preview, options = {}) {
   if (typeof options.restoreActive !== 'boolean' || typeof options.restoreDrafts !== 'boolean') throw new Error('RESTORE_SESSION_CHOICES_REQUIRED');
   if (!preview || preview.ok !== true || preview.version !== 5 || !isPlainObject(preview.snapshot)) throw new Error('RESTORE_PREVIEW_INVALID');
   const mediaDigests = await Promise.all((preview.media || []).map(async item => ({ name: item.name, sha256: await sha256Hex(item.bytes) })));
-  if (await sha256Hex(utf8(canonical({ snapshot: preview.snapshot, interpretations: preview.interpretations || [], media: mediaDigests }))) !== preview.sha256) throw new Error('RESTORE_PREVIEW_CHANGED');
+  const profileAuxiliaryDigests = await Promise.all((preview.profileAuxiliaries || []).map(async item => ({
+    profileId: item.profileId,
+    interpretations: item.interpretations,
+    media: await Promise.all(item.media.map(async mediaItem => ({ name: mediaItem.name, sha256: await sha256Hex(mediaItem.bytes) })))
+  })));
+  if (await sha256Hex(utf8(canonical({ snapshot: preview.snapshot, interpretations: preview.interpretations || [], media: mediaDigests, ...((preview.profileAuxiliaries || []).length ? { profileAuxiliaries: profileAuxiliaryDigests } : {}) }))) !== preview.sha256) throw new Error('RESTORE_PREVIEW_CHANGED');
   const inspected = { ...preview.snapshot };
+  if (!Object.hasOwn(inspected, 'gymverse_profiles_v1')) {
+    try {
+      const currentRegistry = JSON.parse(storage?.getItem?.('gymverse_profiles_v1') || 'null');
+      const activeProfile = currentRegistry?.profiles?.find(item => item.id === currentRegistry.activeProfileId);
+      if (isPlainObject(currentRegistry) && Array.isArray(currentRegistry.profiles) && activeProfile && isPlainObject(activeProfile.data)) {
+        const restoredProfileData = Object.fromEntries(Object.entries(inspected).filter(([key]) => key.startsWith('gymverse_') && key !== 'gymverse_profiles_v1').map(([key, value]) => [key, JSON.stringify(value)]));
+        inspected.gymverse_profiles_v1 = {
+          ...currentRegistry,
+          profiles: currentRegistry.profiles.map(item => item.id === currentRegistry.activeProfileId ? { ...item, data: restoredProfileData } : item)
+        };
+      }
+    } catch (_) { /* An old backup without a profile registry remains a single-profile restore. */ }
+  }
   if (!options.restoreActive) delete inspected.gymverse_active;
   else if (inspected.gymverse_active) inspected.gymverse_active = sanitizeRestoredActive(inspected.gymverse_active);
-  if (!options.restoreDrafts) delete inspected.gymverse_draft_v1;
+  if (!options.restoreDrafts) { delete inspected.gymverse_draft_v1; delete inspected[PROGRAM_DRAFT_KEY]; }
+  if (inspected.gymverse_profiles_v1?.profiles) {
+    inspected.gymverse_profiles_v1 = structuredClone(inspected.gymverse_profiles_v1);
+    for (const profile of inspected.gymverse_profiles_v1.profiles) {
+      if (!options.restoreActive) delete profile.data.gymverse_active;
+      else if (profile.data.gymverse_active) {
+        const session = JSON.parse(profile.data.gymverse_active);
+        profile.data.gymverse_active = JSON.stringify(session ? sanitizeRestoredActive(session) : null);
+      }
+      if (!options.restoreDrafts) delete profile.data.gymverse_draft_v1;
+    }
+  }
   const validation = await inspectLegacySnapshot(inspected, options.validationOptions || {});
   if (!validation.ok) {
     const error = new Error('RESTORE_DATA_INVALID');
@@ -1068,9 +1282,13 @@ export async function restoreBackupV5(storage, preview, options = {}) {
   }
   const keys = Array.from(LEGACY_KEYS);
   const runtime = storage && storage.__gymverseRuntimeStore;
+  const profileId = auxiliaryProfileId(options.profileId || inspected.gymverse_profiles_v1?.activeProfileId || (() => {
+    try { return JSON.parse(storage.getItem('gymverse_profiles_v1') || 'null')?.activeProfileId || null; }
+    catch (_) { return null; }
+  })());
   if (runtime && runtime.mode === 'indexeddb') {
     const updates = Object.fromEntries(keys.map(key => [key, Object.hasOwn(inspected, key) ? inspected[key] : null]));
-    return runtime.restoreSnapshot(updates, { interpretations: preview.interpretations || [], media: preview.media || [], batchId: preview.sha256 });
+    return runtime.restoreSnapshot(updates, { interpretations: preview.interpretations || [], media: preview.media || [], profileAuxiliaries: preview.profileAuxiliaries || [], batchId: preview.sha256, profileId });
   }
   const before = new Map(keys.map(key => [key, storage.getItem(key)]));
   const attempted = [];
@@ -1083,8 +1301,12 @@ export async function restoreBackupV5(storage, preview, options = {}) {
       if (storage.getItem(key) !== value) throw new Error('RESTORE_READBACK_FAILED');
     }
     const indexedDBFactory = options.indexedDB || globalThis.indexedDB;
-    if (indexedDBFactory) await replaceAuxiliaryBatch(preview.interpretations || [], preview.media || [], preview.sha256, indexedDBFactory);
+    if (indexedDBFactory) await replaceAuxiliaryBatch(preview.interpretations || [], preview.media || [], preview.sha256, indexedDBFactory, profileId);
     else if ((preview.interpretations && preview.interpretations.length) || (preview.media && preview.media.length)) throw new Error('INDEXEDDB_UNSUPPORTED');
+    for (const auxiliary of preview.profileAuxiliaries || []) {
+      if (!indexedDBFactory && (auxiliary.interpretations.length || auxiliary.media.length)) throw new Error('INDEXEDDB_UNSUPPORTED');
+      if (indexedDBFactory) await replaceProfileAuxiliary(auxiliary.profileId, auxiliary, { indexedDB: indexedDBFactory, batchId: preview.sha256 });
+    }
     return { status: 'restored', keys: Object.keys(inspected).length, interpretations: (preview.interpretations || []).length };
   } catch (error) {
     error.rollbackErrors = [];

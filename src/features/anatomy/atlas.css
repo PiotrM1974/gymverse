@@ -4,7 +4,7 @@
 .anatomy-atlas summary::before { content: ""; width: 9px; height: 9px; border-radius: 50%; background: #f04438; box-shadow: 0 0 0 5px #f044381b; flex: 0 0 auto; }
 .anatomy-atlas__intro { color: #667481; font-size: .88rem; line-height: 1.45; margin: 9px 0 16px; }
 .anatomy-atlas__controls { display: flex; gap: 7px; margin: 10px 0; }
-.anatomy-atlas__controls button { min-height: 38px; border: 1px solid #d6dee6; border-radius: 999px; padding: 8px 14px; color: #43515e; font: inherit; font-size: .84rem; font-weight: 650; background: #fff; cursor: pointer; transition: background .16s ease, color .16s ease, border-color .16s ease, box-shadow .16s ease; }
+.anatomy-atlas__controls button { min-height: 44px; border: 1px solid #d6dee6; border-radius: 999px; padding: 8px 14px; color: #43515e; font: inherit; font-size: .84rem; font-weight: 650; background: #fff; cursor: pointer; transition: background .16s ease, color .16s ease, border-color .16s ease, box-shadow .16s ease; }
 .anatomy-atlas__controls button[aria-pressed="true"] { background: #202c37; border-color: #202c37; color: white; box-shadow: 0 3px 8px #202c3726; }
 .anatomy-atlas__layout { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1fr); align-items: center; gap: clamp(14px, 3vw, 30px); }
 .anatomy-atlas__layout > * { min-width: 0; }

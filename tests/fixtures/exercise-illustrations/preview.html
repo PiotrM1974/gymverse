@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="theme-color" content="#0b0f11">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%2383d7b1'/%3E%3Ctext x='16' y='23' font-size='22' text-anchor='middle' font-family='sans-serif' font-weight='bold' fill='%230b1513'%3EG%3C/text%3E%3C/svg%3E">
+  <base href="/">
+  <title>Podgląd ilustracji ćwiczeń — GymNastika</title>
+  <link rel="stylesheet" href="/src/features/anatomy/atlas.css">
+  <link rel="stylesheet" href="/tests/fixtures/exercise-illustrations/preview.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#start" aria-label="GymNastika — podgląd ilustracji"><span class="brand-mark" aria-hidden="true">G</span><span>GymNastika</span></a>
+    <span class="environment-label">LOKALNY PODGLĄD · BEZ ZAPISU TRENINGU</span>
+  </header>
+
+  <main class="page-shell" id="start">
+    <section class="page-heading" aria-labelledby="pageTitle">
+      <div>
+        <p class="eyebrow">Biblioteka ruchu</p>
+        <h1 id="pageTitle">Podgląd ilustracji ćwiczeń</h1>
+        <p class="lede">Dwie sylwetki techniki dla unoszenia hantli bokiem, istniejący atlas MuscleMap oraz trzy wcześniejsze szkice referencyjne.</p>
+      </div>
+      <div class="review-state"><span class="state-dot"></span><span>PRZEGLĄD · UNVERIFIED</span></div>
+    </section>
+
+    <nav class="exercise-nav" aria-label="Wybierz ćwiczenie">
+      <button type="button" data-preview-exercise="lat_raise_stand" aria-pressed="true">Unoszenie bokiem</button>
+      <button type="button" data-preview-exercise="db_bench" aria-pressed="false">Wyciskanie hantli</button>
+      <button type="button" data-preview-exercise="lat_pulldown_wide" aria-pressed="false">Ściąganie drążka</button>
+      <button type="button" data-preview-exercise="leg_press" aria-pressed="false">Suwnica</button>
+    </nav>
+
+    <div class="preview-grid">
+      <section class="exercise-panel" aria-label="Ilustracja ćwiczenia">
+        <div class="panel-heading">
+          <div>
+            <p class="panel-kicker">TECHNIKA RUCHU</p>
+            <h2 id="previewTitle" data-exercise-id="lat_raise_stand">Unoszenie hantli bokiem stojąc</h2>
+          </div>
+          <span class="draft-chip" id="assetChip">SZKIC</span>
+        </div>
+
+        <div class="view-controls" role="group" aria-label="Widok ilustracji" hidden>
+          <button type="button" data-view-choice="technique" aria-pressed="true">TECHNIKA</button>
+          <button type="button" data-view-choice="thumbnail" aria-pressed="false">MINIATURA</button>
+        </div>
+        <div class="pose-controls" role="group" aria-label="Pozycja ruchu">
+          <button type="button" data-pose-choice="pose1" aria-pressed="true"><span id="poseLabelFirst">DÓŁ</span></button>
+          <span class="pose-track" aria-hidden="true"><span></span></span>
+          <button type="button" data-pose-choice="pose2" aria-pressed="false"><span id="poseLabelSecond">GÓRA</span></button>
+        </div>
+        <div class="pose-crop" id="illustrationPose" data-pose="pose1" role="img" aria-label="DÓŁ — Unoszenie hantli bokiem stojąc" aria-describedby="positionNote"></div>
+        <p class="asset-error" id="illustrationError" role="alert" hidden></p>
+        <p class="pose-caption" id="positionNote">Pozycja wyjściowa z hantlami przy udach; unoszenie do wysokości barków.</p>
+
+        <div class="workout-meta">
+          <div><span>Plan odniesienia</span><strong id="planName">Push A1</strong></div>
+          <div><span>Serie × zakres</span><strong id="planTarget">4 × 12–15</strong></div>
+          <div class="meta-wide"><span>Sprzęt z katalogu</span><strong id="exerciseEquipment">Dwa hantle, unoszenie bokiem na stojąco</strong></div>
+        </div>
+
+        <div class="review-lines" aria-label="Statusy ilustracji">
+          <div><span>Technika</span><strong id="techniqueStatus" data-status="TECHNICALLY_VALID">TECHNICALLY_VALID*</strong></div>
+          <div><span>Prawa do użycia</span><strong class="unverified" id="rightsStatus">Prawa do użycia: niezweryfikowane. Publikacja wstrzymana.</strong></div>
+        </div>
+        <p class="status-explanation" id="statusExplanation">* Ocena zgodności z podstawowym opisem ćwiczenia, bez niezależnej recenzji eksperckiej.</p>
+      </section>
+
+      <section class="atlas-panel" aria-label="Istniejący atlas MuscleMap">
+        <div class="panel-heading atlas-heading">
+          <div>
+            <p class="panel-kicker">OSOBNY WIDOK</p>
+            <h2>Atlas MuscleMap</h2>
+          </div>
+          <span class="refined-label"><span></span> REFINED</span>
+        </div>
+        <div id="anatomyAtlas" data-exercise-id="lat_raise_stand"></div>
+        <p class="atlas-scope" id="atlasScope" aria-live="polite">Wybór sylwetki atlasu synchronizuje technikę tylko dla unoszenia bokiem.</p>
+        <p class="asset-error" id="atlasAssetError" role="alert" hidden></p>
+      </section>
+    </div>
+
+    <section class="lower-grid">
+      <div class="notes-panel">
+        <p class="panel-kicker">ZASADY PRZEGLĄDU</p>
+        <h2>Ilustracja ruchu, nie mapa aktywacji</h2>
+        <p>Plansza pokazuje pozycje ruchu. Atlas przedstawia dostępne obszary mięśniowe przypisane do ćwiczenia. Żaden czerwony ani złoty obszar nie jest nanoszony na ilustrację techniki.</p>
+        <p id="sourceLine">Punkt odniesienia techniki: <a href="https://www.acefitness.org/resources/everyone/exercise-library/26/lateral-raise/" target="_blank" rel="noreferrer">ACE — Lateral Raise</a>.</p>
+        <p>Atlas MuscleMap jest osobnym diagramem i nie stanowi nakładki na wykonującą postać. Generowana kolorowana pochodna pozostaje w archiwum i jest wyłączona z propozycji. Prawa użycia wymagają potwierdzenia; podgląd nie jest zasobem produkcyjnym.</p>
+      </div>
+      <aside class="timer-panel" id="demoTimer" aria-label="Syntetyczny podgląd aktywnego timera">
+        <div class="timer-icon" aria-hidden="true">◷</div>
+        <div><span class="panel-kicker">PODGLĄD TIMERA · DANE SYNTETYCZNE</span><strong>01:30</strong><small>Timer demonstracyjny — nie jest częścią treningu.</small></div>
+      </aside>
+    </section>
+
+  <footer class="prototype-footer"><span>Podgląd nie zmienia zapisanych danych treningowych.</span><span>Nowy zestaw: 3 WebP · pozostałe 3 szkice: PNG · 1536 × 1024 px</span></footer>
+  </main>
+  <script type="module" src="/tests/fixtures/exercise-illustrations/preview.js"></script>
+</body>
+</html>

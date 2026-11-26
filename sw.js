@@ -3,27 +3,27 @@ const PILOT_URL = new URL(self.location?.href || 'sw.js', self.registration.scop
 const LOOPBACK_HOSTS = new Set(['127.0.0.1', 'localhost', '[::1]']);
 const LOCAL_PRESENTATION_PILOT = LOOPBACK_HOSTS.has(PILOT_URL.hostname.toLowerCase()) &&
   PILOT_URL.searchParams.get('local-exercise-presentation-pilot') === '1';
-const CACHE = LOCAL_PRESENTATION_PILOT ? 'gymverse-v36-presentation-pilot' : 'gymverse-v20';
+const CACHE = LOCAL_PRESENTATION_PILOT ? 'gymverse-v36-presentation-pilot' : 'gymverse-v55';
 const RELEASE_REGISTRY = 'src/data/exercise-presentations/release-registry.json';
-const BASE_SHELL = ['./', 'index.html', 'src/ui/signal.css', 'src/gv-base-b.js', 'src/gv-data.js', 'src/exercise/catalog.js', 'src/exercise/presentation-contract.js', 'src/vendor/zip.min.js', 'src/features/anatomy/atlas.js', 'src/features/anatomy/atlas.css', 'src/features/anatomy/highlight-engine.js', 'src/data/anatomy/catalog-mapping.js', 'src/data/anatomy/musclemap-diagrams.js', 'src/data/anatomy/atlas-data.js', 'src/data/anatomy/male-front.js', 'src/data/anatomy/male-back.js', 'src/data/anatomy/female-front.js', 'src/data/anatomy/female-back.js', 'src/data/anatomy/bodies/male-front.webp', 'src/data/anatomy/bodies/male-back.webp', 'src/data/anatomy/bodies/female-front.webp', 'src/data/anatomy/bodies/female-back.webp', 'src/data/anatomy/THIRD-PARTY-NOTICES.md', 'img/p1_5.jpg', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png', 'apple-touch-icon.png'];
+const BASE_SHELL = ['./', 'index.html', 'src/ui/signal.css', 'src/ui/fonts/manrope-latin-variable.woff2', 'src/ui/fonts/manrope-latin-ext-variable.woff2', 'src/ui/fonts/OFL.txt', 'src/gv-base-b.js', 'src/gv-data.js', 'src/features/backup/import-plan.js', 'src/features/backup/import-preview.js', 'src/exercise/catalog.js', 'src/exercise/presentation-contract.js', 'src/vendor/zip.min.js', 'src/features/profiles/profile-model.js', 'src/features/plans/programs.js', 'src/features/plans/program-editor.js', 'src/features/plans/generated-program.js', 'src/features/plans/program-drafts.js', 'src/features/plans/program-editor-ui.js', 'src/features/plans/synchronization.js', 'src/features/plans/generator.js', 'src/features/plans/progression.js', 'src/features/plans/history-context.js', 'src/features/anatomy/atlas.js', 'src/features/anatomy/atlas.css', 'src/features/anatomy/highlight-engine.js', 'src/data/anatomy/catalog-mapping.js', 'src/data/anatomy/musclemap-diagrams.js', 'src/data/anatomy/atlas-data.js', 'src/data/anatomy/male-front.js', 'src/data/anatomy/male-back.js', 'src/data/anatomy/female-front.js', 'src/data/anatomy/female-back.js', 'src/data/anatomy/bodies/male-front.webp', 'src/data/anatomy/bodies/male-back.webp', 'src/data/anatomy/bodies/female-front.webp', 'src/data/anatomy/bodies/female-back.webp', 'src/data/anatomy/THIRD-PARTY-NOTICES.md', 'img/p1_5.jpg', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png', 'apple-touch-icon.png'];
 const PRESENTATION_PILOT_SHELL = [
   './?local-exercise-presentation-pilot=1',
   'src/exercise/presentation-contract.js',
-  'outputs/GV-EXERCISE-PRESENTATION-CONTRACT-AND-PILOT/local-pilot/presentation-registry.json',
-  'outputs/GV-LAT-RAISE-MALE-FEMALE/selected/technique/lat_raise_stand__default-male.webp',
-  'outputs/GV-LAT-RAISE-MALE-FEMALE/selected/technique/lat_raise_stand__default-female.webp',
-  'outputs/GV-LAT-RAISE-MALE-FEMALE/selected/thumbnails/lat_raise_stand__default-male.webp',
-  'outputs/GV-LAT-RAISE-MALE-FEMALE/selected/thumbnails/lat_raise_stand__default-female.webp'
+  'tests/fixtures/exercise-presentation-pilot/local-pilot/presentation-registry.json',
+  'src/data/exercise-images/selected/technique/lat_raise_stand__default-male.webp',
+  'src/data/exercise-images/selected/technique/lat_raise_stand__default-female.webp',
+  'src/data/exercise-images/selected/thumbnails/lat_raise_stand__default-male.webp',
+  'src/data/exercise-images/selected/thumbnails/lat_raise_stand__default-female.webp'
 ];
 const THREE_IMAGE_PILOT_SHELL = ['db_bench', 'lat_pulldown_wide', 'leg_press'].flatMap(id =>
   ['male', 'female'].flatMap(sex => [
-    `outputs/GV-EXERCISE-IMAGES-THREE/selected/technique/${id}__default-${sex}.webp`,
-    `outputs/GV-EXERCISE-IMAGES-THREE/selected/thumbnails/${id}__default-${sex}.webp`
+    `src/data/exercise-images/selected/technique/${id}__default-${sex}.webp`,
+    `src/data/exercise-images/selected/thumbnails/${id}__default-${sex}.webp`
   ]));
 const COMPLETE_IMAGE_PILOT_SHELL = ['bench_flat__default', 'db_incline__default', 'tri_rope__default', 'row_v__default', 'rear_delt__default', 'biceps_preacher__default', 'tri_machine__default', 'leg_curl__default', 'lat_pulldown_neutral__default', 'row_straight__default', 'db_fly__default', 'db_fly__incline', 'front_raise__default', 'lat_raise_seated__default', 'chest_machine__default', 'pec_deck__default', 'shoulder_press__default', 'shoulder_press__dumbbells', 'face_pull__default', 'lat_raise_cable__default', 'hammer_curl__default', 'cable_curl__default', 'tri_overhead__default', 'row_machine__default', 'leg_extension__default', 'tri_overhead__rope', 'smith_squat__default', 'pullup__default', 'dips__default', 'pushup__default'].flatMap(stem =>
   ['male', 'female'].flatMap(sex => [
-    `outputs/GV-EXERCISE-IMAGES-COMPLETE/selected/technique/${stem}-${sex}.webp`,
-    `outputs/GV-EXERCISE-IMAGES-COMPLETE/selected/thumbnails/${stem}-${sex}.webp`
+    `src/data/exercise-images/selected/technique/${stem}-${sex}.webp`,
+    `src/data/exercise-images/selected/thumbnails/${stem}-${sex}.webp`
   ]));
 async function installPresentationAssets(cache) {
   if (LOCAL_PRESENTATION_PILOT) {

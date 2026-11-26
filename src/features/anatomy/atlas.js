@@ -96,11 +96,11 @@ export function renderAnatomyAtlas(container, exerciseId, sex = 'male', view = '
         </div>
         <div class="anatomy-atlas__legend">
           <section class="anatomy-atlas__legend-group" aria-label="Mięśnie główne">
-            <h3><span class="anatomy-atlas__swatch anatomy-atlas__swatch--primary" aria-hidden="true"></span>Główne</h3>
+            <h3><span class="anatomy-atlas__swatch anatomy-atlas__swatch--primary" aria-hidden="true"></span>Główne mięśnie</h3>
             <ul class="anatomy-atlas__list">${regionMarkup('primary')}</ul>
           </section>
           <section class="anatomy-atlas__legend-group" aria-label="Mięśnie pomocnicze">
-            <h3><span class="anatomy-atlas__swatch anatomy-atlas__swatch--secondary" aria-hidden="true"></span>Pomocnicze</h3>
+            <h3><span class="anatomy-atlas__swatch anatomy-atlas__swatch--secondary" aria-hidden="true"></span>Mięśnie pomocnicze</h3>
             <ul class="anatomy-atlas__list">${regionMarkup('secondary')}</ul>
           </section>
           <details class="anatomy-atlas__details">

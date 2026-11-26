@@ -39,6 +39,26 @@ function evaluate(name, prelude, expression) {
 }
 
 describe('inline helpers characterize current behavior', () => {
+  it('blocks deleting days referenced by sessions, drafts, history or a program', async () => {
+    const cases = [
+      `let active={planId:'day-a'};let history=[];const drafts=[];const programs=[];`,
+      `let active=null;let history=[];const drafts=[{planId:'day-a'}];const programs=[];`,
+      `let active=null;let history=[{planId:'day-a',planTitle:'Day'}];const drafts=[];const programs=[];`,
+      `let active=null;let history=[];const drafts=[];const programs=[{dayPlanIds:['day-a']}];`
+    ];
+    for (const setup of cases) {
+      const prelude = `${setup} let PLANS=[{id:'day-a',title:'Day'},{id:'day-b',title:'Other'}];const PROFILE_STATE={activeProfileId:'p',profiles:[{id:'p',planPrograms:{programs}}]};const LS={get:()=>({items:drafts})};const STORE={transact:()=>{throw new Error('unexpected write')}};const toast=()=>{};`;
+      const start=html.indexOf('async function savePlanChanges('), end=html.indexOf('const PLACEHOLDER',start);
+      expect(await runInNewContext(`${prelude}\nconst PROGRAM_EDITOR_UI=null;\n${html.slice(start,end)}\nsavePlanChanges([{id:'day-b',title:'Other'}])`)).toBe(false);
+    }
+  });
+  it('retains a deleted plan ID and never guesses an ID by a duplicate title', () => {
+    const prelude = `const CATALOG={};const ID_MAP={};const PLANS=[{id:'a',title:'Same'},{id:'b',title:'Same'}];const getPlan=id=>PLANS.find(p=>p.id===id);`;
+    for (const [input,expected] of [[{planId:'removed',planTitle:'Same'},'removed'],[{planTitle:'Same'},null],[{planId:'b',planTitle:'Same'},'b']]) {
+      const value=evaluate('function normalizeSession',prelude,`normalizeSession(${JSON.stringify({date:'2026-01-01T00:00:00Z',details:[],...input})}).planId`);
+      expect(value).toBe(expected);
+    }
+  });
   it('resolves all four catalog variant pairs and rejects assignment to another exercise', () => {
     const prelude = `const VARIANTS = ${JSON.stringify(EXERCISE_VARIANTS)}; const CATALOG = Object.fromEntries(VARIANTS.map(v => [v.exerciseId, v.exerciseId])); const variantFor = (key, variantId) => VARIANTS.find(v => v.exerciseId === key && v.variantId === variantId);`;
     for (const variant of EXERCISE_VARIANTS) {
@@ -59,6 +79,12 @@ describe('inline helpers characterize current behavior', () => {
       { key: 'leg_press', sets: 3, target: '8-10', variantId: 'high_feet' },
       { key: 'leg_press', sets: 2, target: '12-15' }
     ]);
+  });
+
+  it('cleanPlan preserves a valid generated weekday schedule', () => {
+    const prelude = `const CATALOG = { bench_flat: 'Bench Press' }; const safeImg = () => null;`;
+    const result = JSON.parse(evaluate('function cleanPlan', prelude, `JSON.stringify(cleanPlan({ id: 'generated-day', title: 'Do sprawdzenia', dayOfWeek: 'wed', exercises: [{ key: 'bench_flat', sets: 2, target: '8-12' }] }))`));
+    expect(result.dayOfWeek).toBe('wed');
   });
 
   it('the current inline application script parses without changing the HTML', () => {

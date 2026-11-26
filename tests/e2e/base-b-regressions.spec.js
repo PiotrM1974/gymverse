@@ -1,8 +1,15 @@
 import { test, expect } from '@playwright/test';
 
+// Older workout scenarios continue after explicitly skipping the new rest screen.
+test.beforeEach(async ({ page }) => { await page.addLocatorHandler(page.locator('#restScreen:not([hidden])'), async () => { await page.waitForFunction(() => document.querySelector('#sessionSaveStatus').hidden); await page.locator('#restScreen [data-act="timerSkip" ]').click(); }); });
+
 test.beforeEach(async ({ page }) => {
   await page.goto('/');
-  await page.evaluate(() => { localStorage.clear(); sessionStorage.clear(); });
+  await page.evaluate(() => {
+    localStorage.clear(); sessionStorage.clear();
+    localStorage.setItem('gymverse_schema', '4');
+    localStorage.setItem('gymverse_profiles_v1', JSON.stringify({ schemaVersion:1, activeProfileId:'base-b-profile', profiles:[{ id:'base-b-profile', name:'Profil syntetyczny', attributes:{}, data:{} }] }));
+  });
   await page.reload();
   await page.locator('[data-act="startPlan"][data-plan="push_a1"]').waitFor();
 });
@@ -129,7 +136,8 @@ test('final-step completion asks before saving an incomplete session and shows r
   await page.locator('#btnDone_0').click();
   for (let i = 0; i < 4; i += 1) await page.locator('#btnNextStep').click();
   await expect(page.locator('#metaExerciseProgress')).toContainText('1/17');
-  await page.locator('#btnNextStep').click();
+  await expect(page.locator('#btnNextStep')).toBeHidden();
+  await page.locator('[data-act="finish"]').click();
   expect(dialogs.some(message => /1\s*\/\s*17/.test(message))).toBe(true);
   const state = await page.evaluate(() => ({ active: localStorage.getItem('gymverse_active'), history: localStorage.getItem('gymverse_history') }));
   expect(state.active).not.toBeNull();
@@ -150,6 +158,7 @@ test('manual finish confirms an incomplete session using the adjusted set count'
   const dialogs = [];
   page.on('dialog', async dialog => { dialogs.push(dialog.message()); await dialog.dismiss(); });
   await startPushA1(page);
+  await page.locator('.workout-extras > summary').click();
   await page.locator('#btnRemoveSet').click();
   await expect(page.locator('#metaExerciseProgress')).toContainText('0/16');
   await page.locator('#weight_0').fill('40');
@@ -246,6 +255,7 @@ test('weight changed by a programmatic button is drafted and restored after relo
   await page.locator('#weight_0').fill('40');
   await page.locator('#reps_0').fill('8');
   await page.locator('#btnDone_0').click();
+  await page.locator('.workout-extras > summary').click();
   await page.locator('[data-act="copyPrev"]').click();
   await page.locator('[data-act="wstep"][data-d="2.5"]').click();
   await expect.poll(() => page.evaluate(() => JSON.parse(localStorage.getItem('gymverse_draft_v1') || '{"items":[]}').items))
