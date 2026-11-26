@@ -13,6 +13,7 @@ test('history at 390 px labels legacy volume for a completed 85 kg by 10 set', a
     }]));
   });
   await page.goto('/',{waitUntil:'domcontentloaded'});
+  await page.getByRole('button', { name: 'Kopie bezpieczeństwa' }).click();
   await expect(page.locator('#migrateDataButton')).toBeVisible();
   await page.getByRole('button', { name: 'Historia' }).click();
   const stats = page.locator('.hist-stats').first();

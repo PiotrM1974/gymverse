@@ -38,3 +38,20 @@ export function progressionHistory(history,plan,exerciseId){
  const exercise=plan?.exercises?.find(e=>e.key===exerciseId);if(!exercise)return [];
  return history.filter(s=>s.planId===plan.id).map(s=>({...s,details:(s.details||[]).filter(d=>d.exerciseId===exerciseId&&variantKey(d)===variantKey(exercise))})).filter(s=>s.details.length);
 }
+
+export function lifetimeTrainingStats(sessions,volumeForSession){
+ const seen=new Set();let workouts=0,totalVolume=0;
+ for(const session of Array.isArray(sessions)?sessions:[]){
+  const details=Array.isArray(session?.details)?session.details:[];
+  const hasCompletedSet=details.some(set=>set&&typeof set.exerciseId==='string'&&set.exerciseId&&Number.isFinite(Number(set.weight))&&Number(set.weight)>=0&&Number.isFinite(Number(set.reps))&&Number(set.reps)>0);
+  if(!hasCompletedSet)continue;
+  const id=typeof session.id==='string'?session.id.trim():'';
+  if(id&&seen.has(id))continue;
+  if(id)seen.add(id);
+  const volume=typeof volumeForSession==='function'?volumeForSession(session):Number(session.totalVolume);
+  if(!Number.isFinite(volume)||volume<0)continue;
+  workouts++;
+  totalVolume+=volume;
+ }
+ return {workouts,totalVolume};
+}

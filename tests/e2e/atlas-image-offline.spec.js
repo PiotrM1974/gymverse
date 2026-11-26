@@ -38,7 +38,7 @@ async function getModeEvidence(page, mode, networkMode) {
     const svgStyle = getComputedStyle(svg);
     const bodyRect = image.getBoundingClientRect();
     const svgRect = svg.getBoundingClientRect();
-    const response = await caches.open('gymverse-v55').then(cache => cache.match(new URL(image.src)));
+    const response = await caches.open('gymverse-v56').then(cache => cache.match(new URL(image.src)));
     if (!response) throw new Error(`WEBP_CACHE_MISS:${image.currentSrc}`);
     const digest = async blob => Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', await blob.arrayBuffer()))).map(value => value.toString(16).padStart(2, '0')).join('');
     return {
