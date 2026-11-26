@@ -1,3 +1,4 @@
+import {sameDataValue} from './plan-merge.js';
 const clone = value => structuredClone(value);
 const ID = /^pg_[a-f0-9]{32}$/;
 const isRecord = value => value !== null && typeof value === 'object' && !Array.isArray(value);
@@ -29,13 +30,25 @@ export function deleteProgram(profile,id){const next=container(profile);if(!next
 export function readProgramDays(profile,plans,id){const data=container(profile);validatePlanPrograms(data,plans);const program=data.programs.find(p=>p.id===id);if(!program)throw new Error('PROGRAM_NOT_FOUND');return program.dayPlanIds.map(day=>clone(plans.find(plan=>plan.id===day)));}
 export function readAssignedProgram(profile,plans){if(!profile.planPrograms)return null;validatePlanPrograms(profile.planPrograms,plans);const id=profile.planPrograms.assignedProgramId;return id===null?null:clone(profile.planPrograms.programs.find(p=>p.id===id));}
 export function assignProgram(profile,plans,id){if(!profile.planPrograms){if(id===null)return clone(profile);throw new Error('PROGRAM_NOT_FOUND');}const next=container(profile);validatePlanPrograms(next,plans);if(id!==null&&!next.programs.some(p=>p.id===id))throw new Error('PROGRAM_NOT_FOUND');next.assignedProgramId=id;validatePlanPrograms(next,plans);return {...clone(profile),planPrograms:next};}
+export function programAssignmentSnapshot(state,profileId,programId,plans){
+  const profile=state?.profiles?.find(item=>item.id===profileId);
+  if(!profile||state.activeProfileId!==profileId)return null;
+  const program=profile.planPrograms?.programs.find(item=>item.id===programId)??null;
+  return {profileId,programId,assignedProgramId:profile.planPrograms?.assignedProgramId??null,program:clone(program),...(plans?{days:(program?.dayPlanIds||[]).map(id=>clone(plans.find(day=>day.id===id)??null))}:{})};
+}
+export function matchesProgramAssignmentSnapshot(state,expected,plans){
+  if(!expected)return false;
+  const current=programAssignmentSnapshot(state,expected.profileId,expected.programId,plans);
+  return !!current&&current.assignedProgramId===expected.assignedProgramId&&sameDataValue(current.program,expected.program)&&(!Object.hasOwn(expected,'days')||sameDataValue(current.days,expected.days));
+}
 export async function commitProgramProfile(store,state,profileId,plans,change){
   const {withPlanDataLock}=await import('./synchronization.js');
   return withPlanDataLock(async()=>{
     const latest=await store.refreshSnapshot();
     if(!latest.gymverse_profiles_v1||!latest.gymverse_plans)throw new Error('PROGRAM_STATE_STALE');
     const currentState=JSON.parse(latest.gymverse_profiles_v1),currentPlans=JSON.parse(latest.gymverse_plans);
-    if(JSON.stringify(currentState)!==JSON.stringify(state)||JSON.stringify(currentPlans)!==JSON.stringify(plans))throw new Error('PROGRAM_STATE_STALE');
+    const baselineProfile=state?.profiles?.find(p=>p.id===profileId),currentProfile=currentState.profiles?.find(p=>p.id===profileId);
+    if(currentState.activeProfileId!==profileId||!baselineProfile||!currentProfile||!sameDataValue(currentProfile.planPrograms??null,baselineProfile.planPrograms??null))throw new Error('PROGRAM_STATE_STALE');
     if(currentState.activeProfileId!==profileId)throw new Error('PROGRAM_PROFILE_NOT_ACTIVE');
     const index=currentState.profiles.findIndex(p=>p.id===profileId);if(index<0)throw new Error('PROFILE_NOT_FOUND');
     const profile=change(clone(currentState.profiles[index]),clone(currentPlans));if(profile.id!==profileId)throw new Error('PROFILE_ID_INVALID');

@@ -45,3 +45,9 @@ Rzeczywiste zrzuty: outputs/GV-BOLT-STAGE7A/generator-card-light.png i generator
 **Decyzja: 7A gotowy do lokalnego zamknięcia i akceptacji właściciela.** Nie rozpoczęto7B/7C, nie wykonano backupu projektu, commit/merge/push/deploy ani publikacji; zachowano zastane zmiany.
 
 Ograniczenia: powtarzalne cykle zgodne z istniejącym algorytmem, braki mapowania katalogu jawnie pokazywane przez generator; brak oceny naukowej na nowo. Trwałość ostatniego potwierdzonego zapisu (nie gwarancja ostatniego znaku przy kill), możliwość ewikcji/skasowania danych witryny,100 szkiców/5mln znaków, pozostawienie poprzednich propozycji do jawnego odrzucenia. Stare karty poza blokadą, localStorage bez atomowości wielu kluczy wobec obcego klienta. Fizyczny iPhone/iOS kill, WebKit offline i autentyczny historyczny eksport pozostają niezweryfikowane. Premium UI Polish obowiązkowy przed publikacją.
+
+## Dalsza naprawa generatora i konfliktów — 26.11.2026
+
+Generator ma teraz 4 kroki i osobny, tylko do odczytu podgląd; ręczna edycja odbywa się w oddzielnej ścieżce. Zapis i przypisanie korzystają z jednego wywołania istniejącego magazynu (transakcja IndexedDB, blokada/rollback localStorage). Stable-ID merge i semantyczne porównania usuwają fałszywe konflikty. Poprawiono też rzeczywisty przypadek utraty nowej sesji przy usuwaniu historii ze starego widoku. Cache v57 obejmuje nowy moduł synchronizacji.
+
+Końcowe wyniki: jednostkowe 213/213; jeden przebieg Chromium nowych testów i całego Stage 7A 33/33; 7 zaliczonych zależnych przypadków edytora; cztery testy odmowy zapisu IndexedDB 4/4 po korekcie przygotowania menu kopii; integracja treningów/progresji/ZIP 1/1. Osobnych przebiegów nie uznajemy za jeden pełny. Wszystkie dane syntetyczne, bez pełnych454 i bez WebKit/iPhone. Szczegółowe przyczyny, ograniczenia localStorage/starych kart, lista plików i zrzuty: [raport naprawy](GV-GENERATOR-EDITOR-REPAIR.md). Zmiany wyłącznie lokalne, do akceptacji właściciela.

@@ -17,6 +17,7 @@ export function validateWorkingDrafts(value) {
   const d=item?.draft;
   if(!object(item)||!id(item.id)||ids.has(item.id)||!id(item.revision)||!object(d)||!id(d.profileId)||(d.programId!==null&&!id(d.programId))||typeof d.title!=='string'||d.title.length>200||!Array.isArray(d.dayPlanIds)||d.dayPlanIds.length<1||d.dayPlanIds.length>6||new Set(d.dayPlanIds).size!==d.dayPlanIds.length||!plans(d.plans)||!plans(d.basePlans)||!d.dayPlanIds.every(k=>d.plans.some(p=>p.id===k))||!d.dayPlanIds.includes(item.selected)||!object(d.baseState)||d.baseState.activeProfileId!==d.profileId||!Array.isArray(d.baseState.profiles)||!d.baseState.profiles.some(p=>p.id===d.profileId)||!catalog(item.custom)||!catalog(item.baseCustom))throw Error('PROGRAM_DRAFT_INVALID');
   if(Object.hasOwn(d,'generatorAnswers')&&!generatorAnswers(d.generatorAnswers))throw Error('PROGRAM_DRAFT_INVALID');
+  if(Object.hasOwn(d,'generatedProgramId')&&(typeof d.generatedProgramId!=='string'||!/^pg_[a-f0-9]{32}$/.test(d.generatedProgramId)))throw Error('PROGRAM_DRAFT_INVALID');
   ids.add(item.id);
  }
  return value;

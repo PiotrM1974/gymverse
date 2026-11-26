@@ -784,3 +784,17 @@ body.stage6-onboarding .stage6-welcome { max-width:540px;margin:clamp(14px,7vh,7
   #view-history .history-scope { grid-template-columns:1fr; }
   #view-history .history-scope label { font-size:13px; }
 }
+
+/* 2.0.2: one home card per program; membership comes only from dayPlanIds. */
+#view-plans #assignedProgram { margin:0 0 18px; padding:0; border:0; }
+#view-plans #assignedProgram[hidden], #standalonePlans[hidden], #programSelectedDay[hidden] { display:none!important; }
+#view-plans .program-card { width:100%; min-width:0; color:var(--text); text-align:left; font:inherit; cursor:pointer; }
+#view-plans .program-card.is-assigned { border-inline-start:3px solid var(--blue); padding-inline-start:13px; }
+#view-plans .program-card:not(.is-assigned) h3 { font-size:21px; }
+.program-card-label { color:var(--text-muted); font-size:12px; font-weight:500; }
+.program-active-badge { padding:5px 9px; border-radius:8px; color:var(--accent-text); background:var(--lime-dim); font-size:12px; font-weight:600; }
+.program-open { display:flex; align-items:center; justify-content:space-between; min-height:44px; color:var(--accent-text); font-size:14px; font-weight:600; }
+.program-card:focus-visible { outline:3px solid var(--blue); outline-offset:3px; }
+.home-section-title { margin:0 0 12px; font-size:18px; font-weight:600; }
+#standalonePlans { margin-bottom:18px; }
+#programSelectedDay { scroll-margin-top:calc(150px + env(safe-area-inset-top,0px)); }

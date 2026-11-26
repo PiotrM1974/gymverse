@@ -1,9 +1,9 @@
-import { DRAFT_KEY, removeDraftFromSnapshot, programSourceIdentity } from './program-drafts.js';
-import { createProgram, updateProgram, validatePlanPrograms } from './programs.js';
+import { DRAFT_KEY, removeDraftFromSnapshot } from './program-drafts.js';
+import { assignProgram, createProgram, updateProgram, validatePlanPrograms } from './programs.js';
+import { mergePlanChanges, mergeRecordChanges, sameDataValue as same } from './plan-merge.js';
 import { withPlanDataLock } from './synchronization.js';
 
 const copy = value => structuredClone(value);
-const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 
 export function createProgramDraft(state, plans, programId = null) {
   const profile = state.profiles.find(item => item.id === state.activeProfileId);
@@ -38,10 +38,19 @@ export async function commitProgramDraft(store, draft, options = {}) {
     const before = await store.refreshSnapshot();
     const state = JSON.parse(before.gymverse_profiles_v1 || 'null');
     const plans = JSON.parse(before.gymverse_plans || '[]');
-    if (!same(programSourceIdentity(state), programSourceIdentity(draft.baseState)) || !same(plans, draft.basePlans) || state?.activeProfileId !== draft.profileId) throw new Error('PROGRAM_STATE_STALE');
+    const baseProfile=draft.baseState.profiles.find(item=>item.id===draft.profileId),currentProfile=state?.profiles?.find(item=>item.id===draft.profileId);
+    if(state?.activeProfileId!==draft.profileId||!currentProfile||!baseProfile)throw new Error('PROGRAM_STATE_STALE');
+    if(draft.programId){
+      const baseProgram=baseProfile.planPrograms?.programs.find(item=>item.id===draft.programId),currentProgram=currentProfile.planPrograms?.programs.find(item=>item.id===draft.programId);
+      if(!baseProgram||!same(baseProgram,currentProgram))throw new Error('PROGRAM_STATE_STALE');
+    }else if(draft.generatedProgramId&&currentProfile.planPrograms?.programs.some(item=>item.id===draft.generatedProgramId))throw new Error('PROGRAM_STATE_STALE');
+    if(options.assignProgram&&(currentProfile.planPrograms?.assignedProgramId??null)!==(baseProfile.planPrograms?.assignedProgramId??null))throw new Error('PROGRAM_STATE_STALE');
+    if(draft.generatorAnswers&&!same(currentProfile.attributes||{},baseProfile.attributes||{}))throw new Error('PROGRAM_STATE_STALE');
     if (before.gymverse_active && JSON.parse(before.gymverse_active)) throw new Error('PROGRAM_ACTIVE_SESSION');
-    const nextPlans = copy(draft.plans).filter(day => draft.basePlans.some(old => old.id === day.id) || draft.dayPlanIds.includes(day.id));
-    if (new Set(nextPlans.map(day => day.id)).size !== nextPlans.length || draft.basePlans.some(day => !nextPlans.some(next => next.id === day.id))) throw new Error('PROGRAM_DAY_INVALID');
+    // The program editor detaches existing days; it never deletes their records.
+    if(draft.basePlans.some(day=>!draft.plans.some(next=>next.id===day.id)))throw new Error('PROGRAM_DAY_INVALID');
+    const nextPlans = mergePlanChanges(draft.basePlans,copy(draft.plans).filter(day => draft.basePlans.some(old => old.id === day.id) || draft.dayPlanIds.includes(day.id)),plans);
+    if (new Set(nextPlans.map(day => day.id)).size !== nextPlans.length) throw new Error('PROGRAM_DAY_INVALID');
     for (const day of nextPlans) {
       if (!day.title?.trim() || day.title.length > 40 || !Array.isArray(day.exercises)) throw new Error('PROGRAM_DAY_INVALID');
       if (draft.dayPlanIds.includes(day.id) && !day.exercises.length) throw new Error('PROGRAM_DAY_EMPTY');
@@ -50,19 +59,18 @@ export async function commitProgramDraft(store, draft, options = {}) {
     const input = { title: draft.title, dayPlanIds: draft.dayPlanIds };
     const profile = draft.programId
       ? updateProgram(state.profiles[index], nextPlans, draft.programId, input)
-      : createProgram(state.profiles[index], nextPlans, input);
-    validatePlanPrograms(profile.planPrograms, nextPlans);
+      : createProgram(state.profiles[index], nextPlans, input, draft.generatedProgramId?{id:draft.generatedProgramId}:{});
+    const savedProgramId=draft.programId||draft.generatedProgramId||profile.planPrograms.programs.at(-1).id;
+    const savedProfile=options.assignProgram?assignProgram(profile,nextPlans,savedProgramId):profile;
+    validatePlanPrograms(savedProfile.planPrograms, nextPlans);
     const nextState = copy(state);
-    nextState.profiles[index] = profile;
+    nextState.profiles[index] = savedProfile;
     const updates = { gymverse_plans: nextPlans, gymverse_profiles_v1: nextState };
     if (options.workingDraft) {
       if(options.workingDraft.draft.profileId!==draft.profileId || options.workingDraft.draft.programId!==draft.programId)throw Error('DRAFT_CONFLICT');
       updates[DRAFT_KEY]=removeDraftFromSnapshot(before[DRAFT_KEY],options.workingDraft);
     }
-    if (options.custom) {
-      if (!same(JSON.parse(before.gymverse_custom || '{}'), options.baseCustom)) throw new Error('PROGRAM_STATE_STALE');
-      updates.gymverse_custom = options.custom;
-    }
+    if (options.custom) updates.gymverse_custom = mergeRecordChanges(options.baseCustom||{},options.custom,JSON.parse(before.gymverse_custom||'{}'));
     try {
       await store.transact(updates);
       const after = await store.refreshSnapshot();
@@ -78,6 +86,6 @@ export async function commitProgramDraft(store, draft, options = {}) {
       } catch (_) { error.integrityUncertain = true; }
       throw error;
     }
-    return { state: nextState, plans: nextPlans, programId: draft.programId || profile.planPrograms.programs.at(-1).id };
+    return { state: nextState, plans: nextPlans, custom:updates.gymverse_custom||options.custom, programId: savedProgramId };
   }, options.locks);
 }

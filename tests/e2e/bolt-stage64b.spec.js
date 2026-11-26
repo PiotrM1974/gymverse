@@ -89,8 +89,8 @@ for(const count of [1,3,6])test(`creates and reopens ${count} day program withou
   const after=JSON.parse((await snapshot(page)).gymverse_plans);
   for(const id of group.dayPlanIds.slice(0,-1))expect(after.find(item=>item.id===id)).toEqual(plans.find(item=>item.id===id));
   expect(after.find(item=>item.id===group.dayPlanIds.at(-1)).exercises).toHaveLength(2);
-  await page.reload();await page.locator('#assignedProgram [data-act="stage6Ready"]').click();
-  await page.locator(`[data-act="programPreview"][data-id="${group.id}"]`).click();
+  await page.reload();
+  await page.locator(`.view-section.active [data-act="programPreview"][data-id="${group.id}"]`).click();
   await expect(page.locator('[data-act="programDay"]')).toHaveCount(count);
 });
 

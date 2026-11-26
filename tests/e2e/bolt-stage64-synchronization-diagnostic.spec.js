@@ -131,8 +131,8 @@ test('program assignment waits behind a day edit lock and commits after release'
   const other = await context.newPage();
   await other.goto('/');
   await other.waitForFunction(() => !!window.__gymverseTestHarness);
-  await other.locator('#assignedProgram [data-act="stage6Ready"]').click();
-  await other.locator('[data-act="programPreview"][data-id="pg_11111111111111111111111111111111"]').click();
+
+  await other.locator('.view-section.active [data-act="programPreview"][data-id="pg_11111111111111111111111111111111"]').click();
   try {
     await other.locator('[data-act="programAssign"]').click();
     await expect.poll(() => page.evaluate(async () => (await navigator.locks.query()).pending.some(lock => lock.name === 'gymnastika-plan-program-data'))).toBe(true);
@@ -158,8 +158,8 @@ test('deleting a program while its preview is open makes the preview stale witho
   const other = await context.newPage();
   await other.goto('/');
   await other.waitForFunction(() => !!window.__gymverseTestHarness);
-  await page.locator('#assignedProgram [data-act="stage6Ready"]').click();
-  await page.locator('[data-act="programPreview"][data-id="pg_11111111111111111111111111111111"]').click();
+
+  await page.locator('.view-section.active [data-act="programPreview"][data-id="pg_11111111111111111111111111111111"]').click();
   await other.evaluate(async () => {
     const store = window.__gymverseTestHarness.getStore();
     const snapshot = await store.refreshSnapshot();

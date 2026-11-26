@@ -1,5 +1,16 @@
 # GymNastika 2.0 — project handoff
 
+## Current release candidate — GymNastika 2.0.2 (26 Nov 2026)
+
+This section supersedes historical release/authorization status below. Production is 2.0.1 at main be447d4f2a77ea6ca027196404b572d919c82e84, verified against GitHub on 26 Nov 2026. Accepted generator/editor/synchronization fixes are prepared on release/gymnastika-2.0.2-2026-11-26, created directly from the same current origin/main in the existing worktree, preserving unrelated files. The owner authorizes a commit, push of this branch and a new PR titled “GymNastika 2.0.2 — generator i synchronizacja”; **merge and deployment are not authorized**.
+
+Before the additional home-screen request, no further production-code changes were needed during finalization. The subsequently authorized home-screen work is included below. Prior evidence remains: 213/213 unit tests, 33/33 focused Chromium, seven dependent editor cases, 4/4 IndexedDB refusal cases and 1/1 workout/progression/ZIP integration (separate runs). After creating the release branch, three focused Chromium cases passed in one run (10.1 s): combined generated save rollback/retry, assignment-only refusal/retry for an already saved generated program, and returning to answers/cancelling without changing the saved program. The latter two are added regressions; all compare actual persisted records.
+
+Save and assignment in the automatic generator are one operation: on a recoverable failure, rollback retains the draft and prior program; retry retains the generated ID. A previously saved unassigned program supports separate assignment from its preview. On assignment failure the existing message says “Nie zapisano przypisania. Spróbuj ponownie.”, the program remains visible, and retry neither duplicates it nor changes its days. This is not a claim that the generator intentionally leaves a half-saved program. Uncertain integrity still blocks writes.
+
+GitHub Pages configuration verified through authenticated API: legacy build from main at /; only the dynamic pages-build-deployment workflow exists. Pushing this release branch does not update the configured production source. Cache remains gymverse-v57; the additional authorized home-screen runtime changes are described below. No full454, installations, physical iPhone or WebKit checks during finalization. Preserve the old-tab/localStorage limits in the [repair report](docs/tasks/GV-GENERATOR-EDITOR-REPAIR.md). Await owner approval before any merge/publication.
+
+
 This is a curated engineering handoff based on the repository’s source, contracts, task records, and reports. It is **not** a transcript or complete export of ChatGPT, Work, or Bolt conversations. No private workout data or credentials belong here.
 
 ## Project and architecture
@@ -63,6 +74,26 @@ For a future GitHub-only iPhone test, the recommended isolated origin is a dedic
 4. Recheck the remote base and exact file allowlist only after Git operations are approved. Prepare commit/PR and publication plan for review; merging to `main` may automatically publish GitHub Pages.
 
 When resuming in a new Codex session: use the existing checkout, read `AGENTS.md`, this file, local `PROJECT_MEMORY.md`, and the latest task report; verify branch/status before changes; preserve all local and ignored data; do not create another chat or worktree; do not publish or contact external services without explicit authorization.
+
+## Included 2.0.2 home-screen correction
+
+The owner additionally approved one home card per program. The active profile’s planPrograms/dayPlanIds exclusively determine membership; the assigned program is first with an “Aktywny” badge. Remaining programs have compact cards, and standalone records are in their own section without name/weekday grouping. The old duplicate assignment panel is removed. Program cards open the day list; exercises and the start action appear only after selecting a day. The generator and manual editor share this presentation. No day records are removed or migrated. startable() and nextPlanId() remain byte-equivalent (ignoring line endings) to production 2.0.1.
+
+A targeted test exposed an incompatible old freshness check in startWorkout(): it still read removed raw snapshot fields after preview snapshots became semantic. Program starts now use the same relevant-program/day snapshot check as assignment, under the existing Web Lock, preserving actual program/day history context. Unrelated day changes do not block a start; changes to the selected program/day do. No timer, history schema, generator algorithm or backup format changes.
+
+Verification after this addition: npm test **213/213 PASS**; one targeted Chromium run **25/25 PASS** (1.5 min), covering home cards, generated 1–6 days, manual 1/3/6 days, saved-program assignment retry, deletion, profiles, stale start, session/RIR/timer/resume, progression and ZIP integration. After the final standalone display simplification, only the four relevant card/layout cases were repeated: **4/4 PASS** (5.5 s). Prior 3/3 finalization checks and the accepted earlier results remain separate evidence, not one combined full regression. Screenshots at 390 px, LIGHT/DARK: outputs/GV-20202-HOME/{home,program,day-two}-{light,dark}-390.png and standalone-dark-390.png (local, ignored). Mobile checks include 320/375/390 px. No WebKit/physical-device claims.
+
+The final allowlist contains **30 files**: the 22 repair files plus signal.css, home-program-cards.spec.js and six dependent test files whose navigation now uses the program card/explicit day choice. Test fixture readiness checks use the actual initialized application rather than a hidden backup-menu control. Documentation and local private memory are updated; private memory, outputs and unrelated design boards are not staged. The PR remains for owner acceptance only; do not merge or deploy.
+
+## Local generator/editor and write-conflict repair — 26 Nov 2026
+
+Local repair on production 2.0.1 separates the four-step automatic generator from the manual 1–6 day editor. Generated preview is read-only; explicit save and assignment share one operation and a stable draft/program identity. Failed regeneration retains the prior draft, including recovery of older drafts. The generator algorithm, Signal/Manrope and existing data model remain intact.
+
+Whole-array/registry comparisons and JSON property-order comparisons caused false conflicts. Stable-ID merging and semantic freshness checks preserve independent edits while rejecting stale edits to the same data. A real synthetic IndexedDB history overwrite was reproduced and fixed: UI history freshness is now checked under the shared lock before deletion, even if the runtime cache has already refreshed. Program removal preserves day records/history; durable draft references prevent unsafe day deletion. Runtime writes serialize inside the existing data store; IndexedDB uses transactions, while localStorage still relies on lock/rollback/readback and is not natively multi-key atomic. integrityUncertain continues to block unsafe writes. Old tabs may not honor current locks.
+
+Final synthetic checks: units **213/213**; one Chromium generator/editor + Stage 7A run **33/33**; seven dependent editor cases passed; four IndexedDB failure tests **4/4** after correcting the backup-menu fixture; final two-profile workout/progression/ZIP integration **1/1**. These are separate runs, not one full regression. Cache **gymverse-v57**, including the new plan-merge module, was verified offline in Chromium. No full454, Edge, WebKit, physical iPhone or authentic owner-export verification in this task.
+
+See [full repair report](docs/tasks/GV-GENERATOR-EDITOR-REPAIR.md) for causes, deletion audit, exact file list, screenshots and test qualifications. No installs, commit, push, merge or deployment. Preserve unrelated design boards and local data. Await owner acceptance.
 
 ## Local pre-release onboarding follow-up — 26 Nov 2026
 

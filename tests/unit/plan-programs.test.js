@@ -1,5 +1,5 @@
 import {test,expect} from 'vitest';
-import {createProgram,updateProgram,deleteProgram,readProgramDays} from '../../src/features/plans/programs.js';
+import {createProgram,updateProgram,deleteProgram,readProgramDays,programAssignmentSnapshot,matchesProgramAssignmentSnapshot} from '../../src/features/plans/programs.js';
 const plans=Array.from({length:6},(_,i)=>({id:`day-${i}`,title:`Day ${i}`,exercises:[]}));
 const id='pg_11111111111111111111111111111111';
 test('programs keep ordered existing day identities and delete metadata only',()=>{
@@ -35,6 +35,30 @@ test('merge adds complete program, preserves conflicting days, and remains repea
  const changed=plans.map(p=>p.id==='day-0'?{...p,title:'Conflict'}:p);const conflict=planBackupImport(snapshot(base,changed),snapshot(incoming,plans));expect(conflict.snapshot.gymverse_profiles_v1.profiles[0].planPrograms).toBeUndefined();expect(conflict.conflicts.some(c=>c.type==='plan-program-days')).toBe(true);
 });
 test('validation rejects missing references and duplicate ownership',()=>{expect(()=>validatePlanPrograms({schemaVersion:1,assignedProgramId:null,programs:[{id,title:'X',dayPlanIds:['missing']}]},plans)).toThrow();});
+test('assignment freshness ignores unrelated profile data but rejects reassignment or program edits',()=>{
+ const profile=createProgram({id:'profile-one',data:{}},plans,{title:'Plan',dayPlanIds:['day-0']},{id});
+ const state={activeProfileId:'profile-one',profiles:[profile]};
+ const snapshot=programAssignmentSnapshot(state,'profile-one',id);
+ const unrelated=structuredClone(state);unrelated.profiles[0].data={gymverse_history:'[]'};unrelated.profiles.push({id:'profile-two',name:'Two',data:{}});
+ expect(matchesProgramAssignmentSnapshot(unrelated,snapshot)).toBe(true);
+ const reassigned=structuredClone(state);reassigned.profiles[0].planPrograms.assignedProgramId=id;
+ expect(matchesProgramAssignmentSnapshot(reassigned,snapshot)).toBe(false);
+ const edited=structuredClone(state);edited.profiles[0].planPrograms.programs[0].title='Changed';
+ expect(matchesProgramAssignmentSnapshot(edited,snapshot)).toBe(false);
+});
+
+test('assignment snapshot checks relevant day content without blocking unrelated days',()=>{
+ const profile=createProgram({id:'profile-one',data:{}},plans,{title:'Plan',dayPlanIds:['day-0']},{id}),state={activeProfileId:'profile-one',profiles:[profile]},snapshot=programAssignmentSnapshot(state,'profile-one',id,plans);
+ const unrelated=structuredClone(plans);unrelated[1].title='Niezależna zmiana';expect(matchesProgramAssignmentSnapshot(state,snapshot,unrelated)).toBe(true);
+ const changed=structuredClone(plans);changed[0].title='Zmieniony oglądany dzień';expect(matchesProgramAssignmentSnapshot(state,snapshot,changed)).toBe(false);
+});
+test('profile program metadata writes use latest plans and ignore unrelated plan changes',async()=>{
+ const state=bootstrapProfileState({},{id:'profile-one'}).state,latestPlans=[...plans,{id:'added-in-other-tab',title:'Other',exercises:[]}],writes=[];
+ const store={refreshSnapshot:async()=>({gymverse_profiles_v1:JSON.stringify(state),gymverse_plans:JSON.stringify(latestPlans)}),transact:async updates=>writes.push(updates)};
+ const result=await commitProgramProfile(store,state,'profile-one',plans,profile=>createProgram(profile,latestPlans,{title:'New',dayPlanIds:['added-in-other-tab']},{id:'pg_33333333333333333333333333333333'}),testLocks);
+ expect(result.profiles[0].planPrograms.programs[0].dayPlanIds).toEqual(['added-in-other-tab']);
+ expect(writes).toHaveLength(1);
+});
 test('conflicting program ID retains local program and is recorded',()=>{
  const base={id:'profile-one',name:'Test',data:{}};const local=createProgram(base,plans,{title:'Local',dayPlanIds:['day-0']},{id});const source=createProgram(base,plans,{title:'Incoming',dayPlanIds:['day-0']},{id});const result=planBackupImport(snapshot(local),snapshot(source));expect(result.snapshot.gymverse_profiles_v1.profiles[0].planPrograms.programs[0].title).toBe('Local');expect(result.conflicts).toContainEqual({profileId:'profile-one',type:'plan-program',recordId:id});
 });

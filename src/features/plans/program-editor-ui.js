@@ -62,10 +62,10 @@ export function createProgramEditorUI(api) {
       <div class="program-actions">${button('review',review?'Wróć do edycji':'Przejrzyj cały program')}<button class="btn-primary" data-program-action="save" ${busy?'disabled':''}>${busy?'Zapisywanie…':'Zapisz program'}</button>${draft.generatorAnswers?button('generator','Wróć do generatora'):''}${autosaveError?button('retry','Ponów zapis szkicu'):''}${button('cancel','Odrzuć szkic')}</div><p data-working-status role="status">${pendingCount?'Zachowywanie szkicu…':autosaveError?'Nie zachowano ostatnich zmian szkicu.':'Szkic zachowany na tym urządzeniu.'}</p><p id="programEditorStatus" role="status"></p></div>`;
     if(busy)host.querySelectorAll('button,input,select').forEach(control=>{control.disabled=true;});
   }
-  function activate(item, fresh=false){
+  function activate(item, fresh=false, show=true){
     working=item;draft=structuredClone(item.draft);baseCustom=structuredClone(item.baseCustom);custom=structuredClone(item.custom);
     selected=item.selected;review=false;editing=false;autosaveError=null;recovery=null;initial=fresh?fingerprint():null;
-    render();api.show('view-program-editor');
+    render();if(show)api.show('view-program-editor');
     if(fresh)queueSave();
   }
   async function open(id=null, selectedDay=null, fresh=false) {
@@ -73,7 +73,7 @@ export function createProgramEditorUI(api) {
       if(draft){if(!confirm('Opuścić bieżący szkic? Zachowane zmiany pozostaną do wznowienia.'))return;await flushWork();discard();}
       if(api.active()){api.notify('Zakończ aktywny trening przed edycją programu.');return;}
       const raw=await api.store().refreshSnapshot(),state=JSON.parse(raw.gymverse_profiles_v1);
-      const candidates=readWorkingDrafts(raw[DRAFT_KEY]).items.filter(item=>item.draft.profileId===state.activeProfileId&&item.draft.programId===id);
+      const candidates=readWorkingDrafts(raw[DRAFT_KEY]).items.filter(item=>item.draft.profileId===state.activeProfileId&&item.draft.programId===id&&!item.draft.generatorAnswers);
       if(candidates.length&&!fresh){
         recovery={candidates,id,selectedDay};
         host.innerHTML='<div class="program-editor"><h1 class="screen-title">Znaleziono niezapisane zmiany</h1><p>Wznowienie nie zmieni zapisanego programu.</p>'+candidates.map(item=>'<section><h2>'+esc(item.draft.title)+'</h2><button class="btn-primary" data-recover="resume" data-id="'+esc(item.id)+'">Wznów edycję</button><button class="btn-secondary" data-recover="discard" data-id="'+esc(item.id)+'">Odrzuć szkic</button></section>').join('')+(id===null?'<button class="btn-secondary" data-recover="new">Utwórz kolejny program</button>':'')+'<p data-working-status role="status"></p></div>';
@@ -144,12 +144,35 @@ export function createProgramEditorUI(api) {
   });
   return {async stageGenerated(d,catalog){
       if(api.active()||api.uncertain())throw Error('PROGRAM_UNAVAILABLE');
-      if(draft){await flushWork();discard();}
-      activate({id:crypto.randomUUID(),revision:null,draft:d,selected:d.dayPlanIds[0],custom:catalog,baseCustom:catalog},true);
-      await flushWork();
+      if(draft)await flushWork();
+      const previous=draft?.generatorAnswers?structuredClone(working):null;
+      if(draft)discard();
+      if(previous?.draft.generatedProgramId)d.generatedProgramId=previous.draft.generatedProgramId;
+      activate({id:previous?.id||crypto.randomUUID(),revision:previous?.revision??null,draft:d,selected:d.dayPlanIds[0],custom:catalog,baseCustom:catalog},true,false);
+      try{await flushWork();}catch(error){if(previous){activate(previous,false,false);error.previousGeneratedDraftRetained=true;}throw error;}
     },
-    async updateGenerated(plans){draft.plans=[...structuredClone(draft.basePlans),...structuredClone(plans)];queueSave();await flushWork();},
+    async updateGenerated(plans,selectedDay){draft.plans=[...structuredClone(draft.basePlans),...structuredClone(plans)];if(selectedDay&&draft.dayPlanIds.includes(selectedDay))selected=selectedDay;queueSave();await flushWork();},
+    async generatedDrafts(){const raw=await api.store().refreshSnapshot(),state=JSON.parse(raw.gymverse_profiles_v1||'null');return readWorkingDrafts(raw[DRAFT_KEY]).items.filter(item=>item.draft.profileId===state?.activeProfileId&&item.draft.programId===null&&item.draft.generatorAnswers);},
+    async resumeGeneratedDraft(id){const item=(await this.generatedDrafts()).find(row=>row.id===id);if(!item)throw Error('DRAFT_NOT_FOUND');activate(item,false,false);if(!draft.generatedProgramId){draft.generatedProgramId='pg_'+crypto.randomUUID().replaceAll('-','');queueSave();await flushWork();}return structuredClone(working);},
+    async discardGeneratedDraft(id){const item=(await this.generatedDrafts()).find(row=>row.id===id);if(!item)throw Error('DRAFT_NOT_FOUND');await removeWorkingDraft(api.store(),item);},
     async cancelGenerated(){await flushWork();if(working?.revision)await removeWorkingDraft(api.store(),working);discard();},
+    async saveGeneratedAndAssign(){
+      if(busy)return false;
+      if(!draft?.generatorAnswers||!draft.generatedProgramId)throw Error('GENERATED_PROGRAM_NOT_READY');
+      if(api.uncertain())throw Error('INTEGRITY_UNCERTAIN');
+      busy=true;
+      try{
+      if(autosaveError)queueSave();
+      await flushWork();
+      const latest=await api.store().refreshSnapshot(),state=JSON.parse(latest.gymverse_profiles_v1||'null');
+      const profile=state?.profiles?.find(item=>item.id===draft.profileId);
+      if(state?.activeProfileId!==draft.profileId||!profile)throw Error('PROGRAM_STATE_STALE');
+      const prior=profile.planPrograms?.programs.find(item=>item.id===profile.planPrograms.assignedProgramId);
+      if(prior&&!confirm(`Obecny program: ${prior.title}\nNowy program: ${draft.title}\nHistoria i wykonane treningi pozostaną zachowane. Zapisać i przypisać nowy program?`))return false;
+      const result=await commitProgramDraft(api.store(),draft,{custom,baseCustom,workingDraft:working,assignProgram:true});
+      api.saved(result,result.custom||custom,true);draft=null;working=null;editing=false;api.endDay();api.show('view-plans');api.notify('Program został zapisany i przypisany. Historia pozostała bez zmian.');return true;
+      }finally{busy=false;}
+    },
     showGenerated(mode,id){selected=id||selected;review=mode==='program';render();api.show('view-program-editor');if(mode==='day'){editing=true;api.restoreCustom(custom);api.editDay(selected);}if(mode==='save')host.querySelector('[data-program-action="save"]').click();},
     open,returnToProgram,allowLeave,leaveDay(){if(editing){editing=false;api.restoreCustom(baseCustom);}},get editing(){return editing;},get draft(){return draft;},
     localSave(plans,options){draft.plans=structuredClone(plans);if(options.custom){custom=structuredClone(options.custom);api.restoreCustom(custom);}queueSave();return true;},

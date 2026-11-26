@@ -300,6 +300,9 @@ export async function createRuntimeStore(options = {}) {
   let revision = 0;
   let persistQueue = Promise.resolve();
   let onFailure = () => {};
+  const withRuntimeWriteLock = operation => locks && typeof locks.request === 'function'
+    ? locks.request('gymnastika-runtime-store-write', { mode: 'exclusive' }, operation)
+    : operation();
 
   const activeDatabase = () => {
     if (blocked) throw new Error('ACTIVE_DATABASE_UNAVAILABLE');
@@ -583,33 +586,41 @@ export async function createRuntimeStore(options = {}) {
     async transact(updates) {
       if (!updates || typeof updates !== 'object' || Array.isArray(updates)) throw new Error('STORE_UPDATES_INVALID');
       if (writePaused) throw new Error('MIGRATION_IN_PROGRESS');
+      const baseline = new Map(Object.keys(updates).map(key => [key, adapter.storage.getItem(key)]));
       if (mode === 'localStorage') {
-        const before = new Map();
-        try {
-          for (const [key, value] of Object.entries(updates)) {
-            before.set(key, storage.getItem(key));
-            if (value === null) storage.removeItem(key); else storage.setItem(key, JSON.stringify(value));
-            if (storage.getItem(key) !== (value === null ? null : JSON.stringify(value))) throw new Error('STORE_READBACK_FAILED');
+        return withRuntimeWriteLock(async () => {
+          const before = new Map();
+          try {
+            for (const [key] of Object.entries(updates)) if (storage.getItem(key) !== baseline.get(key)) throw new Error('CROSS_TAB_CONFLICT');
+            for (const [key, value] of Object.entries(updates)) {
+              before.set(key, storage.getItem(key));
+              if (value === null) storage.removeItem(key); else storage.setItem(key, JSON.stringify(value));
+              if (storage.getItem(key) !== (value === null ? null : JSON.stringify(value))) throw new Error('STORE_READBACK_FAILED');
+            }
+          } catch (error) {
+            for (const [key, raw] of Array.from(before.entries()).reverse()) {
+              try { if (raw === null) storage.removeItem(key); else storage.setItem(key, raw); } catch (_) {}
+            }
+            throw error;
           }
-        } catch (error) {
-          for (const [key, raw] of Array.from(before.entries()).reverse()) {
-            try { if (raw === null) storage.removeItem(key); else storage.setItem(key, raw); } catch (_) {}
-          }
-          throw error;
-        }
-        for (const [key, value] of Object.entries(updates)) value === null ? cache.delete(key) : cache.set(key, cloneRuntimeValue(value));
-        return { status: 'saved', mode };
+          for (const [key, value] of Object.entries(updates)) value === null ? cache.delete(key) : cache.set(key, cloneRuntimeValue(value));
+          return { status: 'saved', mode };
+        });
       }
       const operation = persistQueue.catch(() => {}).then(async () => {
         if (blocked) throw new Error('ACTIVE_DATABASE_UNAVAILABLE');
         if (writePaused) throw new Error('MIGRATION_IN_PROGRESS');
-        const expectedRevision = revision;
-        const snapshot = await adapter.exportSnapshot();
-        for (const [key, value] of Object.entries(updates)) value === null ? delete snapshot[key] : snapshot[key] = JSON.stringify(value);
-        const result = await persistIndexedSnapshot(snapshot, expectedRevision);
-        cache.clear();
-        Object.entries(snapshot).forEach(([key, raw]) => cache.set(key, parseRuntimeValue(raw)));
-        return result;
+        return withRuntimeWriteLock(async () => {
+          await refreshFromDatabase();
+          for (const [key] of Object.entries(updates)) if (adapter.storage.getItem(key) !== baseline.get(key)) throw new Error('CROSS_TAB_CONFLICT');
+          const expectedRevision = revision;
+          const snapshot = await adapter.exportSnapshot();
+          for (const [key, value] of Object.entries(updates)) value === null ? delete snapshot[key] : snapshot[key] = JSON.stringify(value);
+          const result = await persistIndexedSnapshot(snapshot, expectedRevision);
+          cache.clear();
+          Object.entries(snapshot).forEach(([key, raw]) => cache.set(key, parseRuntimeValue(raw)));
+          return result;
+        });
       }).catch(error => {
         if (error.message === 'CROSS_TAB_CONFLICT') throw error;
         blocked = true;

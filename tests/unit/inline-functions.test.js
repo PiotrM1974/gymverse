@@ -35,7 +35,7 @@ function declaration(source, name) {
 
 function evaluate(name, prelude, expression) {
   const code = `${prelude}\n${declaration(html, name)}\n${expression}`;
-  return runInNewContext(code, { Date, Math, Number, String, Object, Array, Set, isFinite });
+  return runInNewContext(code, { Date, Math, Number, String, Object, Array, Set, isFinite, structuredClone: value => JSON.parse(JSON.stringify(value)) });
 }
 
 describe('inline helpers characterize current behavior', () => {
@@ -49,7 +49,7 @@ describe('inline helpers characterize current behavior', () => {
     for (const setup of cases) {
       const prelude = `${setup} let PLANS=[{id:'day-a',title:'Day'},{id:'day-b',title:'Other'}];const PROFILE_STATE={activeProfileId:'p',profiles:[{id:'p',planPrograms:{programs}}]};const LS={get:()=>({items:drafts})};const STORE={transact:()=>{throw new Error('unexpected write')}};const toast=()=>{};`;
       const start=html.indexOf('async function savePlanChanges('), end=html.indexOf('const PLACEHOLDER',start);
-      expect(await runInNewContext(`${prelude}\nconst PROGRAM_EDITOR_UI=null;\n${html.slice(start,end)}\nsavePlanChanges([{id:'day-b',title:'Other'}])`)).toBe(false);
+      expect(await runInNewContext(`${prelude}\nconst PROGRAM_EDITOR_UI=null;\n${html.slice(start,end)}\nsavePlanChanges([{id:'day-b',title:'Other'}])`, { structuredClone: value => JSON.parse(JSON.stringify(value)) })).toBe(false);
     }
   });
   it('retains a deleted plan ID and never guesses an ID by a duplicate title', () => {
