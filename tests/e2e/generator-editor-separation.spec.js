@@ -1,3 +1,4 @@
+import {setGeneratorDays} from './helpers/generator-days.js';
 import { test, expect } from '@playwright/test';
 
 async function boot(page) {
@@ -30,7 +31,7 @@ async function generate(page, count) {
   await expect(page.locator('.generator-wizard > p')).toContainText('Krok 1 z 4');
   await page.locator('#generatorGoal').selectOption('hypertrophy');
   await page.locator('[data-act="generatorNext"]').click();
-  await page.locator('#generatorDays').fill(String(count));
+  await setGeneratorDays(page,count);
   await page.locator('[data-act="generatorNext"]').click();
   await expect(page.locator('.generator-wizard > p')).toContainText('Krok 3 z 4');
   await page.locator('[data-act="generatorNext"]').click();
@@ -195,8 +196,8 @@ test('deleting a program clears only its assignment and keeps days and workout h
 
   await page.locator('#view-plans [data-act="programPreview"]').click();
   await expect(page.locator('#view-program-preview')).toContainText('Program do usunięcia');
-  await page.locator('[data-act="programDelete"]').click();
-  await expect(page.locator('#view-plan-library')).toHaveClass(/active/);
+  await page.locator('.header-nav [data-view="view-plans"]').click();await page.locator('[data-act="editPlans"]').click();await page.locator('[data-act="programDelete"]').click();
+  await expect(page.locator('.managed-program')).toHaveCount(0);
   const after=await page.evaluate(()=>window.__gymverseTestHarness.getStore().refreshSnapshot());
   const registry=JSON.parse(after.gymverse_profiles_v1),profile=registry.profiles.find(item=>item.id==='synthetic-profile');
   expect(profile.planPrograms.assignedProgramId).toBeNull();
@@ -348,7 +349,7 @@ test('deleting one historical workout preserves plans and the other session',asy
 test('generator and plan merge module are available offline in the new worker cache',async({page,context})=>{
   await boot(page);await page.evaluate(()=>navigator.serviceWorker.ready);await page.reload();
   expect(await page.evaluate(()=>!!navigator.serviceWorker.controller)).toBe(true);
-  expect(await page.evaluate(async()=>!!await (await caches.open('gymverse-v57')).match(new URL('./src/features/plans/plan-merge.js',location.href)))).toBe(true);
+  expect(await page.evaluate(async()=>!!await (await caches.open('gymverse-v59')).match(new URL('./src/features/plans/plan-merge.js',location.href)))).toBe(true);
   await context.setOffline(true);await page.reload();await enterGenerator(page);await generate(page,1);await page.locator('[data-act="saveGeneratedPreview"]').click();await expect(page.locator('#view-plans')).toHaveClass(/active/);
   const raw=await page.evaluate(()=>window.__gymverseTestHarness.getStore().refreshSnapshot());expect(JSON.parse(raw.gymverse_profiles_v1).profiles[0].planPrograms.assignedProgramId).toMatch(/^pg_[a-f0-9]{32}$/);await context.setOffline(false);
 });

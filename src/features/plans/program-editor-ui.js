@@ -1,3 +1,4 @@
+import { archivedProgramDayIds } from './programs.js';
 import { DRAFT_KEY, readWorkingDrafts, saveWorkingDraft, removeWorkingDraft } from './program-drafts.js';
 import { createProgramDraft, addDraftDay, attachDraftDay, commitProgramDraft } from './program-editor.js';
 
@@ -51,7 +52,7 @@ export function createProgramEditorUI(api) {
     const day = draft.plans.find(item => item.id === selected);
     const profile = draft.baseState.profiles.find(item => item.id === draft.profileId);
     const occupied = new Set((profile.planPrograms?.programs || []).filter(item=>item.id!==draft.programId).flatMap(item=>item.dayPlanIds));
-    const available = draft.plans.filter(item=>!occupied.has(item.id)&&!draft.dayPlanIds.includes(item.id));
+    const available = draft.plans.filter(item=>!occupied.has(item.id)&&!draft.dayPlanIds.includes(item.id)&&!archivedProgramDayIds(profile).has(item.id));
     const details = item => `<ol class="stage6-exercises">${item.exercises.map((exercise,index)=>`<li><span class="stage6-number">${index+1}</span><div><strong>${esc(api.exerciseName({...exercise,name:custom[exercise.key]?.name||exercise.name}))}</strong><small>${esc(api.variantName(exercise))} · ${exercise.sets} serii · ${esc(exercise.target)} powt.</small><small>Przerwa ${api.rest(exercise)} s</small>${api.groups?.(exercise)?`<small>Grupy: ${esc(api.groups(exercise))}</small>`:''}</div></li>`).join('') || '<li>Dodaj ćwiczenia w edytorze dnia.</li>'}</ol>`;
     host.innerHTML = `<div class="program-editor"><p class="screen-eyebrow">${review?'PRZEGLĄD PRZED ZAPISEM':'WŁASNY PROGRAM'}</p><h1 class="screen-title">${esc(draft.title)}</h1><p class="small">Zmiany w szkicu zapiszesz przyciskiem „Zapisz program”.</p>
       <label>Nazwa programu<input class="select-custom" data-program-field="title" aria-label="Nazwa programu" maxlength="60" value="${esc(draft.title)}"></label>
@@ -152,11 +153,19 @@ export function createProgramEditorUI(api) {
       try{await flushWork();}catch(error){if(previous){activate(previous,false,false);error.previousGeneratedDraftRetained=true;}throw error;}
     },
     async updateGenerated(plans,selectedDay){draft.plans=[...structuredClone(draft.basePlans),...structuredClone(plans)];if(selectedDay&&draft.dayPlanIds.includes(selectedDay))selected=selectedDay;queueSave();await flushWork();},
+    async resumeWorkingDraft(id){
+      if(api.active()||api.uncertain()){api.notify('Nie można teraz otworzyć edycji. Dane szkicu pozostają zachowane.');return;}
+      try{
+        const raw=await api.store().refreshSnapshot(),state=JSON.parse(raw.gymverse_profiles_v1||'null');
+        const item=readWorkingDrafts(raw[DRAFT_KEY]).items.find(row=>row.id===id&&row.draft.profileId===state?.activeProfileId&&!row.draft.generatorAnswers);
+        if(!item)throw Error('DRAFT_NOT_FOUND');activate(item);
+      }catch{api.notify('Nie można wznowić szkicu. Otwórz ponownie listę szkiców.');}
+    },
     async generatedDrafts(){const raw=await api.store().refreshSnapshot(),state=JSON.parse(raw.gymverse_profiles_v1||'null');return readWorkingDrafts(raw[DRAFT_KEY]).items.filter(item=>item.draft.profileId===state?.activeProfileId&&item.draft.programId===null&&item.draft.generatorAnswers);},
     async resumeGeneratedDraft(id){const item=(await this.generatedDrafts()).find(row=>row.id===id);if(!item)throw Error('DRAFT_NOT_FOUND');activate(item,false,false);if(!draft.generatedProgramId){draft.generatedProgramId='pg_'+crypto.randomUUID().replaceAll('-','');queueSave();await flushWork();}return structuredClone(working);},
     async discardGeneratedDraft(id){const item=(await this.generatedDrafts()).find(row=>row.id===id);if(!item)throw Error('DRAFT_NOT_FOUND');await removeWorkingDraft(api.store(),item);},
     async cancelGenerated(){await flushWork();if(working?.revision)await removeWorkingDraft(api.store(),working);discard();},
-    async saveGeneratedAndAssign(){
+    async saveGeneratedAndAssign({assign=true,edit=false}={}){
       if(busy)return false;
       if(!draft?.generatorAnswers||!draft.generatedProgramId)throw Error('GENERATED_PROGRAM_NOT_READY');
       if(api.uncertain())throw Error('INTEGRITY_UNCERTAIN');
@@ -168,9 +177,9 @@ export function createProgramEditorUI(api) {
       const profile=state?.profiles?.find(item=>item.id===draft.profileId);
       if(state?.activeProfileId!==draft.profileId||!profile)throw Error('PROGRAM_STATE_STALE');
       const prior=profile.planPrograms?.programs.find(item=>item.id===profile.planPrograms.assignedProgramId);
-      if(prior&&!confirm(`Obecny program: ${prior.title}\nNowy program: ${draft.title}\nHistoria i wykonane treningi pozostaną zachowane. Zapisać i przypisać nowy program?`))return false;
-      const result=await commitProgramDraft(api.store(),draft,{custom,baseCustom,workingDraft:working,assignProgram:true});
-      api.saved(result,result.custom||custom,true);draft=null;working=null;editing=false;api.endDay();api.show('view-plans');api.notify('Program został zapisany i przypisany. Historia pozostała bez zmian.');return true;
+      if(assign&&prior&&!confirm(`Obecny program: ${prior.title}\nNowy program: ${draft.title}\nHistoria i wykonane treningi pozostaną zachowane. Zapisać i przypisać nowy program?`))return false;
+      const result=await commitProgramDraft(api.store(),draft,{custom,baseCustom,workingDraft:working,assignProgram:assign});
+      api.saved(result,result.custom||custom,true);draft=null;working=null;editing=false;api.endDay();api.show('view-plans');api.notify(assign?'Program został zapisany i przypisany. Historia pozostała bez zmian.':'Program został zapisany. Przypisanie profilu nie zmieniło się.');if(edit){busy=false;await open(result.programId);}return true;
       }finally{busy=false;}
     },
     showGenerated(mode,id){selected=id||selected;review=mode==='program';render();api.show('view-program-editor');if(mode==='day'){editing=true;api.restoreCustom(custom);api.editDay(selected);}if(mode==='save')host.querySelector('[data-program-action="save"]').click();},

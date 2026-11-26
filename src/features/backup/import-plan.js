@@ -91,6 +91,7 @@ export function planBackupImport(current, incoming, options={}) {
       for (const incomingProgram of sourceProfile.planPrograms.programs) {
         const prior=programs.programs.find(p=>p.id===incomingProgram.id);
         if (prior) { if (canonical(prior)!==canonical(incomingProgram)) mark(target.id,'plan-program',incomingProgram.id); continue; }
+        if(incomingProgram.dayPlanIds.some(id=>(target.planPrograms?.archivedDayPlanIds||[]).includes(id))){mark(target.id,'plan-program-days',incomingProgram.id);continue;}
         const safe=incomingProgram.dayPlanIds.every(id=>{const a=sourcePlans.find(p=>p.id===id),b=mergedPlans.find(p=>p.id===id);return a && b && canonical(a)===canonical(b);});
         if (!safe) { mark(target.id,'plan-program-days',incomingProgram.id); continue; }
         const candidate=clone(programs);candidate.programs.push(clone(incomingProgram));
@@ -107,7 +108,10 @@ export function planBackupImport(current, incoming, options={}) {
         if (sourceProgram&&accepted&&canonical(sourceProgram)===canonical(accepted)&&daysMatch) programs.assignedProgramId=incomingAssigned;
         else mark(target.id,'profile-program-assignment',target.id);
       }
-      if (programs.programs.length || target.planPrograms) target.planPrograms=programs;
+      const archived=[...new Set([...(programs.archivedDayPlanIds||[]),...(sourceProfile.planPrograms.archivedDayPlanIds||[])])];
+      if(archived.length)programs.archivedDayPlanIds=archived;
+      validatePlanPrograms(programs,mergedPlans);
+      if (programs.programs.length || archived.length || target.planPrograms) target.planPrograms=programs;
     }
   }
   if (registry.profiles.length>20) throw new Error('PROFILE_LIMIT_REACHED');

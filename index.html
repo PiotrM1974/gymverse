@@ -2,6 +2,7 @@
 <html lang="pl">
 <head>
 <meta charset="UTF-8">
+<meta name="application-version" content="2.0.3">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -265,7 +266,7 @@ select.select-custom, input.select-custom { width: 100%; background: var(--card-
 <body>
 
 <header id="appHeader">
-  <div class="header-top"><div class="header-brand"><span class="brand-kicker">TWOJE TRENINGI</span><button type="button" class="logo" data-act="view" data-view="view-plans" aria-label="GymNastika — Plany">GYM<span>NASTIKA</span></button></div><button type="button" class="header-mark theme-switch" id="themeSwitch" aria-label="Zmień motyw" title="Zmień motyw">◐</button></div>
+  <div class="header-top"><div class="header-brand"><span class="brand-kicker">TWOJE TRENINGI</span><button type="button" class="logo" data-act="view" data-view="view-plans" aria-label="GymNastika — Plany">GYM<span>NASTIKA</span></button></div><div class="header-tools"><button type="button" class="header-mark settings-toggle" data-act="view" data-view="view-settings" aria-label="Ustawienia" title="Ustawienia">⚙</button><button type="button" class="header-mark theme-switch" id="themeSwitch" aria-label="Zmień motyw" title="Zmień motyw">◐</button></div></div>
   <nav class="header-nav" aria-label="Główna nawigacja">
     <button type="button" data-act="view" data-view="view-plans" aria-current="page"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 3h6M8 9h8M8 13h8M8 17h5"/></svg><span>Plany</span></button>
     <button type="button" data-act="view" data-view="view-stats"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V11m5 9V5m5 15v-8m5 8V8M3 20h18"/></svg><span>Statystyki</span></button>
@@ -280,8 +281,8 @@ select.select-custom, input.select-custom { width: 100%; background: var(--card-
   <div id="view-plans" class="view-section active">
     <section id="stage6Welcome" class="stage6-welcome" hidden aria-labelledby="stage6WelcomeTitle"><span class="stage6-kicker">TWÓJ TRENING ZACZYNA SIĘ TUTAJ</span><h1 id="stage6WelcomeTitle">Witaj w GymNastika</h1><p>Twój trening, Twoje tempo. Dane pozostają na tym urządzeniu.</p><button class="btn-primary" data-act="stage6CreateProfile">Utwórz profil</button><button class="btn-secondary" data-act="stage6Restore">Przywróć dane z kopii</button><button class="btn-secondary home-action" data-act="skipOnboarding">Pomiń na razie</button></section>
     <section id="legacyUpgradeWelcome" class="stage6-welcome legacy-upgrade-welcome" hidden aria-labelledby="legacyUpgradeWelcomeTitle"><span class="stage6-kicker">GYMNASTIKA 2.0</span><h2 id="legacyUpgradeWelcomeTitle">Witaj ponownie w GymNastika!</h2><p>Wykryliśmy dane z wcześniejszej wersji aplikacji. Możesz teraz uzupełnić swój profil, aby korzystać z nowych funkcji GymNastika 2.0.</p><button class="btn-primary" data-act="editProfile">Uzupełnij profil</button><button class="btn-secondary" data-act="dismissLegacyUpgrade">Kontynuuj bez zmian</button></section>
-    <div class="home-title-row"><div class="home-title-copy"><p class="screen-eyebrow">Twoje programy</p><h1 class="screen-title">Wybierz trening</h1></div><div class="backup-menu-wrap" id="backupMenuWrap"><button type="button" class="backup-menu-toggle" id="backupMenuToggle" aria-label="Kopie bezpieczeństwa" title="Kopie bezpieczeństwa" aria-controls="backupActionMenu" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3h13l4 4v14H3V3h1z"/><path d="M7 3v6h10V3M7 21v-7h10v7M14 3v4"/></svg></button><div class="backup-action-menu" id="backupActionMenu" hidden aria-label="Akcje kopii bezpieczeństwa"><p class="small muted" id="backupInfo"></p><button class="btn-primary" data-act="export">Zapisz kopię</button><button class="btn-secondary" data-act="importBtn">Wczytaj kopię</button><button class="btn-secondary" data-act="openStorage">Otwórz kopie bezpieczeństwa</button><button class="btn-secondary" id="migrateDataButton" data-act="migrateData" disabled aria-describedby="backupMenuMigrationNote">Przygotuj bezpieczne przeniesienie danych</button><p class="small muted backup-menu-note" id="backupMenuMigrationNote">Sprawdzanie, czy migracja jest dostępna…</p></div></div></div>
-    <section class="profile-box" aria-labelledby="profileHeading"><h2 id="profileHeading">Aktywny profil</h2><label class="profile-label" for="profileSelect">Profil</label><select id="profileSelect" class="select-custom" aria-label="Aktywny profil"></select><div class="profile-quick-actions"><button class="btn-secondary" data-act="editProfile">Edytuj profil</button><button class="btn-secondary" data-act="addProfile">Dodaj profil</button></div><details id="profileManage"><summary>Więcej ustawień</summary><button class="btn-secondary" data-act="switchProfile">Przełącz profil</button><button class="btn-secondary" data-act="exportProfile">Eksportuj ten profil</button><button class="btn-secondary" data-act="importProfile">Importuj profil</button><input id="profileImportFile" type="file" accept="application/json,.json" hidden><details style="margin-top:12px"><summary>Dodaj profil</summary><label for="newProfileName">Nazwa profilu</label><input id="newProfileName" class="select-custom" maxlength="60" autocomplete="name"><label for="newProfileAge">Wiek (opcjonalnie)</label><input id="newProfileAge" class="select-custom" type="number" min="1" max="120"><label for="newProfileSex">Płeć (opcjonalnie)</label><select id="newProfileSex" class="select-custom"><option value="">Nie podano</option><option value="female">Kobieta</option><option value="male">Mężczyzna</option><option value="other">Inna / wolę nie określać</option></select><label for="newProfileHeight">Wzrost cm (opcjonalnie)</label><input id="newProfileHeight" class="select-custom" type="number" min="80" max="250"><label for="newProfileWeight">Masa kg (opcjonalnie)</label><input id="newProfileWeight" class="select-custom" type="number" min="20" max="400" step="0.1"><label for="newProfileExperience">Doświadczenie (opcjonalnie)</label><select id="newProfileExperience" class="select-custom"><option value="">Nie podano</option><option value="beginner">Początkujące</option><option value="intermediate">Średnie</option><option value="advanced">Zaawansowane</option></select><label for="newProfileEquipment">Dostępny sprzęt (opcjonalnie)</label><select id="newProfileEquipment" class="select-custom" multiple size="5"><option value="bodyweight">Masa ciała</option><option value="dumbbells">Hantle</option><option value="barbell">Sztanga</option><option value="bench">Ławka</option><option value="cables">Wyciągi</option><option value="machines">Maszyny</option><option value="bands">Gumy</option><option value="pullup_bar">Drążek</option><option value="dip_bars">Poręcze</option></select><label for="newProfileRestrictions">Ruchy do pominięcia (opcjonalnie)</label><select id="newProfileRestrictions" class="select-custom" multiple size="4"><option value="overhead_press">Wyciskanie nad głową</option><option value="deep_knee_flexion">Głębokie ugięcie kolana</option><option value="hip_hinge">Skłon / zawias biodrowy</option><option value="floor_exercises">Ćwiczenia na podłodze</option></select><button class="btn-primary" data-act="createProfile">Utwórz profil</button></details><p class="small muted">Profile i treningi są przechowywane lokalnie na tym urządzeniu.</p></details></section>
+    <div class="home-title-row"><div class="home-title-copy"><p class="screen-eyebrow">Twój trening. Twoje tempo.</p><h1 class="screen-title">Witaj ponownie!</h1><p class="home-welcome-copy">Gotowy na kolejny trening?</p></div></div>
+    <section class="profile-box" aria-labelledby="profileHeading"><h2 id="profileHeading">Aktywny profil</h2><p id="homeActiveProfile" class="home-active-profile"></p></section>
     <div id="resumeBox"></div>
     <div id="deloadBox"></div>
     <div id="weekStrip"></div>
@@ -291,8 +292,9 @@ select.select-custom, input.select-custom { width: 100%; background: var(--card-
     <input type="file" id="importFile" accept=".zip,.json,application/zip,application/json" style="display:none">
   </div>
 
+<div id="view-settings" class="view-section"><div class="view-head"><h1 class="screen-title">Ustawienia</h1><button class="btn-icon" data-act="view" data-view="view-plans" aria-label="Zamknij ustawienia">✕</button></div><section class="settings-card"><div class="settings-backup-heading"><div><h2>Kopie bezpieczeństwa</h2><p class="small muted">Zachowaj dane i przenieś je bezpiecznie.</p></div><div class="backup-menu-wrap" id="backupMenuWrap"><button type="button" class="backup-menu-toggle" id="backupMenuToggle" aria-label="Kopie bezpieczeństwa" title="Kopie bezpieczeństwa" aria-controls="backupActionMenu" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3h13l4 4v14H3V3h1z"/><path d="M7 3v6h10V3M7 21v-7h10v7M14 3v4"/></svg></button><div class="backup-action-menu" id="backupActionMenu" hidden aria-label="Akcje kopii bezpieczeństwa"><p class="small muted" id="backupInfo"></p><button class="btn-primary" data-act="export">Zapisz kopię</button><button class="btn-secondary" data-act="importBtn">Wczytaj kopię</button><button class="btn-secondary" data-act="openStorage">Otwórz kopie bezpieczeństwa</button><button class="btn-secondary" id="migrateDataButton" data-act="migrateData" disabled aria-describedby="backupMenuMigrationNote">Przygotuj bezpieczne przeniesienie danych</button><button class="btn-secondary" data-act="legacyImportBtn">Import JSON v4</button><button class="btn-secondary" data-act="exportProfile">Eksportuj profil</button><button class="btn-secondary" data-act="importProfile">Importuj profil</button><button class="btn-secondary" data-act="csv">Eksport CSV</button><p class="small muted backup-menu-note" id="backupMenuMigrationNote">Sprawdzanie, czy migracja jest dostępna…</p></div></div></div></section><section class="settings-card" id="settingsProfiles"><h2>Profile</h2><p id="settingsActiveProfile" class="small muted"></p><label class="profile-label" for="profileSelect">Profil</label><select id="profileSelect" class="select-custom" aria-label="Aktywny profil"></select><div class="profile-quick-actions"><button class="btn-secondary" data-act="addProfile">Dodaj profil</button></div><details id="profileManage"><summary>Zarządzaj profilami</summary><input id="profileImportFile" type="file" accept="application/json,.json" hidden><details style="margin-top:12px"><summary>Dodaj profil</summary><label for="newProfileName">Nazwa profilu</label><input id="newProfileName" class="select-custom" maxlength="60" autocomplete="name"><label for="newProfileAge">Wiek (opcjonalnie)</label><input id="newProfileAge" class="select-custom" type="number" min="1" max="120"><label for="newProfileSex">Płeć (opcjonalnie)</label><select id="newProfileSex" class="select-custom"><option value="">Nie podano</option><option value="female">Kobieta</option><option value="male">Mężczyzna</option><option value="other">Inna / wolę nie określać</option></select><label for="newProfileHeight">Wzrost cm (opcjonalnie)</label><input id="newProfileHeight" class="select-custom" type="number" min="80" max="250"><label for="newProfileWeight">Masa kg (opcjonalnie)</label><input id="newProfileWeight" class="select-custom" type="number" min="20" max="400" step="0.1"><label for="newProfileExperience">Doświadczenie (opcjonalnie)</label><select id="newProfileExperience" class="select-custom"><option value="">Nie podano</option><option value="beginner">Początkujące</option><option value="intermediate">Średnie</option><option value="advanced">Zaawansowane</option></select><label for="newProfileEquipment">Dostępny sprzęt (opcjonalnie)</label><select id="newProfileEquipment" class="select-custom" multiple size="5"><option value="bodyweight">Masa ciała</option><option value="dumbbells">Hantle</option><option value="barbell">Sztanga</option><option value="bench">Ławka</option><option value="cables">Wyciągi</option><option value="machines">Maszyny</option><option value="bands">Gumy</option><option value="pullup_bar">Drążek</option><option value="dip_bars">Poręcze</option></select><label for="newProfileRestrictions">Ruchy do pominięcia (opcjonalnie)</label><select id="newProfileRestrictions" class="select-custom" multiple size="4"><option value="overhead_press">Wyciskanie nad głową</option><option value="deep_knee_flexion">Głębokie ugięcie kolana</option><option value="hip_hinge">Skłon / zawias biodrowy</option><option value="floor_exercises">Ćwiczenia na podłodze</option></select><button class="btn-primary" data-act="createProfile">Utwórz profil</button></details><p class="small muted">Profile i treningi są przechowywane lokalnie na tym urządzeniu.</p></details></section><section class="settings-card" id="settingsPreferences"><h2>Globalne preferencje treningowe</h2><p class="small muted">Domyślne ustawienia dla treningów aktywnego profilu. Czas zapisany przy ćwiczeniu ma pierwszeństwo.</p><div id="settingsRestControls"></div><p class="small muted" id="settingsRestValue"></p><h3>Gryf w kalkulatorze</h3><div class="settings-preference-options"><button type="button" class="rp" data-act="bar" data-kg="20">20 kg</button><button type="button" class="rp" data-act="bar" data-kg="15">15 kg</button><button type="button" class="rp" data-act="bar" data-kg="10">10 kg</button></div><button class="btn-secondary" data-act="editProfile">Preferencje i sprzęt profilu</button></section><section class="settings-card" id="settingsAbout"><h2>O aplikacji</h2><p><strong>GymNastika 2.0.3</strong></p><p class="small muted">Plany, treningi, historia i postępy. Dane pozostają lokalnie na tym urządzeniu. Kopie bezpieczeństwa zapisujesz samodzielnie.</p></section></div>
 <div id="view-storage" class="view-section">
-  <div class="view-head"><h2>Kopie bezpieczeństwa</h2><button class="btn-icon" data-act="view" data-view="view-plans" aria-label="Zamknij">✕</button></div>
+  <div class="view-head"><h2>Kopie bezpieczeństwa</h2><button class="btn-icon" data-act="view" data-view="view-settings" aria-label="Zamknij">✕</button></div>
   <p class="small muted">Dane pozostają na tym urządzeniu. Pełna kopia ZIP v5 obejmuje wszystkie lokalne profile, programy, historię, szkice i aktywne treningi.</p>
   <div class="storage-grid">
     <section class="storage-card"><span class="storage-kicker">PEŁNA KOPIA</span><h3>Zapisz pełną kopię</h3><p>Przygotuj plik, zapisz go poza aplikacją i potwierdź, że zapis się udał.</p><button class="btn-primary" data-act="export">Zapisz pełną kopię ZIP v5</button></section>
@@ -511,6 +513,7 @@ select.select-custom, input.select-custom { width: 100%; background: var(--card-
 </div>
 
 <script src="src/gv-base-b.js"></script>
+<script src="src/ui/program-art.js"></script>
 <script>
 (() => {
 'use strict';
@@ -772,7 +775,9 @@ const DAY_LABELS = { mon: 'Poniedziałek', tue: 'Wtorek', wed: 'Środa', thu: 'C
 const exName = e => EXERCISE_NAMES_EN[e.key] || e.name || nameOf(e.key);
 const imgFor = e => e.key === SHARED_LEG_PRESS_MEDIA.exerciseId && ['default', SHARED_LEG_PRESS_MEDIA.variantId].includes(e.variantId)
   ? SHARED_LEG_PRESS_MEDIA.technique : safeImg(e.img) || IMG_BY_KEY[e.key] || safeImg(e.key) || 'none';
-const startable = () => PLANS.filter(p => p.exercises.length > 0);
+let PROGRAM_RELATIONS;
+const visiblePlans = () => {const archived=PROGRAM_RELATIONS?.archivedProgramDayIds(currentProgramProfile())||new Set();return PLANS.filter(p=>!archived.has(p.id));};
+const startable = () => visiblePlans().filter(p => p.exercises.length > 0);
 
 function cleanPlan(p, catalog = CATALOG) {
   if (!p || typeof p.id !== 'string' || !Array.isArray(p.exercises)) return null;
@@ -808,10 +813,13 @@ async function withPlanDataLock(operation) {
   return runWithLock(operation);
 }
 async function transactProfileUpdates(updates) {
+  const expectedRegistry=PROFILE_STATE&&structuredClone(PROFILE_STATE);
   const expected = Object.fromEntries(Object.keys(updates).filter(key => key.startsWith('gymverse_')).map(key => [key, STORE.storage.getItem(key)]));
   return withPlanDataLock(async () => {
     const latest = await STORE.refreshSnapshot();
     if (Object.entries(expected).some(([key, raw]) => (latest[key] ?? null) !== raw)) throw new Error('PLAN_DATA_STALE');
+    const {sameDataValue}=await import('./src/features/plans/plan-merge.js');
+    if(expectedRegistry&&!sameDataValue(JSON.parse(latest.gymverse_profiles_v1||'null'),expectedRegistry))throw new Error('PLAN_DATA_STALE');
     return STORE.transact(updates);
   });
 }
@@ -1210,6 +1218,7 @@ function switchView(id) {
   if (id === 'view-charts') { initChartsSelect(); refreshChartVariant(); updateCharts(); }
   if (id === 'view-history') renderHistory();
   if (id === 'view-stats') renderStats();
+  if (id === 'view-settings') { renderProfilePicker(); renderTrainingPreferences(); }
   if (id === 'view-planedit') renderPlanEditor();
   if (id === 'view-plan-library') renderStage6Library();
 }
@@ -1239,7 +1248,7 @@ workoutExtrasSummary.textContent = 'Opcje serii';
 workoutExtras.append(workoutExtrasSummary);
 ['.step-strip', '#platesBox', '.set-ctrl', '.rir-row'].forEach(selector => workoutExtras.append(workoutView.querySelector(selector)));
 workoutControls.append(workoutExtras);
-workoutExtras.append(workoutView.querySelector('.rest-row'));
+$('settingsRestControls').append(workoutView.querySelector('.rest-row'));
 workoutView.insertBefore(workoutControls, workoutView.querySelector('.nav-row'));
 const backupMenuToggle = document.getElementById('backupMenuToggle');
 const backupMenu = document.getElementById('backupActionMenu');
@@ -1294,7 +1303,7 @@ function nextPlanId() {
 function renderProfilePicker() {
   const select = $('profileSelect');
   if (!select || !PROFILE_STATE) return;
-  select.innerHTML = PROFILE_STATE.profiles.map(profile => `<option value="${esc(profile.id)}" ${profile.id === PROFILE_STATE.activeProfileId ? 'selected' : ''}>${esc(profile.name)}</option>`).join('');
+  select.innerHTML = PROFILE_STATE.profiles.map(profile => `<option value="${esc(profile.id)}" ${profile.id === PROFILE_STATE.activeProfileId ? 'selected' : ''}>${esc(profile.name)}${profile.id === PROFILE_STATE.activeProfileId ? ' — Aktywny' : ''}</option>`).join('');
   const activeProfile = PROFILE_STATE.profiles.find(profile => profile.id === PROFILE_STATE.activeProfileId);
   const onboarding = PROFILE_STATE.onboardingRequired === true;
   $('stage6Welcome').hidden = !onboarding;
@@ -1303,7 +1312,9 @@ function renderProfilePicker() {
   document.body.classList.toggle('stage6-onboarding', onboarding);
   if (!onboarding) document.body.classList.remove('stage6-profile-entry');
   $('profileHeading').textContent = onboarding ? 'Witaj w GymNastika!' : 'Aktywny profil';
-  $('profileHeading').hidden = !onboarding;
+  $('profileHeading').hidden = false;
+  $('homeActiveProfile').textContent = activeProfile?.name || '';
+  $('homeActiveProfile').hidden = onboarding;
   let welcome = $('profileWelcome');
   if (!welcome) {
     welcome = document.createElement('p'); welcome.id = 'profileWelcome'; welcome.className = 'small muted'; $('profileHeading').insertAdjacentElement('afterend', welcome);
@@ -1317,6 +1328,8 @@ function renderProfilePicker() {
   }
   skipButton.hidden = true;
   const profileManage = $('profileManage');
+  (onboarding ? document.querySelector('.profile-box') : $('settingsProfiles')).append(profileManage);
+  $('settingsActiveProfile').textContent = `Aktywny profil: ${activeProfile?.name || ''}`;
   let welcomeBack = $('stage6WelcomeBack');
   if (!welcomeBack) { welcomeBack = document.createElement('button'); welcomeBack.id = 'stage6WelcomeBack'; welcomeBack.className = 'btn-secondary home-action'; welcomeBack.dataset.act = 'stage6BackWelcome'; welcomeBack.textContent = '← Wróć'; profileManage.parentElement.prepend(welcomeBack); }
   welcomeBack.hidden = !onboarding;
@@ -1327,27 +1340,27 @@ function renderProfilePicker() {
     let editButton = $('editProfileButton');
     if (!editButton) {
       editButton = document.createElement('button'); editButton.id = 'editProfileButton'; editButton.className = 'btn-secondary'; editButton.dataset.act = 'editProfile'; editButton.textContent = 'Edytuj bieżący profil';
-      profileManage.querySelector('summary').insertAdjacentElement('afterend', editButton);
+      document.querySelector('.profile-quick-actions').append(editButton);
     }
     editButton.hidden = onboarding;
     let deleteButton = $('deleteProfileButton');
     if (!deleteButton) {
       deleteButton = document.createElement('button'); deleteButton.id = 'deleteProfileButton'; deleteButton.className = 'btn-secondary danger'; deleteButton.dataset.act = 'deleteProfile'; deleteButton.textContent = 'Usuń bieżący profil';
-      editButton.insertAdjacentElement('afterend', deleteButton);
+      profileManage.querySelector('summary').insertAdjacentElement('afterend', deleteButton);
     }
     deleteButton.disabled = PROFILE_STATE.profiles.length <= 1;
     deleteButton.hidden = onboarding;
-    let legacyImportButton = $('legacyImportButton');
+    let legacyImportButton = document.querySelector('#backupActionMenu [data-act="legacyImportBtn"]');
     if (!legacyImportButton) {
       legacyImportButton = document.createElement('button'); legacyImportButton.id = 'legacyImportButton'; legacyImportButton.className = 'btn-secondary'; legacyImportButton.dataset.act = 'legacyImportBtn'; legacyImportButton.textContent = 'Importuj dane ze starszej wersji';
-      deleteButton.insertAdjacentElement('afterend', legacyImportButton);
+      $('backupActionMenu').append(legacyImportButton);
     }
     select.hidden = onboarding;
     const quickActions = document.querySelector('.profile-quick-actions');
     if (quickActions) quickActions.hidden = onboarding;
     const profileLabel = document.querySelector('label[for="profileSelect"]');
     if (profileLabel) profileLabel.hidden = onboarding;
-    document.querySelector('[data-act="switchProfile"]').hidden = onboarding;
+
     document.querySelector('[data-act="exportProfile"]').hidden = onboarding;
     document.querySelector('[data-act="importProfile"]').hidden = onboarding;
     if (onboarding) {
@@ -1462,13 +1475,15 @@ function cancelProfileWizard() {
 }
 async function switchActiveProfile(targetId) {
   if (!PROFILE_STATE || !targetId || targetId === PROFILE_STATE.activeProfileId) return;
+  if(INTEGRITY_UNCERTAIN){renderProfilePicker();toast('Integralność danych jest niepewna. Przełączenie zablokowano.');return;}
+  if($('profileFormDetails')?.open){$('profileSelect').value=PROFILE_STATE.activeProfileId;toast('Zapisz albo anuluj edycję profilu przed przełączeniem.');return;}
   const { switchProfile } = await import('./src/features/profiles/profile-model.js');
   const current = await STORE.exportSnapshot();
   delete current.gymverse_profiles_v1;
   const result = switchProfile(PROFILE_STATE, current, targetId);
   const updates = Object.fromEntries(Object.entries(result.updates).map(([key, value]) => [key, typeof value === 'string' && key.startsWith('gymverse_') && key !== 'gymverse_profiles_v1' ? JSON.parse(value) : value]));
   try { await transactProfileUpdates(updates); }
-  catch (_) { toast('Profil lub jego dane zmieniły się w innym oknie. Odśwież aplikację przed przełączeniem profilu.'); return; }
+  catch (_) { renderProfilePicker(); toast('Profil lub jego dane zmieniły się w innym oknie. Odśwież aplikację przed przełączeniem profilu.'); return; }
   location.reload();
 }
 let PROGRAM_PREVIEW = null;
@@ -1477,20 +1492,36 @@ let PROGRAM_SAVE_BUSY = false;
 let INTEGRITY_UNCERTAIN = false;
 function currentProgramProfile(){return PROFILE_STATE?.profiles.find(p=>p.id===PROFILE_STATE.activeProfileId);}
 function programDayCountLabel(count){return count===1?'1 dzień treningowy':count+' dni treningowych';}
+function releasedThumbnail(exercise,className='exercise-thumbnail'){
+  const state=exercisePresentationPilot;if(!exercise||!state.ready)return '';
+  const asset=state.module.resolveExercisePresentation({registry:state.registry,exerciseId:exercise.key,variantId:exercise.variantId||'default',sex:state.sex||'male',enabled:true});
+  return asset.status==='released'&&asset.thumbnail?.path?`<img class="${className}" src="${esc(asset.thumbnail.path)}" alt="" loading="lazy" decoding="async" width="64" height="64">`:'';
+}
+function currentPlanArtwork(){
+  const profile=currentProgramProfile(),programs=profile?.planPrograms?.programs||[];
+  const used=new Set(programs.flatMap(p=>p.dayPlanIds));
+  return GymnastikaProgramArt.allocate(profile?.id||'', [...programs.map(p=>'program:'+p.id),...visiblePlans().filter(p=>!used.has(p.id)).map(p=>'plan:'+p.id)]);
+}
+function programEquipmentArtwork(cover){
+  if(!cover)return '';
+  return '<span class="program-cover equipment-art" aria-hidden="true"><img src="'+cover.src+'" data-equipment-art="'+cover.kind+'" data-art-key="'+cover.key+'" style="--art-hue:'+cover.hue+'deg;--art-saturation:'+cover.saturation+'" alt="" width="384" height="384" decoding="async"></span>';
+}
 function renderAssignedProgram(){
   const profile=currentProgramProfile(),assigned=profile?.planPrograms?.assignedProgramId;
   const groups=profile?.planPrograms?.programs||[],ordered=[...groups.filter(p=>p.id===assigned),...groups.filter(p=>p.id!==assigned)];
+  const artwork=currentPlanArtwork();
   const invalid=assigned&&!groups.some(p=>p.id===assigned);
   const box=$('assignedProgram');box.hidden=!groups.length&&!invalid;
   box.innerHTML=(invalid?'<p role="status">Nie można odczytać przypisanego programu. Otwórz bibliotekę i sprawdź przypisanie.</p>':'')+'<div class="plan-grid">'+ordered.map(program=>{
     const isActive=program.id===assigned,missing=program.dayPlanIds.some(id=>!getPlan(id));
-    return `<button type="button" class="plan-card program-card ${isActive?'is-assigned':''}" data-act="programPreview" data-id="${esc(program.id)}" aria-label="Otwórz program ${esc(program.title)}"><span class="plan-card-top"><span class="program-card-label">Program</span>${isActive?'<span class="program-active-badge">Aktywny</span>':''}</span><h3>${esc(program.title)}</h3><p>${programDayCountLabel(program.dayPlanIds.length)}${missing?' · Sprawdź brakujące dni':''}</p><span class="program-open">Otwórz program <span aria-hidden="true">→</span></span></button>`;
+    const art=artwork.get('program:'+program.id),cover=programEquipmentArtwork(art);
+    return `<button type="button" data-card-tint="${art.tint}" class="plan-card program-card ${isActive?'is-assigned':''}" data-act="programPreview" data-id="${esc(program.id)}" aria-label="Otwórz program ${esc(program.title)}"><span class="plan-card-top"><span class="program-card-label">Program</span>${isActive?'<span class="program-active-badge">Aktywny</span>':''}</span><div class="program-overview">${cover}<div><h3>${esc(program.title)}</h3><p>${programDayCountLabel(program.dayPlanIds.length)}${missing?' · Sprawdź brakujące dni':''}</p></div></div><span class="program-open">Otwórz program <span aria-hidden="true">→</span></span></button>`;
   }).join('')+'</div>';
 }
 function renderStage6Library() {
   const groups=currentProgramProfile()?.planPrograms?.programs || [];
   const used=new Set(groups.flatMap(p=>p.dayPlanIds));
-  const standalone=PLANS.filter(p=>!used.has(p.id));
+  const standalone=visiblePlans().filter(p=>!used.has(p.id));
   const programRows=groups.map(program=>`<button data-act="programPreview" data-id="${esc(program.id)}"><strong>${esc(program.title)}</strong><span>${programDayCountLabel(program.dayPlanIds.length)}</span><b aria-hidden="true">→</b></button>`).join('');
   const days=standalone.map(plan=>`<button data-act="stage6Preview" data-id="${esc(plan.id)}"><strong>${esc(plan.title)}</strong><span>${exerciseCountLabel(plan.exercises.length)}${plan.dayOfWeek ? ` · ${esc(DAY_LABELS[plan.dayOfWeek])}` : ''}</span><b aria-hidden="true">→</b></button>`).join('');
   $('stage6PlanList').innerHTML=`<button class="btn-primary" data-act="programNew">+ Utwórz program</button><h2>Programy treningowe</h2>${programRows || '<p>Brak programów wielodniowych w tym profilu.</p>'}<h2>Samodzielne treningi</h2>${days || '<p>Brak samodzielnych treningów.</p>'}`;
@@ -1500,10 +1531,7 @@ function showProgramPreview(id,preserve=false){
   if(!program || program.dayPlanIds.some(day=>!getPlan(day))) {toast('Nie można odczytać programu lub jego dni.');return;}
   if(!preserve || !PROGRAM_PREVIEW || PROGRAM_PREVIEW.programId!==id || PROGRAM_PREVIEW.profileId!==profile.id) PROGRAM_PREVIEW={profileId:profile.id,programId:id,assignment:{profileId:profile.id,programId:id,assignedProgramId:profile.planPrograms?.assignedProgramId??null,program:structuredClone(program),days:program.dayPlanIds.map(id=>structuredClone(getPlan(id)))}};
   const assigned=profile.planPrograms.assignedProgramId===id;
-  $('programPreviewBody').innerHTML=`<p class="screen-eyebrow">PODGLĄD PROGRAMU</p><h1 class="screen-title">${esc(program.title)}</h1><p>${programDayCountLabel(program.dayPlanIds.length)}</p><div class="stage6-choice-grid">${program.dayPlanIds.map((day,index)=>`<button data-act="programDay" data-id="${esc(day)}"><strong>Dzień ${index+1}</strong><span>${esc(getPlan(day).title)}</span><b aria-hidden="true">→</b></button>`).join('')}</div>${assigned?'<p>Przypisany do tego profilu</p><button class="btn-secondary" data-act="programClear">Usuń przypisanie</button>':`<button class="btn-primary" data-act="programAssign" data-id="${esc(id)}">Przypisz do profilu</button>`}<p class="small muted">Usunięcie programu nie usuwa dni treningowych ani zapisanej historii.</p><button class="btn-link danger" data-act="programDelete" data-id="${esc(id)}">Usuń program</button>`;
-  const editButton=document.createElement('button');editButton.className='btn-secondary';editButton.dataset.act='programEdit';editButton.dataset.id=id;editButton.textContent='Edytuj program';
-  $('programPreviewBody').append(editButton);
-  const historyButton=document.createElement('button');historyButton.className='btn-secondary';historyButton.dataset.act='programHistory';historyButton.dataset.id=id;historyButton.textContent='Historia dni programu';$('programPreviewBody').append(historyButton);
+  $('programPreviewBody').innerHTML=`<p class="screen-eyebrow">PODGLĄD PROGRAMU</p><h1 class="screen-title">${esc(program.title)}</h1><p>${programDayCountLabel(program.dayPlanIds.length)}</p><div class="stage6-choice-grid">${program.dayPlanIds.map((day,index)=>`<button data-act="programDay" data-id="${esc(day)}"><strong>Dzień ${index+1}</strong><span>${esc(getPlan(day).title)}</span><b aria-hidden="true">→</b></button>`).join('')}</div>${assigned?'<p class="program-active-note">Aktywny program tego profilu</p>':''}<div class="program-footer-actions"><button class="btn-secondary" data-act="programEdit" data-id="${esc(id)}">Edytuj program</button>${assigned?'<button class="btn-secondary" data-act="programClear">Usuń przypisanie</button>':`<button class="btn-primary" data-act="programAssign" data-id="${esc(id)}">Przypisz do profilu</button>`}<button class="btn-secondary" data-act="programHistory" data-id="${esc(id)}">Historia dni programu</button></div><p class="small muted">Usuwaniem zarządzasz w „Edytuj plany i ćwiczenia”. Dni i historia pozostają zachowane.</p>`;
   const details=document.createElement('section');details.id='programSelectedDay';details.hidden=true;$('programPreviewBody').querySelector('.stage6-choice-grid').after(details);
   if(preserve&&program.dayPlanIds.includes(PROGRAM_PREVIEW.selectedDay))showProgramSelectedDay(PROGRAM_PREVIEW.selectedDay);
   switchView('view-program-preview');
@@ -1595,10 +1623,10 @@ async function refreshProgramView(){
     PROFILE_STATE=state;PLANS=nextPlans;PROGRAM_PREVIEW=null;switchView('view-plan-library');toast('Odświeżono widok programów.');
   }catch(_){toast('Nie udało się odświeżyć widoku. Dane nie zostały zmienione.');}
 }
-async function deleteProgramFromPreview(id){
-  if(INTEGRITY_UNCERTAIN||!PROGRAM_PREVIEW)return;
-  const expected=PROGRAM_PREVIEW.assignment;
-  if(!confirm('Usunąć ten program? Przypisanie zostanie usunięte, ale dni treningowe i historia pozostaną.'))return;
+async function deleteManagedProgram(id){
+  if(INTEGRITY_UNCERTAIN||PLAN_EDIT_MODE!=='own'||!$('view-planedit').classList.contains('active'))return;
+  const expected=MANAGED_PROGRAM_SNAPSHOTS.get(id);if(!expected)return;
+  if(!confirm('Usunąć ten program? Jego dni znikną z list treningów. Historia i zapisane dane pozostaną zachowane.'))return;
   let before;
   try{
     await withPlanDataLock(async()=>{
@@ -1609,15 +1637,18 @@ async function deleteProgramFromPreview(id){
       const index=registry.profiles.findIndex(profile=>profile.id===expected.profileId);
       if(index<0)throw Error('PROGRAM_PREVIEW_STALE');
       const plans=before.gymverse_plans?cleanPlans(JSON.parse(before.gymverse_plans)):defaultPlans();
+      const session=JSON.parse(before.gymverse_active||'null');
+      if(session&&(session.programId===id||session.sessionContext?.programId===id||expected.program.dayPlanIds.includes(session.planId)))throw Error('PROGRAM_ACTIVE_SESSION');
       const next=structuredClone(registry);next.profiles[index]=deleteProgram(next.profiles[index],id);validatePlanPrograms(next.profiles[index].planPrograms,plans);
       await STORE.transact({gymverse_profiles_v1:next});await STORE.flush();
       const after=await STORE.refreshSnapshot();if(JSON.stringify(JSON.parse(after.gymverse_profiles_v1))!==JSON.stringify(next)){const error=Error('PROGRAM_READBACK_FAILED');error.integrityUncertain=true;throw error;}
-      PROFILE_STATE=next;PROGRAM_PREVIEW=null;renderAssignedProgram();switchView('view-plan-library');toast('Usunięto program. Dni treningowe i historia pozostały.');
+      PROFILE_STATE=next;PROGRAM_PREVIEW=null;renderAssignedProgram();renderPlanEditor();toast('Usunięto program i ukryto jego dni. Historia pozostała zachowana.');
     });
   }catch(error){
     let uncertain=!!error.integrityUncertain;
     if(before&&!uncertain){try{uncertain=(await STORE.refreshSnapshot()).gymverse_profiles_v1!==before.gymverse_profiles_v1;}catch{uncertain=true;}}
     if(uncertain){enterIntegrityUncertain();toast('Integralność danych jest niepewna. Zapisy zostały zablokowane.');}
+    else if(error.message==='PROGRAM_ACTIVE_SESSION')toast('Najpierw zakończ aktywny trening tego programu. Sesja i jej wyniki pozostają zachowane.');
     else if(error.message==='PROGRAM_PREVIEW_STALE'||error.message==='CROSS_TAB_CONFLICT')toast('Program lub przypisanie zmieniły się w innym oknie. Odśwież widok programów.');
     else toast('Nie usunięto programu. Jego dni treningowe i historia pozostały.');
   }
@@ -1628,16 +1659,18 @@ function renderPlans() {
   const done = lastDoneMap();
   const next = nextPlanId();
   const used=new Set((currentProgramProfile()?.planPrograms?.programs||[]).flatMap(program=>program.dayPlanIds));
-  const list = PLANS.filter(plan=>!used.has(plan.id));
+  const list = visiblePlans().filter(plan=>!used.has(plan.id));
   $('standalonePlans').hidden=!list.length;
+  const artwork=currentPlanArtwork();
   const renderCard = p => {
+    const art=artwork.get('plan:'+p.id);
     const when = done[p.id] ? 'ostatnio: ' + new Date(done[p.id]).toLocaleDateString('pl-PL', { day: 'numeric', month: 'short' }) : 'jeszcze nie robiony';
-    const type = /^push/i.test(p.title) ? 'push' : /^pull/i.test(p.title) ? 'pull' : 'other';
-    const typeLabel = type === 'other' ? (/^(full[ -]?body|fbw)/i.test(p.title) ? 'FULL BODY' : 'PLAN') : type.toUpperCase();
-    return `<div class="plan-card ${type} ${p.id === next ? 'next' : ''}" data-act="${p.exercises.length?'startPlan':'stage6Preview'}" data-id="${esc(p.id)}" data-plan="${esc(p.id)}" role="button" tabindex="0" aria-label="${p.exercises.length?'Rozpocznij trening':'Otwórz trening'} ${esc(p.title)}">
+    const type = /^push/i.test(p.title) ? 'push' : /^pull/i.test(p.title) ? 'pull' : /^(legs|nogi|dół)/i.test(p.title) ? 'legs' : /^(full[ -]?body|fbw)/i.test(p.title) ? 'full' : 'other';
+    const typeLabel = type === 'other' ? 'PLAN' : type==='full'?'FULL BODY':type.toUpperCase();
+    return `<div data-card-tint="${art.tint}" class="plan-card ${type} ${p.id === next ? 'next' : ''}" data-act="${p.exercises.length?'startPlan':'stage6Preview'}" data-id="${esc(p.id)}" data-plan="${esc(p.id)}" role="button" tabindex="0" aria-label="${p.exercises.length?'Rozpocznij trening':'Otwórz trening'} ${esc(p.title)}">
       <div class="plan-card-top"><span class="plan-type">${typeLabel}</span>${p.id === next ? '<span class="badge">Następny</span>' : ''}</div>
-      <h3>${esc(p.title)}</h3>
-      <p>${exerciseCountLabel(p.exercises.length)}${p.dayOfWeek ? ` · ${DAY_LABELS[p.dayOfWeek]}` : ''} · ${when}</p>
+      <div class="program-overview">${programEquipmentArtwork(art)}<div><h3>${esc(p.title)}</h3>
+      <p>${exerciseCountLabel(p.exercises.length)}${p.dayOfWeek ? ` · ${DAY_LABELS[p.dayOfWeek]}` : ''} · ${when}</p></div></div>
       <span class="plan-start" aria-hidden="true">${p.exercises.length?'Rozpocznij trening':'Otwórz trening'} <svg viewBox="0 0 24 24" focusable="false"><path d="M8 5.5v13l10-6.5z"/></svg></span>
     </div>`;
   };
@@ -2003,6 +2036,9 @@ function renderStep() {
   $('metaExerciseProgress').textContent = `Wykonane ${progress.completed}/${progress.required}${progress.excess ? ` · +${progress.excess} ponad plan` : ''}`;
   $('progressBar').style.width = Math.min(100, Math.round(active.sets.length / plannedSets() * 100)) + '%';
   $('currentExName').textContent = e.name;
+  $('workoutHeadingArt')?.remove();
+  const headingArt=releasedThumbnail(e,'workout-heading-art');
+  if(headingArt){const art=document.createElement('div');art.id='workoutHeadingArt';art.innerHTML=headingArt;$('currentExName').parentElement.append(art);}
   $('currentExVariant').textContent = variantName(e);
   $('swappedTag').hidden = !e.swapped;
   $('currentExTarget').textContent = `${n} ${plSeries(n)} × ${e.target} powt.`;
@@ -2799,9 +2835,15 @@ async function timerAdd() {
   if (active && timerPausedLeft == null) { active.timerEndAt = timerEndAt; saveActive(); }
   renderTimer();
 }
+function renderTrainingPreferences(){
+  document.querySelectorAll('[data-act="rest"]').forEach(button=>{const selected=Number(button.dataset.sec)===restSetting;button.classList.toggle('active',selected);button.setAttribute('aria-pressed',String(selected));});
+  document.querySelectorAll('#settingsPreferences [data-act="bar"]').forEach(button=>{const selected=Number(button.dataset.kg)===barKg;button.classList.toggle('active',selected);button.setAttribute('aria-pressed',String(selected));});
+  $('settingsRestValue').textContent=restSetting?'Domyślnie: '+Math.floor(restSetting/60)+':'+String(restSetting%60).padStart(2,'0'):'Auto: czas dobierany do ćwiczenia.';
+}
 async function setRest(sec) {
   await LS.set('gymverse_rest', sec);
   restSetting = sec;
+  renderTrainingPreferences();
   document.querySelectorAll('[data-act="rest"]').forEach(b => b.classList.toggle('active', Number(b.dataset.sec) === sec));
   if (active) renderExerciseRest(exAt(active.step));
 }
@@ -3358,11 +3400,24 @@ function ensureCustomSplitDraft(state) {
   const dayCount = Number(state.daysPerWeek) || 3;
   if (state.customSplitFocus.length !== dayCount) state.customSplitFocus = Array.from({ length: dayCount }, (_, day) => state.customSplitFocus[day] || GENERATOR_GROUP_OPTIONS.map(([key], index) => index % dayCount === day ? key : null).filter(Boolean));
 }
+function updateGeneratorDayControls(delta=0) {
+  const state=ensureGeneratorDraft();
+  state.daysPerWeek=Math.max(1,Math.min(6,state.daysPerWeek+delta));
+  state.scheduleDays=generatorChecked('generatorSchedule');
+  document.querySelectorAll('[name="generatorSchedule"]').forEach(input=>{input.checked=state.scheduleDays.includes(input.value);input.disabled=!input.checked&&state.scheduleDays.length>=state.daysPerWeek;});
+  $('generatorDays').textContent=state.daysPerWeek+(state.daysPerWeek===1?' dzień':' dni');
+  document.querySelector('[data-act="generatorDaysMinus"]').disabled=state.daysPerWeek===1;
+  document.querySelector('[data-act="generatorDaysPlus"]').disabled=state.daysPerWeek===6;
+  const overLimit=state.scheduleDays.length>state.daysPerWeek;
+  let status=$('generatorScheduleStatus');if(!status){status=document.createElement('p');status.id='generatorScheduleStatus';status.className='small muted';status.setAttribute('role','status');$('generatorDays').closest('.day-stepper').after(status);}
+  status.hidden=!overLimit;status.textContent=overLimit?'Odznacz nadmiarowe dni tygodnia lub zwiększ liczbę treningów. Twoje zaznaczenia pozostają zachowane.':'';
+  document.querySelector('[data-act="generatorNext"]').disabled=overLimit;
+}
 function captureGeneratorStep() {
   const state = ensureGeneratorDraft();
   if (state.step === 1) { state.goal = $('generatorGoal').value; state.targetWeight = $('generatorTargetWeight').value.trim(); }
   else if (state.step === 2) {
-    const days = Number($('generatorDays').value);
+    const days = state.daysPerWeek;
     if (!Number.isInteger(days) || days < 1 || days > 6) throw new Error('Wybierz od 1 do 6 dni treningowych.');
     state.daysPerWeek = days; state.scheduleDays = generatorChecked('generatorSchedule');
     if (state.scheduleDays.length && state.scheduleDays.length !== days) throw new Error('Wybierz tyle dni tygodnia, ile treningów, albo zostaw harmonogram elastyczny.');
@@ -3401,13 +3456,13 @@ function renderGeneratorReview(state) {
 
 function renderGeneratorWizard() {
   const state=ensureGeneratorDraft();ensureCustomSplitDraft(state);
-  const days=GENERATOR_DAY_OPTIONS.map(([key,label])=>`<label class="pe-check"><input type="checkbox" name="generatorSchedule" value="${key}" ${state.scheduleDays.includes(key)?'checked':''}>${label}</label>`).join('');
+  const days=GENERATOR_DAY_OPTIONS.map(([key,label])=>`<label class="pe-check"><input type="checkbox" name="generatorSchedule" value="${key}" ${state.scheduleDays.includes(key)?'checked':state.scheduleDays.length>=state.daysPerWeek?'disabled':''}>${label}</label>`).join('');
   const equipment=GENERATOR_EQUIPMENT_OPTIONS.filter(([key])=>generatorProfile()?.attributes?.equipment?.includes(key)).map(([key,label])=>`<label class="pe-check"><input type="checkbox" name="generatorEquipment" value="${key}" ${state.equipment.includes(key)?'checked':''}>${label}</label>`).join('');
   const movement=GENERATOR_RESTRICTION_OPTIONS.map(([key,label])=>`<label class="pe-check"><input type="checkbox" name="generatorMovementExclusions" value="${key}" ${state.movementExclusions.includes(key)?'checked':''}>${label}</label>`).join('');
   const groups=GENERATOR_GROUP_OPTIONS.map(([key,label])=>`<label class="pe-check"><input type="checkbox" name="generatorFocus" value="${key}" ${state.focus.includes(key)?'checked':''} ${state.balanced?'disabled':''}>${label}</label>`).join('');
   let content='';
   if(state.step===1)content=`<label for="generatorGoal">Jaki jest Twój główny cel?</label><select id="generatorGoal" class="select-custom">${generatorOptions(GENERATOR_GOAL_OPTIONS,state.goal)}</select><div id="generatorTargetWeightField" ${state.goal==='fat_loss'?'':'hidden'}><label for="generatorTargetWeight">Docelowa masa (opcjonalnie)</label><input id="generatorTargetWeight" class="select-custom" type="number" min="20" max="400" step="0.1" value="${esc(state.targetWeight)}" placeholder="np. 70"><small class="muted">To notatka, nie prognoza tempa zmian.</small></div>`;
-  else if(state.step===2)content=`<label for="generatorDays">Ile dni w tygodniu chcesz trenować?</label><input id="generatorDays" class="select-custom" type="number" min="1" max="6" step="1" value="${state.daysPerWeek}"><fieldset><legend>Stałe dni (opcjonalnie)</legend><p class="small muted">Zaznacz dokładnie tyle dni, ile treningów, albo pozostaw grafik elastyczny.</p>${days}</fieldset><label for="generatorMinutesPreset">Ile czasu masz na trening?</label><select id="generatorMinutesPreset" class="select-custom">${[['30','30 minut'],['45','45 minut'],['60','60 minut'],['75','75 minut'],['90','90 minut'],['custom','Własna wartość']].map(([value,label])=>`<option value="${value}" ${state.sessionMode===value?'selected':''}>${label}</option>`).join('')}</select>${state.sessionMode==='custom'?`<label for="generatorMinutesCustom">Minuty (20–120)</label><input id="generatorMinutesCustom" class="select-custom" type="number" min="20" max="120" step="1" value="${state.sessionMinutes}">`:''}`;
+  else if(state.step===2)content=`<h3 id="generatorDaysLabel">Ile dni w tygodniu chcesz trenować?</h3><div class="day-stepper" role="group" aria-labelledby="generatorDaysLabel"><button class="btn-secondary" data-act="generatorDaysMinus" aria-label="Mniej dni" ${state.daysPerWeek===1?'disabled':''}>−</button><output id="generatorDays" aria-live="polite">${state.daysPerWeek} ${state.daysPerWeek===1?'dzień':'dni'}</output><button class="btn-secondary" data-act="generatorDaysPlus" aria-label="Więcej dni" ${state.daysPerWeek===6?'disabled':''}>+</button></div><fieldset class="generator-schedule"><legend>Stałe dni (opcjonalnie)</legend><p class="small muted">Zaznacz dokładnie tyle dni, ile treningów, albo pozostaw grafik elastyczny.</p><div class="schedule-options">${days}</div></fieldset><label for="generatorMinutesPreset">Ile czasu masz na trening?</label><select id="generatorMinutesPreset" class="select-custom">${[['30','30 minut'],['45','45 minut'],['60','60 minut'],['75','75 minut'],['90','90 minut'],['custom','Własna wartość']].map(([value,label])=>`<option value="${value}" ${state.sessionMode===value?'selected':''}>${label}</option>`).join('')}</select>${state.sessionMode==='custom'?`<label for="generatorMinutesCustom">Minuty (20–120)</label><input id="generatorMinutesCustom" class="select-custom" type="number" min="20" max="120" step="1" value="${state.sessionMinutes}">`:''}`;
   else if(state.step===3)content=`<fieldset><legend>Dostępny sprzęt z aktywnego profilu</legend><p class="small muted">Możesz zawęzić sprzęt tylko dla tej propozycji. Profil nie zostanie zmieniony.</p>${equipment||'<p class="small">Uzupełnij sprzęt w profilu przed generowaniem planu.</p>'}</fieldset><fieldset><legend>Ograniczenia ruchowe</legend>${movement}</fieldset><details class="generator-advanced"><summary>Preferencje dodatkowe</summary><label for="generatorSplit">Rodzaj treningu</label><select id="generatorSplit" class="select-custom">${generatorOptions(GENERATOR_SPLIT_OPTIONS,state.split)}</select>${state.split==='custom'?Array.from({length:state.daysPerWeek},(_,day)=>`<label>Dzień ${day+1}<select class="select-custom" name="generatorCustomFocus" data-day="${day}" multiple size="${Math.min(5,GENERATOR_GROUP_OPTIONS.length)}">${GENERATOR_GROUP_OPTIONS.map(([key,label])=>`<option value="${key}" ${state.customSplitFocus[day]?.includes(key)?'selected':''}>${label}</option>`).join('')}</select></label>`).join(''):''}<fieldset><legend>Priorytet partii</legend><label class="pe-check"><input type="checkbox" id="generatorBalanced" ${state.balanced?'checked':''}>Równomiernie dla całego ciała</label>${groups}</fieldset><label for="generatorFavorites">Ulubione ćwiczenia</label><select id="generatorFavorites" class="select-custom" multiple size="4">${Object.keys(CATALOG_BASE).map(id=>`<option value="${esc(id)}" ${state.favorites.includes(id)?'selected':''}>${esc(EXERCISE_NAMES_EN[id]||CATALOG_BASE[id]||id)}</option>`).join('')}</select><label for="generatorExclusions">Wykluczone ćwiczenia</label><select id="generatorExclusions" class="select-custom" multiple size="4">${Object.keys(CATALOG_BASE).map(id=>`<option value="${esc(id)}" ${state.exclusions.includes(id)?'selected':''}>${esc(EXERCISE_NAMES_EN[id]||CATALOG_BASE[id]||id)}</option>`).join('')}</select><label for="generatorHistoryChoice">Uwzględnij historię</label><select id="generatorHistoryChoice" class="select-custom"><option value="no" ${state.historyChoice==='no'?'selected':''}>Nie</option><option value="yes" ${state.historyChoice==='yes'?'selected':''} ${history.length?'':'disabled'}>Tak — preferuj znane ćwiczenia</option><option value="no_history" ${state.historyChoice==='no_history'?'selected':''} ${history.length?'disabled':''}>Brak historii</option></select><label for="generatorExperience">Doświadczenie</label><select id="generatorExperience" class="select-custom"><option value="">Nie podano</option>${generatorOptions(GENERATOR_EXPERIENCE_OPTIONS,state.experience)}</select><label class="pe-check"><input type="checkbox" id="generatorReturnAfterBreak" ${state.returnAfterBreak?'checked':''}>Wracam po dłuższej przerwie</label></details>`;
   else content=renderGeneratorReview(state);
   const titles=['Cel','Dni i czas','Warunki','Podsumowanie'];
@@ -3434,7 +3489,7 @@ function renderGeneratedPreview(state) {
       const groupText = map?.groups?.map(group => groups.get(group) || group).join(', ') || 'brak mapowania';
       const equipmentText = map?.equipment?.map(key => equipment.get(key) || key).join(map.equipmentMode === 'any' ? ' / ' : ' + ') || 'brak mapowania';
       const variantText = exercise.variantId || item?.defaultVariant || 'domyślny katalogowy';
-      return `<li data-exercise-id="${esc(exercise.key)}" style="padding:10px 0;border-top:1px solid var(--border)"><b>${esc(label)}</b><div class="small muted">Wariant: ${esc(variantText)} · Serie: ${exercise.sets} × ${esc(exercise.target)} powt. · Przerwa: ${restFor(exercise)} s</div><details class="preview-exercise-details"><summary>Szczegóły ćwiczenia</summary><p class="small muted">Grupy mięśniowe: ${esc(groupText)} · Sprzęt: ${esc(equipmentText)}</p></details></li>`;
+      return `<li data-exercise-id="${esc(exercise.key)}"><details class="generated-exercise-details"><summary>${releasedThumbnail(exercise)}<span class="generated-exercise-copy"><b>${esc(label)}</b><small>${exercise.sets} × ${esc(exercise.target)} powt. · przerwa ${restFor(exercise)} s</small></span><span class="exercise-disclosure-arrow" aria-hidden="true">›</span></summary><div class="generated-exercise-information"><p class="small muted">Wariant: ${esc(variantText)}</p><p class="small muted">Grupy mięśniowe: ${esc(groupText)} · Sprzęt: ${esc(equipmentText)}</p></div></details></li>`;
     }).join('');
     return `<section id="generated-day-${planIndex}" class="data-box" style="margin:12px 0"><h4>${esc(plan.title)}</h4><p class="small muted">Orientacyjny czas: ${time ? `${time.low}–${time.high} min` : 'brak oszacowania'}.</p><ul style="list-style:none;padding:0;margin:0">${rows}</ul></section>`;
   })();
@@ -3443,7 +3498,7 @@ function renderGeneratedPreview(state) {
   const warnings = [...result.notes, ...preview.metrics.findings.map(item => item.code === 'CATALOG_GAPS' ? `Braki katalogu: ${item.patterns.join(', ')}.` : '')].filter(Boolean);
   const weekCards=preview.plans.map((plan,index)=>{const time=timeByPlan.get(plan.id);const label=plan.dayOfWeek?days.get(plan.dayOfWeek):'Elastycznie';return `<button type="button" class="btn-secondary" data-act="generatedDay" data-index="${index}" aria-pressed="${index===selectedIndex}" aria-label="Pokaż dzień ${index+1}: ${esc(plan.title)}">Dzień ${index+1}<span>${esc(plan.title)}</span><small>${esc(label)}${time?` · ${time.low}–${time.high} min`:''}</small></button>`;}).join('');
   const scientific=`${warnings.length?`<h4>Dlaczego taki plan?</h4><ul class="small">${warnings.map(note => `<li>${esc(note)}</li>`).join('')}</ul>`:''}<p class="small muted">Badania opisują średnie grupowe, a nie wynik konkretnej osoby. Serie i zakres powtórzeń są roboczymi, edytowalnymi ustawieniami, a oszacowanie czasu i objętości nie stanowi pomiaru biologicznego. Dowody dotyczące optimum odpoczynku, zwłaszcza ponad 90 s, pozostają niejednoznaczne. Pełne źródła i ograniczenia generatora: docs/research/ (S01, S02, S04, S05, S06).</p>`;
-  return `<section id="generatorPreview" class="data-box"><h3>Twój wygenerowany plan</h3><p class="small muted">Sprawdź ćwiczenia w wybranym dniu. Zapis przypisze ten program do aktywnego profilu.</p><div class="program-day-tabs" role="group" aria-label="Dni programu">${weekCards}</div><div class="generated-day-navigation"><button class="btn-secondary" data-act="generatedDay" data-index="${Math.max(0,selectedIndex-1)}" ${selectedIndex===0?'disabled':''}>← Poprzedni dzień</button><span>Dzień ${selectedIndex+1} z ${preview.plans.length}</span><button class="btn-secondary" data-act="generatedDay" data-index="${Math.min(preview.plans.length-1,selectedIndex+1)}" ${selectedIndex===preview.plans.length-1?'disabled':''}>Następny dzień →</button></div>${planMarkup}<details class="generator-preview-details"><summary>Uzasadnienie i ograniczenia</summary><p class="small">${esc(volumeLine)}</p>${scientific}</details><div class="nav-row"><button class="btn-primary" data-act="saveGeneratedPreview">Zapisz i ustaw jako mój program</button><button class="btn-secondary" data-act="editGeneratorAnswers">Zmień odpowiedzi</button><button class="btn-secondary" data-act="regeneratePlan">Wygeneruj ponownie</button><button class="btn-secondary" data-act="cancelGeneratedPreview">Anuluj</button></div></section>`;
+  return `<section id="generatorPreview" class="data-box"><h3>Twój wygenerowany plan</h3><p class="small muted">Niezapisana propozycja. Sprawdź wybrany dzień. Zapisz i przypisz program albo przejdź do osobnej edycji po zapisaniu.</p><div class="program-day-tabs" role="group" aria-label="Dni programu">${weekCards}</div><div class="generated-day-navigation"><button class="btn-secondary" data-act="generatedDay" data-index="${Math.max(0,selectedIndex-1)}" ${selectedIndex===0?'disabled':''}>← Poprzedni dzień</button><span>Dzień ${selectedIndex+1} z ${preview.plans.length}</span><button class="btn-secondary" data-act="generatedDay" data-index="${Math.min(preview.plans.length-1,selectedIndex+1)}" ${selectedIndex===preview.plans.length-1?'disabled':''}>Następny dzień →</button></div>${planMarkup}<details class="generator-preview-details"><summary>Uzasadnienie i ograniczenia</summary><p class="small">${esc(volumeLine)}</p>${scientific}</details><div class="nav-row"><button class="btn-primary" data-act="saveGeneratedPreview">Zapisz i ustaw jako mój program</button><button class="btn-secondary" data-act="saveGeneratedForEdit">Zapisz i przejdź do edycji</button><button class="btn-secondary" data-act="editGeneratorAnswers">Wróć do generatora</button><button class="btn-secondary" data-act="regeneratePlan">Wygeneruj ponownie</button><button class="btn-secondary" data-act="cancelGeneratedPreview">Anuluj</button></div></section>`;
 }
 
 async function updateGeneratedPreviewMetrics(state) {
@@ -3487,18 +3542,42 @@ function renderPlanEditor() {
   PROGRAM_EDITOR_UI?.decorateDay();
   if (PLAN_EDIT_MODE === 'own' && !editPlanId) {
     const button=document.createElement('button');button.className='btn-primary';button.dataset.act='programNew';button.textContent='+ Utwórz program wielodniowy';$('planEditBody').prepend(button);
+    const drafts=document.createElement('section');drafts.id='managedDrafts';$('planEditBody').append(drafts);renderManagedDrafts(drafts);
   }
+}
+const MANAGED_PROGRAM_SNAPSHOTS=new Map();
+const MANAGED_DRAFT_SNAPSHOTS=new Map();
+async function renderManagedDrafts(host){
+  const profileId=currentProgramProfile()?.id;
+  try{
+    const {readWorkingDrafts}=await import('./src/features/plans/program-drafts.js');
+    const raw=await STORE.refreshSnapshot();
+    if(!host.isConnected||profileId!==currentProgramProfile()?.id)return;
+    const items=readWorkingDrafts(raw.gymverse_program_drafts_v1).items.filter(item=>item.draft.profileId===profileId);
+    MANAGED_DRAFT_SNAPSHOTS.clear();for(const item of items)MANAGED_DRAFT_SNAPSHOTS.set(item.id,item);
+    host.innerHTML=items.length?'<h2>Niezapisane szkice</h2><p class="small muted">Szkice są oddzielone od zapisanych programów. Odrzucenie szkicu nie usuwa programu ani historii.</p>'+items.map(item=>`<article class="settings-card"><h3>${esc(item.draft.title)}</h3><p>${item.draft.generatorAnswers?'Propozycja generatora':'Szkic edycji'} · ${programDayCountLabel(item.draft.dayPlanIds.length)}</p><button class="btn-secondary" data-act="managedDraftResume" data-id="${esc(item.id)}">Wznów szkic</button><button class="btn-secondary danger" data-act="managedDraftDiscard" data-id="${esc(item.id)}">Odrzuć szkic</button></article>`).join(''):'';
+  }catch{if(host.isConnected)host.textContent='Nie udało się odczytać szkiców. Otwórz edytor ponownie.';}
+}
+async function discardManagedDraft(id){
+  const item=MANAGED_DRAFT_SNAPSHOTS.get(id);if(!item||INTEGRITY_UNCERTAIN)return;
+  if(!confirm(`Odrzucić niezapisany szkic „${item.draft.title}”? Zapisane programy i treningi pozostaną.`))return;
+  try{const {removeWorkingDraft}=await import('./src/features/plans/program-drafts.js');await removeWorkingDraft(STORE,item);renderPlanEditor();toast('Odrzucono tylko wskazany szkic.');}
+  catch(error){if(error.integrityUncertain)enterIntegrityUncertain();toast(error.integrityUncertain?'Integralność danych jest niepewna. Zapisy zablokowano.':'Szkic zmienił się lub zapis nie powiódł się. Zachowano dane; odśwież widok.');}
 }
 function renderPlanEditorContent() {
   const box = $('planEditBody');
   if (PLAN_EDIT_MODE === 'generator') {
     $('planEditTitle').textContent = GENERATOR_WIZARD?.preview ? 'Generator treningowy' : 'Wygeneruj plan automatycznie';
     box.innerHTML = GENERATOR_WIZARD?.preview ? renderGeneratedPreview(GENERATOR_WIZARD) : GENERATOR_RECOVERY?.length ? `<section class="data-box"><h3>Znaleziono niezapisany szkic generatora</h3><p>Wznowienie pokaże zapisaną propozycję. Program nie został jeszcze zmieniony.</p>${GENERATOR_RECOVERY.map(item=>`<article class="data-box"><h4>${esc(item.draft.title)}</h4><p>${item.draft.dayPlanIds.length} dni</p><button class="btn-primary" data-act="generatorResume" data-id="${esc(item.id)}">Wznów propozycję</button><button class="btn-secondary" data-act="generatorDiscardDraft" data-id="${esc(item.id)}">Odrzuć szkic</button></article>`).join('')}<button class="btn-secondary" data-act="generatorNew">Utwórz nową propozycję</button></section>` : renderGeneratorWizard();
+    if($('generatorDays'))updateGeneratorDayControls();
     return;
   }
   if (!editPlanId) {
-    $('planEditTitle').textContent = 'Własne plany i treningi';
-    box.innerHTML = '<div class="plan-grid">' + PLANS.map(p => {
+    $('planEditTitle').textContent = 'Edytuj plany i ćwiczenia';
+    const profile=currentProgramProfile(),programs=profile?.planPrograms?.programs||[],used=new Set(programs.flatMap(p=>p.dayPlanIds));
+    MANAGED_PROGRAM_SNAPSHOTS.clear();
+    for(const p of programs)MANAGED_PROGRAM_SNAPSHOTS.set(p.id,{profileId:profile.id,programId:p.id,assignedProgramId:profile.planPrograms.assignedProgramId??null,program:structuredClone(p),days:p.dayPlanIds.map(id=>structuredClone(getPlan(id)))});
+    box.innerHTML = '<h2>Zapisane programy</h2><div class="managed-programs">'+programs.map(p=>`<article class="managed-program settings-card" data-id="${esc(p.id)}"><h3>${esc(p.title)}</h3><p>${programDayCountLabel(p.dayPlanIds.length)}${p.id===profile.planPrograms.assignedProgramId?' · Aktywny':''}</p><div class="program-actions"><button class="btn-secondary" data-act="programEdit" data-id="${esc(p.id)}">Edytuj program</button><button class="btn-secondary danger" data-act="programDelete" data-id="${esc(p.id)}">Usuń program</button></div></article>`).join('')+'</div><h2>Samodzielne treningi</h2><div class="plan-grid">' + visiblePlans().filter(p=>!used.has(p.id)).map(p => {
       const type = /^push/i.test(p.title) ? 'push' : /^pull/i.test(p.title) ? 'pull' : 'other';
       return `<div class="plan-card ${type}" data-act="peOpen" data-id="${esc(p.id)}" role="button" tabindex="0" aria-label="Edytuj plan ${esc(p.title)}"><span class="plan-type">${type === 'other' ? 'PLAN' : type.toUpperCase()}</span><div><h3>${esc(p.title)}</h3><p>${exerciseCountLabel(p.exercises.length)}</p></div><div class="plan-arrow" aria-hidden="true">✎</div></div>`;
     }).join('') + '</div><button class="btn-link danger" style="width:100%" data-act="peReset">Przywróć domyślne plany</button>';
@@ -4039,7 +4118,7 @@ async function importData(ev) {
       const plansDiffer = inPlans.length > 0 && JSON.stringify(inPlans) !== JSON.stringify(PLANS);
       const replacePlans = !!(plansDiffer && !active);
       const activeProfile = PROFILE_STATE?.profiles.find(profile => profile.id === PROFILE_STATE.activeProfileId);
-      if (replacePlans && activeProfile?.planPrograms?.programs.length) { toast('Import planów z JSON v4 jest zablokowany, ponieważ profil zawiera programy.'); return; }
+      if (replacePlans && (activeProfile?.planPrograms?.programs.length || activeProfile?.planPrograms?.archivedDayPlanIds?.length)) { toast('Import planów z JSON v4 jest zablokowany, ponieważ profil zawiera programy lub zachowane dni archiwalne. Historia bez zastępowania planów może być importowana osobno.'); return; }
       const targetProfileName = PROFILE_STATE?.profiles.find(profile => profile.id === PROFILE_STATE.activeProfileId)?.name || 'Mój profil';
       const importedDates = incoming.map(session => Date.parse(session.date)).filter(Number.isFinite).sort((a, b) => a - b);
       const dateRange = importedDates.length ? `${new Date(importedDates[0]).toLocaleDateString('pl-PL')}–${new Date(importedDates.at(-1)).toLocaleDateString('pl-PL')}` : 'brak poprawnego zakresu';
@@ -4126,11 +4205,14 @@ function recalcSession2(s, bwSet = BW, measurements = body) { if (s.details && s
 
 /* ================== ZDARZENIA ================== */
 const ACTIONS = {
+  generatorDaysMinus: () => updateGeneratorDayControls(-1),
+  generatorDaysPlus: () => updateGeneratorDayControls(1),
   stage6CreateProfile: () => { document.body.classList.add('stage6-profile-entry'); $('profileManage').open = true; $('profileFormDetails').open = true; setProfileWizardStep(1); $('newProfileName').focus(); window.scrollTo(0, 0); },
   profileNext: profileWizardNext,
   profileBack: () => setProfileWizardStep(PROFILE_WIZARD_STEP - 1),
   profileCancel: cancelProfileWizard,
   addProfile: () => {
+    switchView('view-settings');
     if (PROFILE_STATE?.profiles.length >= 20) { toast('Możesz utworzyć maksymalnie 20 profili.'); return; }
     PROFILE_EDIT_ID = null; clearProfileWizardFields(); PROFILE_GOAL_TOUCHED = false;
     $('profileManage').open = true; $('profileFormDetails').open = true;
@@ -4151,7 +4233,9 @@ const ACTIONS = {
   programStart: () => {if(PROGRAM_PREVIEW?.profileId===currentProgramProfile()?.id)startWorkout(PROGRAM_PREVIEW.selectedDay,PROGRAM_PREVIEW.programId);else toast('Profil lub program zmienił się. Odśwież podgląd.');},
   programBack: () => {if(PROGRAM_PREVIEW)showProgramPreview(PROGRAM_PREVIEW.programId,true);},
   programAssign: el => saveProgramAssignment(el.dataset.id),
-  programDelete: el => deleteProgramFromPreview(el.dataset.id),
+  programDelete: el => deleteManagedProgram(el.dataset.id),
+  managedDraftDiscard: el=>discardManagedDraft(el.dataset.id),
+  managedDraftResume: async el=>{const item=MANAGED_DRAFT_SNAPSHOTS.get(el.dataset.id);if(!item)return;if(item.draft.generatorAnswers){PLAN_EDIT_MODE='generator';await ACTIONS.generatorResume(el);}else await PROGRAM_EDITOR_UI.resumeWorkingDraft(el.dataset.id);},
   programRefresh: refreshProgramView,
   programClear: async () => {if(!PROGRAM_PREVIEW){const id=currentProgramProfile()?.planPrograms?.assignedProgramId;if(!id)return;showProgramPreview(id);}await saveProgramAssignment(null);},
   integrityEmergency: () => offerEmergencyExport(history,lastSets,active,true),
@@ -4172,7 +4256,7 @@ const ACTIONS = {
   wstep: el => stepWeight(Number(el.dataset.d)),
   copyPrev,
   plates: togglePlates,
-  bar: async el => { const next = Number(el.dataset.kg); await LS.set('gymverse_bar', next); barKg = next; updatePlates(); },
+  bar: async el => { const next = Number(el.dataset.kg); await LS.set('gymverse_bar', next); barKg = next; updatePlates(); renderTrainingPreferences(); },
   addSet, removeSet, swapOpen, chooseSwap: el => applySwap(el.dataset.key),
   rir: el => setRir(Number(el.dataset.v)),
   next: nextStep,
@@ -4198,6 +4282,7 @@ const ACTIONS = {
   deloadEnd: async () => { await LS.set('gymverse_deload_until', 0); renderPlans(); },
   switchProfile: async () => switchActiveProfile($('profileSelect').value),
   editProfile: () => {
+    switchView('view-settings');
     const profile = PROFILE_STATE?.profiles.find(item => item.id === PROFILE_STATE.activeProfileId);
     if (!profile) return;
     const attributes = profile.attributes || {};
@@ -4290,6 +4375,7 @@ const ACTIONS = {
   },
   editGeneratedDay: () => {},
   editGeneratedProgram: () => {},
+  saveGeneratedForEdit: async () => {try{await PROGRAM_EDITOR_UI.saveGeneratedAndAssign({assign:false,edit:true});}catch(error){if(error.integrityUncertain)enterIntegrityUncertain();toast(error.integrityUncertain?'Integralność danych jest niepewna. Zapisy zablokowano.':'Nie zapisano programu. Szkic zachowano; możesz ponowić zapis.');}},
   saveGeneratedPreview: async () => {try{const saved=await PROGRAM_EDITOR_UI.saveGeneratedAndAssign();if(!saved)return;}catch(error){if(error.integrityUncertain)enterIntegrityUncertain();toast(error.message==='PROGRAM_STATE_STALE'?'Program lub profil zmienił się w innym oknie. Szkic zachowano; odśwież dane i spróbuj ponownie.':error.integrityUncertain?'Integralność danych jest niepewna. Dalsze zapisy zostały zablokowane.':'Nie zapisano programu. Szkic zachowano; możesz bezpiecznie ponowić zapis.');}},
   regeneratePlan: async () => {try{await ACTIONS.generatePlan();}catch{toast('Nie udało się przygotować nowej propozycji. Poprzedni szkic pozostaje zachowany.');}},
   cancelGeneratedPreview: async () => {await ACTIONS.generatorCancel();},
@@ -4434,13 +4520,15 @@ document.addEventListener('focusout', async e => {
 });
 document.addEventListener('change', async e => {
   const t = e.target;
+  if (t.id === 'profileSelect') { await switchActiveProfile(t.value); return; }
+  if (t.name === 'generatorSchedule') { ensureGeneratorDraft().scheduleDays=generatorChecked('generatorSchedule'); updateGeneratorDayControls(); return; }
   if (t.id === 'generatorSplit') {
     const state = ensureGeneratorDraft(); state.split = t.value;
     if (state.split === 'custom') ensureCustomSplitDraft(state);
     renderPlanEditor(); return;
   }
   if (t.id === 'generatorMinutesPreset') {
-    const state = ensureGeneratorDraft(); state.sessionMode = t.value; renderPlanEditor(); return;
+    const state = ensureGeneratorDraft(); state.scheduleDays=generatorChecked('generatorSchedule'); state.sessionMode = t.value; renderPlanEditor(); return;
   }
   if (t.id === 'generatorBalanced') {
     const state = ensureGeneratorDraft(); state.balanced = t.checked;
@@ -4588,8 +4676,9 @@ async function init() {
     });
     const { bootstrapProfileState } = await import('./src/features/profiles/profile-model.js');
     const initializedProfiles = bootstrapProfileState(await STORE.exportSnapshot());
-    PROFILE_STATE = initializedProfiles.state;
     if (Object.keys(initializedProfiles.updates).length) await transactProfileUpdates(initializedProfiles.updates);
+    PROFILE_STATE = initializedProfiles.state;
+    PROGRAM_RELATIONS=await import('./src/features/plans/programs.js');
     HISTORY_HELPERS=await import('./src/features/plans/history-context.js');
     await loadState();
     await STORE.flush();

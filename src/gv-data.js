@@ -825,7 +825,7 @@ export async function restoreLegacyV4(storage, parsed, options = {}) {
     const { readProfileState } = await import('./features/profiles/profile-model.js');
     const registry = readProfileState({gymverse_profiles_v1:rawProfiles});
     const profile = registry.profiles.find(item => item.id === registry.activeProfileId);
-    if (profile?.planPrograms?.programs.length) throw new Error('LEGACY_RESTORE_PROGRAMS_PROTECTED');
+    if (profile?.planPrograms?.programs.length || profile?.planPrograms?.archivedDayPlanIds?.length) throw new Error('LEGACY_RESTORE_PROGRAMS_PROTECTED');
   }
   let snapshot = normalizeV4Export(parsed);
   const inspection = await inspectLegacySnapshot(snapshot, options.validationOptions || {});

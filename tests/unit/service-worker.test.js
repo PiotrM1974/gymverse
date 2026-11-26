@@ -89,7 +89,7 @@ describe('service worker cache safety', () => {
     let installation;
     harness.listeners.install({ waitUntil: promise => { installation = promise; } });
     await installation;
-    expect(harness.opened).toContain('gymverse-v57');
+    expect(harness.opened).toContain('gymverse-v59');
     expect(harness.added).toContain('src/features/plans/progression.js');
     expect(harness.added).toContain('src/ui/signal.css');
     expect(harness.added).toContain('src/ui/fonts/manrope-latin-variable.woff2');
@@ -136,7 +136,7 @@ describe('service worker cache safety', () => {
       let installation;
       harness.listeners.install({ waitUntil: promise => { installation = promise; } });
       await installation;
-      expect(harness.opened).toContain('gymverse-v57');
+      expect(harness.opened).toContain('gymverse-v59');
       expect(harness.added).toContain('src/features/plans/progression.js');
       expect(harness.added).toContain('src/data/exercise-presentations/release-registry.json');
       expect(harness.added.filter(url => url.startsWith('src/data/exercise-images/selected/technique/'))).toHaveLength(68);
@@ -176,7 +176,7 @@ describe('service worker cache safety', () => {
     let installation;
     harness.listeners.install({ waitUntil: promise => { installation = promise; } });
     await expect(installation).rejects.toThrow('failed to cache');
-      expect(harness.opened).toContain('gymverse-v57');
+      expect(harness.opened).toContain('gymverse-v59');
     expect(harness.deleted).toEqual([]);
     expect(harness.skipWaitingCalls).toBe(0);
   });

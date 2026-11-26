@@ -82,3 +82,37 @@ test('full legacy restore is blocked when existing program days could be replace
 test('failed rollback reports uncertain integrity instead of claiming a safe write',async()=>{
  const state=bootstrapProfileState({},{id:'profile-one'}).state;const values=new Map([['gymverse_plans',rawPlans],['gymverse_profiles_v1',JSON.stringify(state)]]);const store={refreshSnapshot:async()=>({gymverse_plans:values.get('gymverse_plans'),gymverse_profiles_v1:values.get('gymverse_profiles_v1')}),storage:{getItem:key=>values.get(key)??null},transact:async()=>{values.set('gymverse_plans','changed');throw new Error('rollback failed')}};const change=p=>createProgram(p,plans,{title:'X',dayPlanIds:['day-0']},{id});await expect(commitProgramProfile(store,state,'profile-one',plans,change,testLocks)).rejects.toMatchObject({integrityUncertain:true});
 });
+
+
+test('deletion retains records but durably archives only the removed program days',()=>{
+ const profile=createProgram({id:'profile-one',data:{}},plans,{title:'Gone',dayPlanIds:['day-0','day-1']},{id});
+ const before=structuredClone(plans),removed=deleteProgram(profile,id);
+ expect(removed.planPrograms.archivedDayPlanIds).toEqual(['day-0','day-1']);
+ expect(plans).toEqual(before);expect(profile.planPrograms.programs).toHaveLength(1);
+});
+
+import {archivedProgramDayIds} from '../../src/features/plans/programs.js';
+
+test('archive is optional, validated and never hides a live shared reference',()=>{
+ const old={schemaVersion:1,assignedProgramId:null,programs:[]};expect(validatePlanPrograms(old,plans)).toBe(old);expect(archivedProgramDayIds({planPrograms:old}).size).toBe(0);
+ for(const value of [null,'day-0',['day-0','day-0'],[1],['']])expect(()=>validatePlanPrograms({...old,archivedDayPlanIds:value},plans)).toThrow('PROGRAM_ARCHIVE_INVALID');
+ const profile={id:'profile-one',planPrograms:{...old,programs:[{id,title:'Gone',dayPlanIds:['day-0','day-1']},{id:'pg_'+'2'.repeat(32),title:'Shared',dayPlanIds:['day-1']} ]}};
+ const result=deleteProgram(profile,id);expect(result.planPrograms.archivedDayPlanIds).toEqual(['day-0']);expect(archivedProgramDayIds(result).has('day-1')).toBe(false);
+ expect(archivedProgramDayIds({planPrograms:{...result.planPrograms,archivedDayPlanIds:['day-0','day-1']}})).toEqual(new Set(['day-0']));
+});
+
+test('archive survives ZIP v5, profile export, smart merge and cannot revive through older backup',async()=>{
+ const base={id:'profile-one',name:'Synthetic',data:{gymverse_plans:rawPlans}};
+ const live=createProgram(base,plans,{title:'Old',dayPlanIds:['day-0','day-1']},{id}),removed=deleteProgram(live,id);
+ const snap=snapshot(removed);const restored=await previewBackupV5(await createBackupV5(snap));expect(restored.snapshot).toMatchObject(snap);
+ const exported=exportProfileSnapshot(snap.gymverse_profiles_v1,{gymverse_plans:rawPlans});expect(importProfileSnapshot(snap.gymverse_profiles_v1,exported,{id:'profile-two'}).profile.planPrograms).toEqual(removed.planPrograms);
+ const merged=planBackupImport(snapshot(base),restored.snapshot);expect(merged.snapshot.gymverse_profiles_v1.profiles[0].planPrograms.archivedDayPlanIds).toEqual(['day-0','day-1']);
+ const oldBackup=planBackupImport(snap,snapshot(live));expect(oldBackup.snapshot.gymverse_profiles_v1.profiles[0].planPrograms.programs).toEqual([]);expect(oldBackup.conflicts).toContainEqual({profileId:'profile-one',type:'plan-program-days',recordId:id});
+});
+
+test('legacy full restore cannot replace retained archived day records',async()=>{
+ const profile=deleteProgram(createProgram({id:'profile-one',name:'Synthetic',data:{}},plans,{title:'Gone',dayPlanIds:['day-0']},{id}),id);
+ const registry={schemaVersion:1,activeProfileId:'profile-one',profiles:[profile]};
+ const storage={getItem:k=>k==='gymverse_profiles_v1'?JSON.stringify(registry):null};
+ await expect(restoreLegacyV4(storage,{}, {confirmed:true,restoreActive:false,restoreDrafts:false})).rejects.toThrow('LEGACY_RESTORE_PROGRAMS_PROTECTED');
+});

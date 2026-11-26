@@ -1,3 +1,43 @@
+# PR #14 final corrections — 26 November 2026
+
+Current candidate supersedes previous 2.0.3 notes: profile switching is exclusively in Settings; home has a read-only active profile name. An open profile form blocks switching, and profile writes compare the UI registry snapshot inside the existing data lock. First-start bootstrap remains supported.
+
+Deleted programs now record optional planPrograms.archivedDayPlanIds in the existing per-profile registry. Day records remain available to history/drafts but are excluded from ordinary lists and new attachments. Live references have priority; active sessions block deletion. ZIP v5/profile export preserve the field, smart merge retains it and rejects stale program resurrection, and JSON v4 replacement cannot destroy retained archive records. No automatic migration or new storage system. App version 2.0.3; cache v59.
+
+Unit tests 221/221. Targeted Chromium/WebKit failures were diagnosed and their affected cases passed subsequent runs; exact separate results and limitations in [release report](docs/tasks/GV-RELEASE-203.md#końcowe-poprawki-pr-14--wykonanie-26112026). Home and Settings screenshots updated; approved art and other screenshots retained. No full E2E regression, physical iPhone or authentic legacy export verification. Existing old orphan days cannot be inferred safely and are not retroactively migrated. Older tabs may ignore archive metadata; localStorage atomicity limits remain.
+
+Authorized: commit and push these corrections to release/gymnastika-2.0.3, update PR #14 only. No merge/main push/deployment. Preserve unrelated local design boards and ignored PROJECT_MEMORY.md/outputs.
+
+---
+
+# Current candidate — GymNastika 2.0.3 (26 November 2026)
+
+This section supersedes the historical release/authorization notes below. PR #13 is merged; verified production main is 94a7511a047f9d421a10fcc24b217bde5789c6ab (2.0.2). Current release branch: release/gymnastika-2.0.3, based on that main. Owner authorizes commit/push of this branch and a new PR only; no main push, merge, deployment or new installation.
+
+The accepted UX/3D cards/artwork are retained. Explicitly approved release corrections preserve selected weekdays when reducing the count, remove deletion from program preview, expose existing profile-wide rest/bar preferences in Settings and show version 2.0.3. Existing storage/schema, training logic and PWA identity remain unchanged; shell cache v58.
+
+Fresh verification: unit 216/216; one targeted Chromium 52/52; separate desktop WebKit 9/9. Full historical E2E suite, physical iPhone and authentic legacy export are not certified. Some old 10-step wizard tests still need alignment before a full run. Keep unrelated local design boards. No automatic publication after this task. [Release scope, full file list, test evidence and limitations](docs/tasks/GV-RELEASE-203.md). [Actual synthetic screenshots](docs/releases/2.0.3/README.md).
+
+---
+
+## Owner acceptance — 2026-11-26
+
+The owner accepted the presented local UX/visual changes, including the stronger 3D cards, random equipment/colour variants and shared LIGHT/DARK backgrounds. Local visual review is complete. This does not authorize a new commit/push, PR update, merge or deployment. Physical iPhone and authentic legacy-export verification remain open.
+
+## Latest local visual refinement — 2026-11-26
+
+Approved 3D equipment covers replace rejected SVGs. Random existing program/plan IDs seed stable equipment/colour variants and eight soft card tints; canonical-order collision handling, no storage writes/schema changes. Six WebP assets are precached. Raised card edges/shadows support LIGHT/DARK and reduced motion. Exercise thumbnails remain exact. New evidence: unit216/216; Chromium6/6 after correcting a premature DOM read in the offline test; desktop WebKit3/3; final raised-card Chromium2/2. No physical iPhone, commit, PR update or deployment. See docs/tasks/GV-UX-ORGANIZATION.md and src/ui/program-art/README.md for limits/provenance.
+
+# Local UX continuation after PR #13 — 2026-11-26
+
+The owner requested a local UI/organization refinement, supplied a visual reference, distinguished equipment artwork on program cards from exact exercise thumbnails, and requested a shared LIGHT/DARK background. These changes are **uncommitted and not pushed**. PR #13 at 5e8e9e6b6e6440d2d428cddfd842eb826ffc4312 does not contain them. Existing worktree and branch retained; no merge, deployment or installation.
+
+Implemented settings/backup relocation, central program and durable draft management, bounded day stepper, separate save-then-edit route, supplied palette, approved exercise thumbnails and local raster 3D equipment illustrations. No storage schema, generator algorithm or historical identity changes. Unit 213/213; focused Chromium 34/35 then 11/11 after correcting a test's wait; interaction/visual and art runs are separately recorded. WebKit 10/11 then the one corrected profile-switch test 1/1. These are not a full green regression. See [scope, exact evidence, files and limitations](docs/tasks/GV-UX-ORGANIZATION.md).
+
+Preserve all unrelated untracked design boards. Physical iPhone and genuine legacy export remain open. Old-tab synchronization and non-atomic localStorage limits remain. Owner accepted the local UX and visual result on 2026-11-26; do not update PR or publish automatically.
+
+---
+
 # GymNastika 2.0 — project handoff
 
 ## Current release candidate — GymNastika 2.0.2 (26 Nov 2026)
@@ -128,3 +168,7 @@ Zrzut wykrył .home-action[hidden] regression; selektor CSS i test regresyjny na
 Testy: npm run test:unit 200/200; Chromium celowane 6/6 (nowy UX 5/5, history-volume 1/1), włącznie z responsive 320/375/390/430 LIGHT/DARK i offline shell w Chromium. Pełne 454 E2E nie były uruchamiane; WebKit, rzeczywisty iPhone/Safari ani pełny import round-trip ZIP nie były częścią tej weryfikacji. Zrzuty ignorowane przez Git: outputs/GV-POST-PRODUCTION-UX/.
 
 Właściciel zatwierdził przygotowanie aktualizacji GymNastika 2.0.1. Commit aplikacji 1ce648139b04bedb7cfa4ceac7428b3f2f48c593 na gałęzi release/gymnastika-2.0.1-2026-11-26 został wypchnięty, a PR #12 do main jest otwarty. PR ma 16 zmienionych plików i po odświeżeniu GitHub zgłosił mergeable=true. Scalenia ani deploy nie wykonano; produkcja pozostaje bez zmian. Nieśledzone alternatywne plansze Signal zachowano.
+
+Final background/visual check: 2/2 Chromium, 13 views in both themes and 320/375/390/430 px. Local gallery: outputs/GV-UX-ORGANIZATION/index.html. Ready for visual review only; no publication.
+
+Local visual correction 2026-11-26: stronger raised-card treatment requested by the owner (9px side, bevel and stronger shadow). Chromium showcase2/2 PASS across320–430px LIGHT/DARK; latest screenshots14-raised-cards-light/dark-390. Presentation only; no publication.

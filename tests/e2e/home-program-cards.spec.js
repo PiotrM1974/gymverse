@@ -59,12 +59,12 @@ test('home assignment switching and profile isolation survive reload without cha
   await expect(page.locator('#view-plans .program-card[data-id="'+A+'"]')).not.toContainText('Aktywny');
   await page.reload();await expect(page.locator('#view-plans .program-card').first()).toHaveAttribute('data-id',B);
   const assigned=await raw(page);expect(assigned.gymverse_plans).toBe(before.gymverse_plans);expect(assigned.gymverse_history).toBe(before.gymverse_history);
-  await page.locator('#profileManage > summary').click();await page.locator('#profileSelect').selectOption('profile-b');
-  await page.locator('[data-act="switchProfile"]').click();
+  await page.getByRole('button',{name:'Ustawienia',exact:true}).click();await page.locator('#profileSelect').selectOption('profile-b');
+
   await expect(page.locator('#profileSelect')).toHaveValue('profile-b');
   await expect(page.locator('#view-plans .program-card')).toHaveCount(1);await expect(page.locator('#view-plans .program-card')).toHaveAttribute('data-id',C);
   await expect(page.locator('#standalonePlans')).toBeHidden();
-  await page.locator('#profileManage > summary').click();await page.locator('#profileSelect').selectOption('profile-a');await page.locator('[data-act="switchProfile"]').click();
+  await page.getByRole('button',{name:'Ustawienia',exact:true}).click();await page.locator('#profileSelect').selectOption('profile-a');
   await expect(page.locator('#profileSelect')).toHaveValue('profile-a');await expect(page.locator('#view-plans .program-card').first()).toHaveAttribute('data-id',B);
   expect((await raw(page)).gymverse_plans).toBe(before.gymverse_plans);
 });
