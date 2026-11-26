@@ -96,4 +96,4 @@ Zrzut wykrył .home-action[hidden] regression; selektor CSS i test regresyjny na
 
 Testy: npm run test:unit 200/200; Chromium celowane 6/6 (nowy UX 5/5, history-volume 1/1), włącznie z responsive 320/375/390/430 LIGHT/DARK i offline shell w Chromium. Pełne 454 E2E nie były uruchamiane; WebKit, rzeczywisty iPhone/Safari ani pełny import round-trip ZIP nie były częścią tej weryfikacji. Zrzuty ignorowane przez Git: outputs/GV-POST-PRODUCTION-UX/.
 
-Zmiany nie zostały opublikowane: brak commit, push, merge i deploy; bieżąca produkcja pozostaje wcześniejsza. Zachować worktree i nieśledzone alternatywne plansze Signal.
+Właściciel zatwierdził przygotowanie aktualizacji GymNastika 2.0.1. Commit aplikacji 1ce648139b04bedb7cfa4ceac7428b3f2f48c593 na gałęzi release/gymnastika-2.0.1-2026-11-26 został wypchnięty, a PR #12 do main jest otwarty. PR ma 16 zmienionych plików i po odświeżeniu GitHub zgłosił mergeable=true. Scalenia ani deploy nie wykonano; produkcja pozostaje bez zmian. Nieśledzone alternatywne plansze Signal zachowano.
