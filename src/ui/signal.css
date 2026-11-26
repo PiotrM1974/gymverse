@@ -941,3 +941,9 @@ body::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none
 #settingsPreferences .rest-row>span{flex-basis:100%;}
 #settingsPreferences .rp{min-width:54px;min-height:44px;}
 #settingsPreferences h3{font-size:16px;margin-top:18px;}
+
+/* Compact read-only identity; the picker lives exclusively in Settings. */
+#view-plans .profile-box #profileHeading {position:static;width:auto;height:auto;margin:0;padding:0;overflow:visible;clip-path:none;white-space:normal;font-size:11px;font-weight:600;line-height:1.5;letter-spacing:.04em;color:var(--text-muted);text-transform:uppercase;}
+#view-plans .home-active-profile {margin:2px 0 0;font-size:14px;line-height:1.5;font-weight:600;overflow-wrap:anywhere;}
+body.stage6-profile-entry #view-plans .profile-box #profileHeading {font-size:20px;text-transform:none;letter-spacing:0;}
+#settingsProfiles #profileSelect {width:100%;margin:6px 0 14px;}

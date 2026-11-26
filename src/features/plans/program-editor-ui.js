@@ -1,3 +1,4 @@
+import { archivedProgramDayIds } from './programs.js';
 import { DRAFT_KEY, readWorkingDrafts, saveWorkingDraft, removeWorkingDraft } from './program-drafts.js';
 import { createProgramDraft, addDraftDay, attachDraftDay, commitProgramDraft } from './program-editor.js';
 
@@ -51,7 +52,7 @@ export function createProgramEditorUI(api) {
     const day = draft.plans.find(item => item.id === selected);
     const profile = draft.baseState.profiles.find(item => item.id === draft.profileId);
     const occupied = new Set((profile.planPrograms?.programs || []).filter(item=>item.id!==draft.programId).flatMap(item=>item.dayPlanIds));
-    const available = draft.plans.filter(item=>!occupied.has(item.id)&&!draft.dayPlanIds.includes(item.id));
+    const available = draft.plans.filter(item=>!occupied.has(item.id)&&!draft.dayPlanIds.includes(item.id)&&!archivedProgramDayIds(profile).has(item.id));
     const details = item => `<ol class="stage6-exercises">${item.exercises.map((exercise,index)=>`<li><span class="stage6-number">${index+1}</span><div><strong>${esc(api.exerciseName({...exercise,name:custom[exercise.key]?.name||exercise.name}))}</strong><small>${esc(api.variantName(exercise))} · ${exercise.sets} serii · ${esc(exercise.target)} powt.</small><small>Przerwa ${api.rest(exercise)} s</small>${api.groups?.(exercise)?`<small>Grupy: ${esc(api.groups(exercise))}</small>`:''}</div></li>`).join('') || '<li>Dodaj ćwiczenia w edytorze dnia.</li>'}</ol>`;
     host.innerHTML = `<div class="program-editor"><p class="screen-eyebrow">${review?'PRZEGLĄD PRZED ZAPISEM':'WŁASNY PROGRAM'}</p><h1 class="screen-title">${esc(draft.title)}</h1><p class="small">Zmiany w szkicu zapiszesz przyciskiem „Zapisz program”.</p>
       <label>Nazwa programu<input class="select-custom" data-program-field="title" aria-label="Nazwa programu" maxlength="60" value="${esc(draft.title)}"></label>

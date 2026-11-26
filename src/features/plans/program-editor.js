@@ -1,5 +1,5 @@
 import { DRAFT_KEY, removeDraftFromSnapshot } from './program-drafts.js';
-import { assignProgram, createProgram, updateProgram, validatePlanPrograms } from './programs.js';
+import { archivedProgramDayIds, assignProgram, createProgram, updateProgram, validatePlanPrograms } from './programs.js';
 import { mergePlanChanges, mergeRecordChanges, sameDataValue as same } from './plan-merge.js';
 import { withPlanDataLock } from './synchronization.js';
 
@@ -29,7 +29,7 @@ export function addDraftDay(draft, title = `Dzień ${draft.dayPlanIds.length + 1
 export function attachDraftDay(draft, dayId) {
   const profile = draft.baseState.profiles.find(item => item.id === draft.profileId);
   const occupied = (profile.planPrograms?.programs || []).filter(item => item.id !== draft.programId).flatMap(item => item.dayPlanIds);
-  if (draft.dayPlanIds.length >= 6 || draft.dayPlanIds.includes(dayId) || occupied.includes(dayId) || !draft.plans.some(day => day.id === dayId)) throw new Error('PROGRAM_DAY_INVALID');
+  if (draft.dayPlanIds.length >= 6 || draft.dayPlanIds.includes(dayId) || occupied.includes(dayId) || archivedProgramDayIds(profile).has(dayId) || !draft.plans.some(day => day.id === dayId)) throw new Error('PROGRAM_DAY_INVALID');
   draft.dayPlanIds.push(dayId);
 }
 
@@ -44,6 +44,7 @@ export async function commitProgramDraft(store, draft, options = {}) {
       const baseProgram=baseProfile.planPrograms?.programs.find(item=>item.id===draft.programId),currentProgram=currentProfile.planPrograms?.programs.find(item=>item.id===draft.programId);
       if(!baseProgram||!same(baseProgram,currentProgram))throw new Error('PROGRAM_STATE_STALE');
     }else if(draft.generatedProgramId&&currentProfile.planPrograms?.programs.some(item=>item.id===draft.generatedProgramId))throw new Error('PROGRAM_STATE_STALE');
+    if(draft.dayPlanIds.some(id=>archivedProgramDayIds(currentProfile).has(id)))throw new Error('PROGRAM_STATE_STALE');
     if(options.assignProgram&&(currentProfile.planPrograms?.assignedProgramId??null)!==(baseProfile.planPrograms?.assignedProgramId??null))throw new Error('PROGRAM_STATE_STALE');
     if(draft.generatorAnswers&&!same(currentProfile.attributes||{},baseProfile.attributes||{}))throw new Error('PROGRAM_STATE_STALE');
     if (before.gymverse_active && JSON.parse(before.gymverse_active)) throw new Error('PROGRAM_ACTIVE_SESSION');

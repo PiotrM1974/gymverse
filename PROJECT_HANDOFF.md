@@ -1,3 +1,15 @@
+# PR #14 final corrections — 26 November 2026
+
+Current candidate supersedes previous 2.0.3 notes: profile switching is exclusively in Settings; home has a read-only active profile name. An open profile form blocks switching, and profile writes compare the UI registry snapshot inside the existing data lock. First-start bootstrap remains supported.
+
+Deleted programs now record optional planPrograms.archivedDayPlanIds in the existing per-profile registry. Day records remain available to history/drafts but are excluded from ordinary lists and new attachments. Live references have priority; active sessions block deletion. ZIP v5/profile export preserve the field, smart merge retains it and rejects stale program resurrection, and JSON v4 replacement cannot destroy retained archive records. No automatic migration or new storage system. App version 2.0.3; cache v59.
+
+Unit tests 221/221. Targeted Chromium/WebKit failures were diagnosed and their affected cases passed subsequent runs; exact separate results and limitations in [release report](docs/tasks/GV-RELEASE-203.md#końcowe-poprawki-pr-14--wykonanie-26112026). Home and Settings screenshots updated; approved art and other screenshots retained. No full E2E regression, physical iPhone or authentic legacy export verification. Existing old orphan days cannot be inferred safely and are not retroactively migrated. Older tabs may ignore archive metadata; localStorage atomicity limits remain.
+
+Authorized: commit and push these corrections to release/gymnastika-2.0.3, update PR #14 only. No merge/main push/deployment. Preserve unrelated local design boards and ignored PROJECT_MEMORY.md/outputs.
+
+---
+
 # Current candidate — GymNastika 2.0.3 (26 November 2026)
 
 This section supersedes the historical release/authorization notes below. PR #13 is merged; verified production main is 94a7511a047f9d421a10fcc24b217bde5789c6ab (2.0.2). Current release branch: release/gymnastika-2.0.3, based on that main. Owner authorizes commit/push of this branch and a new PR only; no main push, merge, deployment or new installation.

@@ -80,3 +80,12 @@ test('an independent deleted day stays deleted while a new program is saved',asy
   const saved=await commitProgramDraft(store,draft,{locks});
   expect(saved.plans.map(day=>day.id)).toEqual(draft.dayPlanIds);
 });
+
+import {deleteProgram} from '../../src/features/plans/programs.js';
+test('old new-program draft cannot reattach days archived after its snapshot',async()=>{
+ const registry=state(),days=[{id:'day',title:'Day',exercises:[{key:'bench_flat',sets:1,target:'8'}]}],draft=createProgramDraft(registry,days);attachDraftDay(draft,'day');
+ registry.profiles[0]=deleteProgram(createProgram(registry.profiles[0],days,{title:'Later',dayPlanIds:['day']},{id:'pg_'+'a'.repeat(32)}),'pg_'+'a'.repeat(32));
+ const store=storeFor(registry,days),before=structuredClone(store.data);
+ await expect(commitProgramDraft(store,draft,{locks})).rejects.toThrow('PROGRAM_STATE_STALE');expect(store.data).toEqual(before);
+ const fresh=createProgramDraft(registry,days);expect(()=>attachDraftDay(fresh,'day')).toThrow('PROGRAM_DAY_INVALID');
+});

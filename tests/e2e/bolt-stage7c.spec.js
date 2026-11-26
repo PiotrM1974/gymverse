@@ -66,7 +66,7 @@ async function inspect(p,day,weight){
  const before=await plans(p);await p.locator('[data-act="acceptProgressionReview"][data-plan-id="'+day.id+'"]').click();await expect(p.locator('#progressionReview')).toContainText('Decyzja zapisana');const after=await plans(p);expect(after.find(x=>x.id===day.id).exercises).toEqual(before.find(x=>x.id===day.id).exercises);expect(after.find(x=>x.id===day.id).progressionReview.currentLoad).toBe(weight);expect(await history(p)).toEqual(h);
  return {history:h,plans:after,total};
 }
-async function switchProfile(p,id){await nav(p,'plans');const navigation=p.waitForEvent('framenavigated',{predicate:f=>f===p.mainFrame()});await p.locator('#profileSelect').selectOption(id);await navigation;await expect(p.locator('#profileSelect')).toHaveValue(id);await expect.poll(async()=>(await state(p)).activeProfileId).toBe(id);await ready(p);}
+async function switchProfile(p,id){await p.getByRole('button',{name:'Ustawienia',exact:true}).click();const navigation=p.waitForEvent('framenavigated',{predicate:f=>f===p.mainFrame()});await p.locator('#profileSelect').selectOption(id);await navigation;await expect(p.locator('#profileSelect')).toHaveValue(id);await expect.poll(async()=>(await state(p)).activeProfileId).toBe(id);await ready(p);}
 
 test('two real generated programs complete workouts, progression and full ZIP restore without mixing profiles',async({page,browser},info)=>{
  // Two profiles, four workouts, responsive checks and real download/restore exceed a single-page test.

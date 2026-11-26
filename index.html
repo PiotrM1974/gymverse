@@ -282,7 +282,7 @@ select.select-custom, input.select-custom { width: 100%; background: var(--card-
     <section id="stage6Welcome" class="stage6-welcome" hidden aria-labelledby="stage6WelcomeTitle"><span class="stage6-kicker">TWÓJ TRENING ZACZYNA SIĘ TUTAJ</span><h1 id="stage6WelcomeTitle">Witaj w GymNastika</h1><p>Twój trening, Twoje tempo. Dane pozostają na tym urządzeniu.</p><button class="btn-primary" data-act="stage6CreateProfile">Utwórz profil</button><button class="btn-secondary" data-act="stage6Restore">Przywróć dane z kopii</button><button class="btn-secondary home-action" data-act="skipOnboarding">Pomiń na razie</button></section>
     <section id="legacyUpgradeWelcome" class="stage6-welcome legacy-upgrade-welcome" hidden aria-labelledby="legacyUpgradeWelcomeTitle"><span class="stage6-kicker">GYMNASTIKA 2.0</span><h2 id="legacyUpgradeWelcomeTitle">Witaj ponownie w GymNastika!</h2><p>Wykryliśmy dane z wcześniejszej wersji aplikacji. Możesz teraz uzupełnić swój profil, aby korzystać z nowych funkcji GymNastika 2.0.</p><button class="btn-primary" data-act="editProfile">Uzupełnij profil</button><button class="btn-secondary" data-act="dismissLegacyUpgrade">Kontynuuj bez zmian</button></section>
     <div class="home-title-row"><div class="home-title-copy"><p class="screen-eyebrow">Twój trening. Twoje tempo.</p><h1 class="screen-title">Witaj ponownie!</h1><p class="home-welcome-copy">Gotowy na kolejny trening?</p></div></div>
-    <section class="profile-box" aria-labelledby="profileHeading"><h2 id="profileHeading">Aktywny profil</h2><label class="profile-label" for="profileSelect">Profil</label><select id="profileSelect" class="select-custom" aria-label="Aktywny profil"></select></section>
+    <section class="profile-box" aria-labelledby="profileHeading"><h2 id="profileHeading">Aktywny profil</h2><p id="homeActiveProfile" class="home-active-profile"></p></section>
     <div id="resumeBox"></div>
     <div id="deloadBox"></div>
     <div id="weekStrip"></div>
@@ -292,7 +292,7 @@ select.select-custom, input.select-custom { width: 100%; background: var(--card-
     <input type="file" id="importFile" accept=".zip,.json,application/zip,application/json" style="display:none">
   </div>
 
-<div id="view-settings" class="view-section"><div class="view-head"><h1 class="screen-title">Ustawienia</h1><button class="btn-icon" data-act="view" data-view="view-plans" aria-label="Zamknij ustawienia">✕</button></div><section class="settings-card"><div class="settings-backup-heading"><div><h2>Kopie bezpieczeństwa</h2><p class="small muted">Zachowaj dane i przenieś je bezpiecznie.</p></div><div class="backup-menu-wrap" id="backupMenuWrap"><button type="button" class="backup-menu-toggle" id="backupMenuToggle" aria-label="Kopie bezpieczeństwa" title="Kopie bezpieczeństwa" aria-controls="backupActionMenu" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3h13l4 4v14H3V3h1z"/><path d="M7 3v6h10V3M7 21v-7h10v7M14 3v4"/></svg></button><div class="backup-action-menu" id="backupActionMenu" hidden aria-label="Akcje kopii bezpieczeństwa"><p class="small muted" id="backupInfo"></p><button class="btn-primary" data-act="export">Zapisz kopię</button><button class="btn-secondary" data-act="importBtn">Wczytaj kopię</button><button class="btn-secondary" data-act="openStorage">Otwórz kopie bezpieczeństwa</button><button class="btn-secondary" id="migrateDataButton" data-act="migrateData" disabled aria-describedby="backupMenuMigrationNote">Przygotuj bezpieczne przeniesienie danych</button><button class="btn-secondary" data-act="legacyImportBtn">Import JSON v4</button><button class="btn-secondary" data-act="exportProfile">Eksportuj profil</button><button class="btn-secondary" data-act="importProfile">Importuj profil</button><button class="btn-secondary" data-act="csv">Eksport CSV</button><p class="small muted backup-menu-note" id="backupMenuMigrationNote">Sprawdzanie, czy migracja jest dostępna…</p></div></div></div></section><section class="settings-card" id="settingsProfiles"><h2>Profile</h2><p id="settingsActiveProfile" class="small muted"></p><div class="profile-quick-actions"><button class="btn-secondary" data-act="addProfile">Dodaj profil</button></div><details id="profileManage"><summary>Zarządzaj profilami</summary><input id="profileImportFile" type="file" accept="application/json,.json" hidden><details style="margin-top:12px"><summary>Dodaj profil</summary><label for="newProfileName">Nazwa profilu</label><input id="newProfileName" class="select-custom" maxlength="60" autocomplete="name"><label for="newProfileAge">Wiek (opcjonalnie)</label><input id="newProfileAge" class="select-custom" type="number" min="1" max="120"><label for="newProfileSex">Płeć (opcjonalnie)</label><select id="newProfileSex" class="select-custom"><option value="">Nie podano</option><option value="female">Kobieta</option><option value="male">Mężczyzna</option><option value="other">Inna / wolę nie określać</option></select><label for="newProfileHeight">Wzrost cm (opcjonalnie)</label><input id="newProfileHeight" class="select-custom" type="number" min="80" max="250"><label for="newProfileWeight">Masa kg (opcjonalnie)</label><input id="newProfileWeight" class="select-custom" type="number" min="20" max="400" step="0.1"><label for="newProfileExperience">Doświadczenie (opcjonalnie)</label><select id="newProfileExperience" class="select-custom"><option value="">Nie podano</option><option value="beginner">Początkujące</option><option value="intermediate">Średnie</option><option value="advanced">Zaawansowane</option></select><label for="newProfileEquipment">Dostępny sprzęt (opcjonalnie)</label><select id="newProfileEquipment" class="select-custom" multiple size="5"><option value="bodyweight">Masa ciała</option><option value="dumbbells">Hantle</option><option value="barbell">Sztanga</option><option value="bench">Ławka</option><option value="cables">Wyciągi</option><option value="machines">Maszyny</option><option value="bands">Gumy</option><option value="pullup_bar">Drążek</option><option value="dip_bars">Poręcze</option></select><label for="newProfileRestrictions">Ruchy do pominięcia (opcjonalnie)</label><select id="newProfileRestrictions" class="select-custom" multiple size="4"><option value="overhead_press">Wyciskanie nad głową</option><option value="deep_knee_flexion">Głębokie ugięcie kolana</option><option value="hip_hinge">Skłon / zawias biodrowy</option><option value="floor_exercises">Ćwiczenia na podłodze</option></select><button class="btn-primary" data-act="createProfile">Utwórz profil</button></details><p class="small muted">Profile i treningi są przechowywane lokalnie na tym urządzeniu.</p></details></section><section class="settings-card" id="settingsPreferences"><h2>Globalne preferencje treningowe</h2><p class="small muted">Domyślne ustawienia dla treningów aktywnego profilu. Czas zapisany przy ćwiczeniu ma pierwszeństwo.</p><div id="settingsRestControls"></div><p class="small muted" id="settingsRestValue"></p><h3>Gryf w kalkulatorze</h3><div class="settings-preference-options"><button type="button" class="rp" data-act="bar" data-kg="20">20 kg</button><button type="button" class="rp" data-act="bar" data-kg="15">15 kg</button><button type="button" class="rp" data-act="bar" data-kg="10">10 kg</button></div><button class="btn-secondary" data-act="editProfile">Preferencje i sprzęt profilu</button></section><section class="settings-card" id="settingsAbout"><h2>O aplikacji</h2><p><strong>GymNastika 2.0.3</strong></p><p class="small muted">Plany, treningi, historia i postępy. Dane pozostają lokalnie na tym urządzeniu. Kopie bezpieczeństwa zapisujesz samodzielnie.</p></section></div>
+<div id="view-settings" class="view-section"><div class="view-head"><h1 class="screen-title">Ustawienia</h1><button class="btn-icon" data-act="view" data-view="view-plans" aria-label="Zamknij ustawienia">✕</button></div><section class="settings-card"><div class="settings-backup-heading"><div><h2>Kopie bezpieczeństwa</h2><p class="small muted">Zachowaj dane i przenieś je bezpiecznie.</p></div><div class="backup-menu-wrap" id="backupMenuWrap"><button type="button" class="backup-menu-toggle" id="backupMenuToggle" aria-label="Kopie bezpieczeństwa" title="Kopie bezpieczeństwa" aria-controls="backupActionMenu" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3h13l4 4v14H3V3h1z"/><path d="M7 3v6h10V3M7 21v-7h10v7M14 3v4"/></svg></button><div class="backup-action-menu" id="backupActionMenu" hidden aria-label="Akcje kopii bezpieczeństwa"><p class="small muted" id="backupInfo"></p><button class="btn-primary" data-act="export">Zapisz kopię</button><button class="btn-secondary" data-act="importBtn">Wczytaj kopię</button><button class="btn-secondary" data-act="openStorage">Otwórz kopie bezpieczeństwa</button><button class="btn-secondary" id="migrateDataButton" data-act="migrateData" disabled aria-describedby="backupMenuMigrationNote">Przygotuj bezpieczne przeniesienie danych</button><button class="btn-secondary" data-act="legacyImportBtn">Import JSON v4</button><button class="btn-secondary" data-act="exportProfile">Eksportuj profil</button><button class="btn-secondary" data-act="importProfile">Importuj profil</button><button class="btn-secondary" data-act="csv">Eksport CSV</button><p class="small muted backup-menu-note" id="backupMenuMigrationNote">Sprawdzanie, czy migracja jest dostępna…</p></div></div></div></section><section class="settings-card" id="settingsProfiles"><h2>Profile</h2><p id="settingsActiveProfile" class="small muted"></p><label class="profile-label" for="profileSelect">Profil</label><select id="profileSelect" class="select-custom" aria-label="Aktywny profil"></select><div class="profile-quick-actions"><button class="btn-secondary" data-act="addProfile">Dodaj profil</button></div><details id="profileManage"><summary>Zarządzaj profilami</summary><input id="profileImportFile" type="file" accept="application/json,.json" hidden><details style="margin-top:12px"><summary>Dodaj profil</summary><label for="newProfileName">Nazwa profilu</label><input id="newProfileName" class="select-custom" maxlength="60" autocomplete="name"><label for="newProfileAge">Wiek (opcjonalnie)</label><input id="newProfileAge" class="select-custom" type="number" min="1" max="120"><label for="newProfileSex">Płeć (opcjonalnie)</label><select id="newProfileSex" class="select-custom"><option value="">Nie podano</option><option value="female">Kobieta</option><option value="male">Mężczyzna</option><option value="other">Inna / wolę nie określać</option></select><label for="newProfileHeight">Wzrost cm (opcjonalnie)</label><input id="newProfileHeight" class="select-custom" type="number" min="80" max="250"><label for="newProfileWeight">Masa kg (opcjonalnie)</label><input id="newProfileWeight" class="select-custom" type="number" min="20" max="400" step="0.1"><label for="newProfileExperience">Doświadczenie (opcjonalnie)</label><select id="newProfileExperience" class="select-custom"><option value="">Nie podano</option><option value="beginner">Początkujące</option><option value="intermediate">Średnie</option><option value="advanced">Zaawansowane</option></select><label for="newProfileEquipment">Dostępny sprzęt (opcjonalnie)</label><select id="newProfileEquipment" class="select-custom" multiple size="5"><option value="bodyweight">Masa ciała</option><option value="dumbbells">Hantle</option><option value="barbell">Sztanga</option><option value="bench">Ławka</option><option value="cables">Wyciągi</option><option value="machines">Maszyny</option><option value="bands">Gumy</option><option value="pullup_bar">Drążek</option><option value="dip_bars">Poręcze</option></select><label for="newProfileRestrictions">Ruchy do pominięcia (opcjonalnie)</label><select id="newProfileRestrictions" class="select-custom" multiple size="4"><option value="overhead_press">Wyciskanie nad głową</option><option value="deep_knee_flexion">Głębokie ugięcie kolana</option><option value="hip_hinge">Skłon / zawias biodrowy</option><option value="floor_exercises">Ćwiczenia na podłodze</option></select><button class="btn-primary" data-act="createProfile">Utwórz profil</button></details><p class="small muted">Profile i treningi są przechowywane lokalnie na tym urządzeniu.</p></details></section><section class="settings-card" id="settingsPreferences"><h2>Globalne preferencje treningowe</h2><p class="small muted">Domyślne ustawienia dla treningów aktywnego profilu. Czas zapisany przy ćwiczeniu ma pierwszeństwo.</p><div id="settingsRestControls"></div><p class="small muted" id="settingsRestValue"></p><h3>Gryf w kalkulatorze</h3><div class="settings-preference-options"><button type="button" class="rp" data-act="bar" data-kg="20">20 kg</button><button type="button" class="rp" data-act="bar" data-kg="15">15 kg</button><button type="button" class="rp" data-act="bar" data-kg="10">10 kg</button></div><button class="btn-secondary" data-act="editProfile">Preferencje i sprzęt profilu</button></section><section class="settings-card" id="settingsAbout"><h2>O aplikacji</h2><p><strong>GymNastika 2.0.3</strong></p><p class="small muted">Plany, treningi, historia i postępy. Dane pozostają lokalnie na tym urządzeniu. Kopie bezpieczeństwa zapisujesz samodzielnie.</p></section></div>
 <div id="view-storage" class="view-section">
   <div class="view-head"><h2>Kopie bezpieczeństwa</h2><button class="btn-icon" data-act="view" data-view="view-settings" aria-label="Zamknij">✕</button></div>
   <p class="small muted">Dane pozostają na tym urządzeniu. Pełna kopia ZIP v5 obejmuje wszystkie lokalne profile, programy, historię, szkice i aktywne treningi.</p>
@@ -775,7 +775,9 @@ const DAY_LABELS = { mon: 'Poniedziałek', tue: 'Wtorek', wed: 'Środa', thu: 'C
 const exName = e => EXERCISE_NAMES_EN[e.key] || e.name || nameOf(e.key);
 const imgFor = e => e.key === SHARED_LEG_PRESS_MEDIA.exerciseId && ['default', SHARED_LEG_PRESS_MEDIA.variantId].includes(e.variantId)
   ? SHARED_LEG_PRESS_MEDIA.technique : safeImg(e.img) || IMG_BY_KEY[e.key] || safeImg(e.key) || 'none';
-const startable = () => PLANS.filter(p => p.exercises.length > 0);
+let PROGRAM_RELATIONS;
+const visiblePlans = () => {const archived=PROGRAM_RELATIONS?.archivedProgramDayIds(currentProgramProfile())||new Set();return PLANS.filter(p=>!archived.has(p.id));};
+const startable = () => visiblePlans().filter(p => p.exercises.length > 0);
 
 function cleanPlan(p, catalog = CATALOG) {
   if (!p || typeof p.id !== 'string' || !Array.isArray(p.exercises)) return null;
@@ -811,10 +813,13 @@ async function withPlanDataLock(operation) {
   return runWithLock(operation);
 }
 async function transactProfileUpdates(updates) {
+  const expectedRegistry=PROFILE_STATE&&structuredClone(PROFILE_STATE);
   const expected = Object.fromEntries(Object.keys(updates).filter(key => key.startsWith('gymverse_')).map(key => [key, STORE.storage.getItem(key)]));
   return withPlanDataLock(async () => {
     const latest = await STORE.refreshSnapshot();
     if (Object.entries(expected).some(([key, raw]) => (latest[key] ?? null) !== raw)) throw new Error('PLAN_DATA_STALE');
+    const {sameDataValue}=await import('./src/features/plans/plan-merge.js');
+    if(expectedRegistry&&!sameDataValue(JSON.parse(latest.gymverse_profiles_v1||'null'),expectedRegistry))throw new Error('PLAN_DATA_STALE');
     return STORE.transact(updates);
   });
 }
@@ -1298,7 +1303,7 @@ function nextPlanId() {
 function renderProfilePicker() {
   const select = $('profileSelect');
   if (!select || !PROFILE_STATE) return;
-  select.innerHTML = PROFILE_STATE.profiles.map(profile => `<option value="${esc(profile.id)}" ${profile.id === PROFILE_STATE.activeProfileId ? 'selected' : ''}>${esc(profile.name)}</option>`).join('');
+  select.innerHTML = PROFILE_STATE.profiles.map(profile => `<option value="${esc(profile.id)}" ${profile.id === PROFILE_STATE.activeProfileId ? 'selected' : ''}>${esc(profile.name)}${profile.id === PROFILE_STATE.activeProfileId ? ' — Aktywny' : ''}</option>`).join('');
   const activeProfile = PROFILE_STATE.profiles.find(profile => profile.id === PROFILE_STATE.activeProfileId);
   const onboarding = PROFILE_STATE.onboardingRequired === true;
   $('stage6Welcome').hidden = !onboarding;
@@ -1307,7 +1312,9 @@ function renderProfilePicker() {
   document.body.classList.toggle('stage6-onboarding', onboarding);
   if (!onboarding) document.body.classList.remove('stage6-profile-entry');
   $('profileHeading').textContent = onboarding ? 'Witaj w GymNastika!' : 'Aktywny profil';
-  $('profileHeading').hidden = !onboarding;
+  $('profileHeading').hidden = false;
+  $('homeActiveProfile').textContent = activeProfile?.name || '';
+  $('homeActiveProfile').hidden = onboarding;
   let welcome = $('profileWelcome');
   if (!welcome) {
     welcome = document.createElement('p'); welcome.id = 'profileWelcome'; welcome.className = 'small muted'; $('profileHeading').insertAdjacentElement('afterend', welcome);
@@ -1468,6 +1475,8 @@ function cancelProfileWizard() {
 }
 async function switchActiveProfile(targetId) {
   if (!PROFILE_STATE || !targetId || targetId === PROFILE_STATE.activeProfileId) return;
+  if(INTEGRITY_UNCERTAIN){renderProfilePicker();toast('Integralność danych jest niepewna. Przełączenie zablokowano.');return;}
+  if($('profileFormDetails')?.open){$('profileSelect').value=PROFILE_STATE.activeProfileId;toast('Zapisz albo anuluj edycję profilu przed przełączeniem.');return;}
   const { switchProfile } = await import('./src/features/profiles/profile-model.js');
   const current = await STORE.exportSnapshot();
   delete current.gymverse_profiles_v1;
@@ -1491,7 +1500,7 @@ function releasedThumbnail(exercise,className='exercise-thumbnail'){
 function currentPlanArtwork(){
   const profile=currentProgramProfile(),programs=profile?.planPrograms?.programs||[];
   const used=new Set(programs.flatMap(p=>p.dayPlanIds));
-  return GymnastikaProgramArt.allocate(profile?.id||'', [...programs.map(p=>'program:'+p.id),...PLANS.filter(p=>!used.has(p.id)).map(p=>'plan:'+p.id)]);
+  return GymnastikaProgramArt.allocate(profile?.id||'', [...programs.map(p=>'program:'+p.id),...visiblePlans().filter(p=>!used.has(p.id)).map(p=>'plan:'+p.id)]);
 }
 function programEquipmentArtwork(cover){
   if(!cover)return '';
@@ -1512,7 +1521,7 @@ function renderAssignedProgram(){
 function renderStage6Library() {
   const groups=currentProgramProfile()?.planPrograms?.programs || [];
   const used=new Set(groups.flatMap(p=>p.dayPlanIds));
-  const standalone=PLANS.filter(p=>!used.has(p.id));
+  const standalone=visiblePlans().filter(p=>!used.has(p.id));
   const programRows=groups.map(program=>`<button data-act="programPreview" data-id="${esc(program.id)}"><strong>${esc(program.title)}</strong><span>${programDayCountLabel(program.dayPlanIds.length)}</span><b aria-hidden="true">→</b></button>`).join('');
   const days=standalone.map(plan=>`<button data-act="stage6Preview" data-id="${esc(plan.id)}"><strong>${esc(plan.title)}</strong><span>${exerciseCountLabel(plan.exercises.length)}${plan.dayOfWeek ? ` · ${esc(DAY_LABELS[plan.dayOfWeek])}` : ''}</span><b aria-hidden="true">→</b></button>`).join('');
   $('stage6PlanList').innerHTML=`<button class="btn-primary" data-act="programNew">+ Utwórz program</button><h2>Programy treningowe</h2>${programRows || '<p>Brak programów wielodniowych w tym profilu.</p>'}<h2>Samodzielne treningi</h2>${days || '<p>Brak samodzielnych treningów.</p>'}`;
@@ -1617,7 +1626,7 @@ async function refreshProgramView(){
 async function deleteManagedProgram(id){
   if(INTEGRITY_UNCERTAIN||PLAN_EDIT_MODE!=='own'||!$('view-planedit').classList.contains('active'))return;
   const expected=MANAGED_PROGRAM_SNAPSHOTS.get(id);if(!expected)return;
-  if(!confirm('Usunąć ten program? Przypisanie zostanie usunięte, ale dni treningowe i historia pozostaną.'))return;
+  if(!confirm('Usunąć ten program? Jego dni znikną z list treningów. Historia i zapisane dane pozostaną zachowane.'))return;
   let before;
   try{
     await withPlanDataLock(async()=>{
@@ -1628,15 +1637,18 @@ async function deleteManagedProgram(id){
       const index=registry.profiles.findIndex(profile=>profile.id===expected.profileId);
       if(index<0)throw Error('PROGRAM_PREVIEW_STALE');
       const plans=before.gymverse_plans?cleanPlans(JSON.parse(before.gymverse_plans)):defaultPlans();
+      const session=JSON.parse(before.gymverse_active||'null');
+      if(session&&(session.programId===id||session.sessionContext?.programId===id||expected.program.dayPlanIds.includes(session.planId)))throw Error('PROGRAM_ACTIVE_SESSION');
       const next=structuredClone(registry);next.profiles[index]=deleteProgram(next.profiles[index],id);validatePlanPrograms(next.profiles[index].planPrograms,plans);
       await STORE.transact({gymverse_profiles_v1:next});await STORE.flush();
       const after=await STORE.refreshSnapshot();if(JSON.stringify(JSON.parse(after.gymverse_profiles_v1))!==JSON.stringify(next)){const error=Error('PROGRAM_READBACK_FAILED');error.integrityUncertain=true;throw error;}
-      PROFILE_STATE=next;PROGRAM_PREVIEW=null;renderAssignedProgram();renderPlanEditor();toast('Usunięto program. Dni treningowe i historia pozostały.');
+      PROFILE_STATE=next;PROGRAM_PREVIEW=null;renderAssignedProgram();renderPlanEditor();toast('Usunięto program i ukryto jego dni. Historia pozostała zachowana.');
     });
   }catch(error){
     let uncertain=!!error.integrityUncertain;
     if(before&&!uncertain){try{uncertain=(await STORE.refreshSnapshot()).gymverse_profiles_v1!==before.gymverse_profiles_v1;}catch{uncertain=true;}}
     if(uncertain){enterIntegrityUncertain();toast('Integralność danych jest niepewna. Zapisy zostały zablokowane.');}
+    else if(error.message==='PROGRAM_ACTIVE_SESSION')toast('Najpierw zakończ aktywny trening tego programu. Sesja i jej wyniki pozostają zachowane.');
     else if(error.message==='PROGRAM_PREVIEW_STALE'||error.message==='CROSS_TAB_CONFLICT')toast('Program lub przypisanie zmieniły się w innym oknie. Odśwież widok programów.');
     else toast('Nie usunięto programu. Jego dni treningowe i historia pozostały.');
   }
@@ -1647,7 +1659,7 @@ function renderPlans() {
   const done = lastDoneMap();
   const next = nextPlanId();
   const used=new Set((currentProgramProfile()?.planPrograms?.programs||[]).flatMap(program=>program.dayPlanIds));
-  const list = PLANS.filter(plan=>!used.has(plan.id));
+  const list = visiblePlans().filter(plan=>!used.has(plan.id));
   $('standalonePlans').hidden=!list.length;
   const artwork=currentPlanArtwork();
   const renderCard = p => {
@@ -3565,7 +3577,7 @@ function renderPlanEditorContent() {
     const profile=currentProgramProfile(),programs=profile?.planPrograms?.programs||[],used=new Set(programs.flatMap(p=>p.dayPlanIds));
     MANAGED_PROGRAM_SNAPSHOTS.clear();
     for(const p of programs)MANAGED_PROGRAM_SNAPSHOTS.set(p.id,{profileId:profile.id,programId:p.id,assignedProgramId:profile.planPrograms.assignedProgramId??null,program:structuredClone(p),days:p.dayPlanIds.map(id=>structuredClone(getPlan(id)))});
-    box.innerHTML = '<h2>Zapisane programy</h2><div class="managed-programs">'+programs.map(p=>`<article class="managed-program settings-card" data-id="${esc(p.id)}"><h3>${esc(p.title)}</h3><p>${programDayCountLabel(p.dayPlanIds.length)}${p.id===profile.planPrograms.assignedProgramId?' · Aktywny':''}</p><div class="program-actions"><button class="btn-secondary" data-act="programEdit" data-id="${esc(p.id)}">Edytuj program</button><button class="btn-secondary danger" data-act="programDelete" data-id="${esc(p.id)}">Usuń program</button></div></article>`).join('')+'</div><h2>Samodzielne treningi</h2><div class="plan-grid">' + PLANS.filter(p=>!used.has(p.id)).map(p => {
+    box.innerHTML = '<h2>Zapisane programy</h2><div class="managed-programs">'+programs.map(p=>`<article class="managed-program settings-card" data-id="${esc(p.id)}"><h3>${esc(p.title)}</h3><p>${programDayCountLabel(p.dayPlanIds.length)}${p.id===profile.planPrograms.assignedProgramId?' · Aktywny':''}</p><div class="program-actions"><button class="btn-secondary" data-act="programEdit" data-id="${esc(p.id)}">Edytuj program</button><button class="btn-secondary danger" data-act="programDelete" data-id="${esc(p.id)}">Usuń program</button></div></article>`).join('')+'</div><h2>Samodzielne treningi</h2><div class="plan-grid">' + visiblePlans().filter(p=>!used.has(p.id)).map(p => {
       const type = /^push/i.test(p.title) ? 'push' : /^pull/i.test(p.title) ? 'pull' : 'other';
       return `<div class="plan-card ${type}" data-act="peOpen" data-id="${esc(p.id)}" role="button" tabindex="0" aria-label="Edytuj plan ${esc(p.title)}"><span class="plan-type">${type === 'other' ? 'PLAN' : type.toUpperCase()}</span><div><h3>${esc(p.title)}</h3><p>${exerciseCountLabel(p.exercises.length)}</p></div><div class="plan-arrow" aria-hidden="true">✎</div></div>`;
     }).join('') + '</div><button class="btn-link danger" style="width:100%" data-act="peReset">Przywróć domyślne plany</button>';
@@ -4106,7 +4118,7 @@ async function importData(ev) {
       const plansDiffer = inPlans.length > 0 && JSON.stringify(inPlans) !== JSON.stringify(PLANS);
       const replacePlans = !!(plansDiffer && !active);
       const activeProfile = PROFILE_STATE?.profiles.find(profile => profile.id === PROFILE_STATE.activeProfileId);
-      if (replacePlans && activeProfile?.planPrograms?.programs.length) { toast('Import planów z JSON v4 jest zablokowany, ponieważ profil zawiera programy.'); return; }
+      if (replacePlans && (activeProfile?.planPrograms?.programs.length || activeProfile?.planPrograms?.archivedDayPlanIds?.length)) { toast('Import planów z JSON v4 jest zablokowany, ponieważ profil zawiera programy lub zachowane dni archiwalne. Historia bez zastępowania planów może być importowana osobno.'); return; }
       const targetProfileName = PROFILE_STATE?.profiles.find(profile => profile.id === PROFILE_STATE.activeProfileId)?.name || 'Mój profil';
       const importedDates = incoming.map(session => Date.parse(session.date)).filter(Number.isFinite).sort((a, b) => a - b);
       const dateRange = importedDates.length ? `${new Date(importedDates[0]).toLocaleDateString('pl-PL')}–${new Date(importedDates.at(-1)).toLocaleDateString('pl-PL')}` : 'brak poprawnego zakresu';
@@ -4664,8 +4676,9 @@ async function init() {
     });
     const { bootstrapProfileState } = await import('./src/features/profiles/profile-model.js');
     const initializedProfiles = bootstrapProfileState(await STORE.exportSnapshot());
-    PROFILE_STATE = initializedProfiles.state;
     if (Object.keys(initializedProfiles.updates).length) await transactProfileUpdates(initializedProfiles.updates);
+    PROFILE_STATE = initializedProfiles.state;
+    PROGRAM_RELATIONS=await import('./src/features/plans/programs.js');
     HISTORY_HELPERS=await import('./src/features/plans/history-context.js');
     await loadState();
     await STORE.flush();

@@ -96,3 +96,46 @@ Stan przygotowania: kandydat gotowy do PR i przeglądu. Scalenie/publikacja wyma
 - tests/unit/branding.test.js
 - tests/unit/program-art.test.js
 - tests/unit/service-worker.test.js
+
+## Poprawki po przeglądzie PR #14 — plan 26.11.2026
+
+Zakres autoryzowany przez właściciela: przenieść wybór profilu do Ustawień oraz ukrywać dni usuwanego programu bez kasowania rekordów. Minimalne opcjonalne pole planPrograms.archivedDayPlanIds w istniejącym rejestrze profili; brak pola oznacza dotychczasowe dane. Filtrowanie według identyfikatorów; istniejąca relacja programu ma pierwszeństwo. Zapis w istniejącej blokadzie/transakcji, ochrona aktywnej sesji, sprawdzanie szkiców i kopii ZIP. Bez migracji i bez osobnego archiwum UI. Testy jednostkowe, celowane Chromium/WebKit, dwa nowe zrzuty; potem commit/push tylko do PR #14.
+
+## Końcowe poprawki PR #14 — wykonanie 26.11.2026
+
+Ta sekcja zastępuje opis stanu pierwszego commita powyżej w zakresie profili, archiwizacji i cache. Nie zmieniono zaakceptowanych ilustracji, kart 3D, generatora ani pozostałej oprawy.
+
+### Profile
+
+Przyczyna: poprzednie porządkowanie przeniosło akcje administracyjne, ale pozostawiło sam picker na stronie głównej. Teraz jedyny profileSelect znajduje się w Ustawienia → Profile, wybór przełącza profil bez dodatkowego przycisku; aktualna opcja ma oznaczenie Aktywny. Na głównej widoczna jest kompaktowa etykieta i nazwa, bez formularza. Pierwszy start nadal korzysta z dotychczasowego kreatora.
+
+Otwarta edycja profilu blokuje przełączenie do czasu zapisu lub anulowania. Dane aktywnego treningu pozostają w profilu i można go wznowić po powrocie. Test dwóch kart wykazał realną lukę: stary PROFILE_STATE mógł zostać użyty z aktualnymi wartościami localStorage. transactProfileUpdates porównuje teraz migawkę rejestru UI z najnowszym rejestrem wewnątrz wspólnej blokady. Przy pierwszym starcie stan UI jest przypisywany dopiero po zapisaniu bootstrapu — kontrola wykryła i usunęła regresję kolejności inicjalizacji wprowadzoną przez to zabezpieczenie.
+
+### Usunięte programy
+
+Przyczyna: usuwano metadane programu, lecz zachowane dni nie miały informacji odróżniającej je od samodzielnych treningów.
+
+Minimalna zmiana trwałych danych: opcjonalna lista identyfikatorów planPrograms.archivedDayPlanIds w istniejącym rejestrze profili (schemaVersion nadal 1). Pole jest walidowane; brak pola zachowuje zgodność ze starymi danymi. Dodawane wyłącznie przy jawnej operacji usunięcia, bez migracji, nowego magazynu ani kasowania rekordów dni. Dni mające rzeczywiste powiązanie z innym programem są wyłączone z ukrywania; istniejące zasady tworzenia programów nie zostały poluzowane.
+
+Filtrowanie obejmuje ekran główny, bibliotekę, edytor, listę dni do dołączenia oraz wybór następnego treningu. Historia i jej filtry nadal mogą czytać pełne rekordy. Aktywna sesja programu/dnia, również z drugiej karty, blokuje usunięcie z jasnym komunikatem. Stary szkic nie może ponownie dołączyć zarchiwizowanego dnia. Zapis wykorzystuje istniejący Web Lock, aktualny odczyt, transact, readback, rollback i integrityUncertain.
+
+ZIP v5 i eksport profilu zachowują pole bez zmiany numeru formatu. Inteligentny import przenosi oznaczenie, a starszy program używający lokalnie zarchiwizowanych dni zgłasza konflikt zamiast cicho wrócić. Pełne zastępowanie planów przez JSON v4 jest chronione także po usunięciu ostatniego programu; import samej starszej historii nadal działa. Sprawdzono wyłącznie syntetyczny fixture v4.
+
+### Testy — odrębne przebiegi, nie jedna zielona regresja
+
+- Jednostkowe: 221/221, 27 plików; wcześniej celowane 72/72.
+- Chromium, pierwszy celowany zestaw: 24/30. Trzy błędy dotyczyły niewłaściwego wejścia testu do migracji; pozostałe: kolejności pól JSON po ZIP, odczytu przed zakończeniem zapisu sesji i rzeczywistej luki przełączenia profilu w drugiej karcie.
+- Chromium, ponowienie + nowe przypadki: 7/9. Kontrola ujawniła regresję bootstrapu po dodaniu ochrony oraz zbyt wczesne wpisywanie pól w teście przed zakończeniem zapisu RIR. Zastosowano oczekiwanie na rzeczywisty sygnał zapisu, bez opóźnień arbitralnych i bez osłabienia asercji danych.
+- Chromium, końcowe ponowienie niezaliczonych przypadków + rollback: 4/4.
+- Chromium, integracja dwóch rzeczywiście wygenerowanych programów, treningów/progresji i pełnego przywrócenia ZIP; offline v59; JSON v4: 3/3.
+- Chromium, końcowe LIGHT/DARK 320/375/390 px: 2/2.
+- Desktopowy WebKit: 19/20, jedyne niepowodzenie dotyczyło tego samego bootstrapu; po poprawce pierwszy start i JSON v4 2/2. Końcowa kontrola wizualna 2/2.
+- Wszystkie niepowodzenia w powyższym zakresie mają zaliczone celowane potwierdzenie po poprawkach. Nie wykonano pełnej regresji setek E2E. Nie uznaje się osobnych ponowień za jeden zielony przebieg.
+
+Scenariusze obejmują programy 1/3/6 dni w localStorage i IndexedDB, brak powracających kafelków po reloadzie, niezmienione rekordy planów i drugiego profilu, rzeczywisty trening/RIR/420 kg tonażu/Poprzednio, ZIP i przywrócenie w odizolowanym kontekście, szkice, aktywną sesję w dwóch kartach, odmowę zapisu, retry, zwolnienie blokady i niepewny rollback blokujący dalsze zapisy. Zrzuty domowego ekranu i Ustawień odświeżone, pozostałe pliki zrzutów zachowane.
+
+### PWA i ograniczenia
+
+Wersja aplikacji pozostaje 2.0.3; zmienione zasoby otrzymały cache gymverse-v59. Nie zmieniono cyklu aktywacji ani tożsamości PWA i nie czyszczono danych. Starsze otwarte karty/wersje nie rozumieją nowego oznaczenia archiwum; localStorage nadal nie ma natywnej atomowości wielu kluczy. Fizyczny iPhone i autentyczny historyczny eksport pozostają niezweryfikowane. Nie klasyfikujemy wstecz dni programów usuniętych przed dodaniem oznaczenia — utraconej relacji nie można bezpiecznie odgadnąć po nazwie. Archiwalne rekordy pozostają w kopiach i historii; nie dodano osobnego interfejsu archiwum.
+
+Status: gotowe do aktualizacji istniejącego PR #14. Bez merge, push main, deploy, nowych zależności lub operacji na danych właściciela.

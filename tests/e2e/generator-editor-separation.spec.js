@@ -349,7 +349,7 @@ test('deleting one historical workout preserves plans and the other session',asy
 test('generator and plan merge module are available offline in the new worker cache',async({page,context})=>{
   await boot(page);await page.evaluate(()=>navigator.serviceWorker.ready);await page.reload();
   expect(await page.evaluate(()=>!!navigator.serviceWorker.controller)).toBe(true);
-  expect(await page.evaluate(async()=>!!await (await caches.open('gymverse-v58')).match(new URL('./src/features/plans/plan-merge.js',location.href)))).toBe(true);
+  expect(await page.evaluate(async()=>!!await (await caches.open('gymverse-v59')).match(new URL('./src/features/plans/plan-merge.js',location.href)))).toBe(true);
   await context.setOffline(true);await page.reload();await enterGenerator(page);await generate(page,1);await page.locator('[data-act="saveGeneratedPreview"]').click();await expect(page.locator('#view-plans')).toHaveClass(/active/);
   const raw=await page.evaluate(()=>window.__gymverseTestHarness.getStore().refreshSnapshot());expect(JSON.parse(raw.gymverse_profiles_v1).profiles[0].planPrograms.assignedProgramId).toMatch(/^pg_[a-f0-9]{32}$/);await context.setOffline(false);
 });

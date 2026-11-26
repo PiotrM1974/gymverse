@@ -17,6 +17,9 @@ async function boot(page,count=4){
 
 test('settings contains profile and backup actions without cluttering home',async({page})=>{
  await boot(page);const before=await raw(page);
+ await expect(page.locator('#view-plans #profileSelect')).toHaveCount(0);
+ await expect(page.locator('#homeActiveProfile')).toHaveText('Profil testowy A');
+ await expect(page.locator('#settingsProfiles #profileSelect')).toHaveCount(1);
  await expect(page.locator('#view-plans [data-act="addProfile"]')).toHaveCount(0);
  await expect(page.locator('#view-plans #backupMenuToggle')).toHaveCount(0);
  await page.getByRole('button',{name:'Ustawienia',exact:true}).click();
@@ -71,9 +74,9 @@ test('settings expose existing profile-wide preferences and release info without
  await expect(page.locator('#settingsPreferences [data-act="rest"][data-sec="180"]')).toHaveAttribute('aria-pressed','true');
  await expect(page.locator('#settingsPreferences [data-act="bar"][data-kg="15"]')).toHaveAttribute('aria-pressed','true');
  const after=await raw(page);for(const key of ['gymverse_plans','gymverse_history','gymverse_active'])expect(after[key]).toBe(before[key]);
- await page.locator('.header-nav [data-view="view-plans"]').click();await page.locator('#profileSelect').selectOption('profile-b');await expect(page.locator('.program-card')).toHaveCount(1);
+ await page.locator('.header-nav [data-view="view-plans"]').click();await page.getByRole('button',{name:'Ustawienia',exact:true}).click();await page.locator('#profileSelect').selectOption('profile-b');await expect(page.locator('.program-card')).toHaveCount(1);
  await page.getByRole('button',{name:'Ustawienia',exact:true}).click();await expect(page.locator('#settingsPreferences [data-act="rest"][data-sec="0"]')).toHaveAttribute('aria-pressed','true');
- await page.locator('.header-nav [data-view="view-plans"]').click();await page.locator('#profileSelect').selectOption('profile-a');await expect(page.locator('.program-card')).toHaveCount(2);
+ await page.locator('.header-nav [data-view="view-plans"]').click();await page.getByRole('button',{name:'Ustawienia',exact:true}).click();await page.locator('#profileSelect').selectOption('profile-a');await expect(page.locator('.program-card')).toHaveCount(2);
  await page.locator('.program-card').first().click();await page.locator('[data-act="programDay"]').first().click();await page.locator('[data-act="programStart"]').click();
  await expect(page.locator('#exerciseRestCurrent')).toContainText('1:00');expect(JSON.parse((await raw(page)).gymverse_rest)).toBe(180);
 });
