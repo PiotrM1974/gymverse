@@ -1,3 +1,4 @@
+import {setGeneratorDays} from './helpers/generator-days.js';
 import { test, expect } from '@playwright/test';
 import { mkdir } from 'node:fs/promises';
 
@@ -167,7 +168,7 @@ test('all ten generator steps and real proposal stay usable at mobile widths', a
   for (let step = 1; step <= 10; step++) {
     await expect(page.locator('.generator-wizard > p').first()).toContainText(`Krok ${step} z 10`);
     await capture(page, info, `generator-step-${step}`, step === 1 || step === 10);
-    if (step === 2) await page.locator('#generatorDays').fill('3');
+    if (step === 2) await setGeneratorDays(page,3);
     if (step < 10) await page.locator('[data-act="generatorNext"]').click();
   }
   await page.locator('[data-act="generatePlan"]').click();
@@ -189,7 +190,7 @@ test('all ten generator steps and real proposal stay usable at mobile widths', a
   }
   await page.locator('#generatorPreview [data-act="editGeneratorAnswers"]').click();
   await page.locator('[data-act="generatorGoStep"][data-step="2"]').click();
-  await page.locator('#generatorDays').fill('6');
+  await setGeneratorDays(page,6);
   for(let step=3;step<=10;step++)await page.locator('[data-act="generatorNext"]').click();
   await page.locator('[data-act="generatePlan"]').click();
   await expect(page.locator('#generatorPreview .program-day-tabs button')).toHaveCount(6);

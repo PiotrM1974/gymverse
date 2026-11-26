@@ -1,3 +1,4 @@
+import {setGeneratorDays} from './helpers/generator-days.js';
 import {test,expect} from '@playwright/test';
 const action=(p,n)=>p.locator('[data-program-action="'+n+'"]');
 const snapshot=p=>p.evaluate(()=>window.__gymverseTestHarness.getStore().refreshSnapshot());
@@ -7,7 +8,7 @@ async function boot(page){
  await page.goto('/');await expect.poll(()=>page.evaluate(()=>!!window.__gymverseTestHarness)).toBe(true);await page.locator('#view-plans [data-act="stage6OpenChoices"]').click();await page.locator('[data-act="stage6Generator"]').click();
 }
 async function generate(page,count){
- await expect(page.locator('#generatorGoal')).toHaveValue('fitness');await page.locator('#generatorGoal').selectOption('hypertrophy');await page.locator('[data-act="generatorNext"]').click();await page.locator('#generatorDays').fill(String(count));await page.locator('[data-act="generatorNext"]').click();await page.locator('[data-act="generatorNext"]').click();await page.locator('[data-act="generatePlan"]').click();await expect(page.locator('#generatorPreview')).toBeVisible();
+ await expect(page.locator('#generatorGoal')).toHaveValue('fitness');await page.locator('#generatorGoal').selectOption('hypertrophy');await page.locator('[data-act="generatorNext"]').click();await setGeneratorDays(page,count);await page.locator('[data-act="generatorNext"]').click();await page.locator('[data-act="generatorNext"]').click();await page.locator('[data-act="generatePlan"]').click();await expect(page.locator('#generatorPreview')).toBeVisible();
 }
 async function enterGenerator(page){await page.locator('#view-plans [data-act="stage6OpenChoices"]').click();await page.locator('[data-act="stage6Generator"]').click();if(await page.locator('[data-act="generatorNew"]').isVisible())await page.locator('[data-act="generatorNew"]').click();await expect(page.locator('.generator-wizard')).toBeVisible();}
 for(const count of [1,2,3,4,5,6])test('generated '+count+' days retain records and save an assigned program',async({page},info)=>{

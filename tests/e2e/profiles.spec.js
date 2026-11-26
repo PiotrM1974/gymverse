@@ -1,3 +1,4 @@
+import {setGeneratorDays} from './helpers/generator-days.js';
 import { test, expect } from '@playwright/test';
 async function chooseProfileOptions(page,id,values){if(id==='newProfileRestrictions'&&!await page.locator('#profileRestrictionPicker').evaluate(e=>e.open))await page.locator('#profileRestrictionPicker > summary').click();if(id==='newProfileRestrictions'&&await page.locator('#profileExerciseGroup').count()&&!await page.locator('#profileExerciseGroup').evaluate(e=>e.open))await page.locator('#profileExerciseGroup > summary').click();for(const box of await page.locator('[data-profile-choice="'+id+'"]:checked').all())await box.uncheck();for(const value of values)await page.locator('[data-profile-choice="'+id+'"][value="'+value+'"]').check();}
 import { readFile, writeFile } from 'node:fs/promises';
@@ -284,7 +285,7 @@ test('ten-step generator captures a custom split and reviews every answer before
   await page.locator('#generatorGoal').selectOption('fat_loss');
   await page.locator('#generatorTargetWeight').fill('66');
   await page.locator('[data-act="generatorNext"]').click();
-  await page.locator('#generatorDays').fill('2');
+  await setGeneratorDays(page,2);
   await page.locator('[name="generatorSchedule"][value="mon"]').check();
   await page.locator('[name="generatorSchedule"][value="thu"]').check();
   await page.locator('[data-act="generatorNext"]').click();

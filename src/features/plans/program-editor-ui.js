@@ -152,11 +152,19 @@ export function createProgramEditorUI(api) {
       try{await flushWork();}catch(error){if(previous){activate(previous,false,false);error.previousGeneratedDraftRetained=true;}throw error;}
     },
     async updateGenerated(plans,selectedDay){draft.plans=[...structuredClone(draft.basePlans),...structuredClone(plans)];if(selectedDay&&draft.dayPlanIds.includes(selectedDay))selected=selectedDay;queueSave();await flushWork();},
+    async resumeWorkingDraft(id){
+      if(api.active()||api.uncertain()){api.notify('Nie można teraz otworzyć edycji. Dane szkicu pozostają zachowane.');return;}
+      try{
+        const raw=await api.store().refreshSnapshot(),state=JSON.parse(raw.gymverse_profiles_v1||'null');
+        const item=readWorkingDrafts(raw[DRAFT_KEY]).items.find(row=>row.id===id&&row.draft.profileId===state?.activeProfileId&&!row.draft.generatorAnswers);
+        if(!item)throw Error('DRAFT_NOT_FOUND');activate(item);
+      }catch{api.notify('Nie można wznowić szkicu. Otwórz ponownie listę szkiców.');}
+    },
     async generatedDrafts(){const raw=await api.store().refreshSnapshot(),state=JSON.parse(raw.gymverse_profiles_v1||'null');return readWorkingDrafts(raw[DRAFT_KEY]).items.filter(item=>item.draft.profileId===state?.activeProfileId&&item.draft.programId===null&&item.draft.generatorAnswers);},
     async resumeGeneratedDraft(id){const item=(await this.generatedDrafts()).find(row=>row.id===id);if(!item)throw Error('DRAFT_NOT_FOUND');activate(item,false,false);if(!draft.generatedProgramId){draft.generatedProgramId='pg_'+crypto.randomUUID().replaceAll('-','');queueSave();await flushWork();}return structuredClone(working);},
     async discardGeneratedDraft(id){const item=(await this.generatedDrafts()).find(row=>row.id===id);if(!item)throw Error('DRAFT_NOT_FOUND');await removeWorkingDraft(api.store(),item);},
     async cancelGenerated(){await flushWork();if(working?.revision)await removeWorkingDraft(api.store(),working);discard();},
-    async saveGeneratedAndAssign(){
+    async saveGeneratedAndAssign({assign=true,edit=false}={}){
       if(busy)return false;
       if(!draft?.generatorAnswers||!draft.generatedProgramId)throw Error('GENERATED_PROGRAM_NOT_READY');
       if(api.uncertain())throw Error('INTEGRITY_UNCERTAIN');
@@ -168,9 +176,9 @@ export function createProgramEditorUI(api) {
       const profile=state?.profiles?.find(item=>item.id===draft.profileId);
       if(state?.activeProfileId!==draft.profileId||!profile)throw Error('PROGRAM_STATE_STALE');
       const prior=profile.planPrograms?.programs.find(item=>item.id===profile.planPrograms.assignedProgramId);
-      if(prior&&!confirm(`Obecny program: ${prior.title}\nNowy program: ${draft.title}\nHistoria i wykonane treningi pozostaną zachowane. Zapisać i przypisać nowy program?`))return false;
-      const result=await commitProgramDraft(api.store(),draft,{custom,baseCustom,workingDraft:working,assignProgram:true});
-      api.saved(result,result.custom||custom,true);draft=null;working=null;editing=false;api.endDay();api.show('view-plans');api.notify('Program został zapisany i przypisany. Historia pozostała bez zmian.');return true;
+      if(assign&&prior&&!confirm(`Obecny program: ${prior.title}\nNowy program: ${draft.title}\nHistoria i wykonane treningi pozostaną zachowane. Zapisać i przypisać nowy program?`))return false;
+      const result=await commitProgramDraft(api.store(),draft,{custom,baseCustom,workingDraft:working,assignProgram:assign});
+      api.saved(result,result.custom||custom,true);draft=null;working=null;editing=false;api.endDay();api.show('view-plans');api.notify(assign?'Program został zapisany i przypisany. Historia pozostała bez zmian.':'Program został zapisany. Przypisanie profilu nie zmieniło się.');if(edit){busy=false;await open(result.programId);}return true;
       }finally{busy=false;}
     },
     showGenerated(mode,id){selected=id||selected;review=mode==='program';render();api.show('view-program-editor');if(mode==='day'){editing=true;api.restoreCustom(custom);api.editDay(selected);}if(mode==='save')host.querySelector('[data-program-action="save"]').click();},
