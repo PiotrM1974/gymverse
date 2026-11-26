@@ -1,5 +1,8 @@
 import { test, expect } from '@playwright/test';
 
+// Older workout scenarios continue after explicitly skipping the new rest screen.
+test.beforeEach(async ({ page }) => { await page.addLocatorHandler(page.locator('#restScreen:not([hidden])'), async () => { await page.waitForFunction(() => document.querySelector('#sessionSaveStatus').hidden); await page.locator('#restScreen [data-act="timerSkip" ]').click(); }); });
+
 test.beforeEach(async ({ page }) => {
   await page.goto('/');
   await page.waitForFunction(() => !!window.__gymverseTestHarness);
@@ -9,6 +12,16 @@ test.beforeEach(async ({ page }) => {
     request.onerror = () => reject(request.error);
   }));
 });
+
+async function installIndexedDbProfile(page, plans = []) {
+  await page.evaluate(plans => {
+    localStorage.setItem('gymverse_schema', '4');
+    localStorage.setItem('gymverse_plans', JSON.stringify(plans));
+    localStorage.setItem('gymverse_profiles_v1', JSON.stringify({ schemaVersion: 1, activeProfileId: 'indexeddb-test-profile', profiles: [{ id: 'indexeddb-test-profile', name: 'IndexedDB test', attributes: { age: 34, trainingGoal: 'fitness', equipment: ['machines', 'dumbbells', 'bench', 'cables'], restrictions: [] }, data: {}, planPrograms: { schemaVersion: 1, assignedProgramId: null, programs: [] } }] }));
+  }, plans);
+  await page.reload();
+  await page.waitForFunction(() => !!window.__gymverseTestHarness);
+}
 
 const syntheticSnapshot = () => ({
   gymverse_schema: 2,
@@ -20,13 +33,16 @@ const syntheticSnapshot = () => ({
 });
 
 const seedEditableState = async page => {
+  await page.waitForFunction(() => document.querySelector('#migrateDataButton')?.hidden === false);
   await page.evaluate(() => {
+    localStorage.removeItem('gymverse_profiles_v1');
     localStorage.setItem('gymverse_plans', JSON.stringify([{ id: 'p_synthetic', title: 'Plan syntetyczny', exercises: [{ key: 'bench_flat', sets: 2, target: '8-10' }] }]));
     localStorage.setItem('gymverse_custom', JSON.stringify({}));
     localStorage.setItem('gymverse_history', JSON.stringify([{ id: 'session-synthetic', date: '2026-02-03T12:00:00.000Z', planId: 'p_synthetic', planTitle: 'Plan syntetyczny', details: [{ id: 'set-synthetic', exerciseId: 'bench_flat', exerciseName: 'Wyciskanie sztangi na ławce płaskiej', setNumber: 1, weight: 40, reps: 8, date: '2026-02-03T12:00:00.000Z' }] }]));
   });
   await page.reload();
   await page.waitForFunction(() => !!window.__gymverseTestHarness);
+  await expect(page.locator('#migrateDataButton')).toBeVisible();
 };
 
 const activateThenFailIndexedDb = page => page.evaluate(async () => {
@@ -46,7 +62,7 @@ test('failed IndexedDB edit keeps the committed history set and reports the prop
   await seedEditableState(page);
   rejectEmergencyExportAndEnter(page);
   await activateThenFailIndexedDb(page);
-  await page.locator('[data-act="view"][data-view="view-history"]').click();
+  await page.getByRole('button', { name: 'Historia', exact: true }).click();
   await page.locator('[data-act="histToggle"][data-i="0"]').click();
   await page.locator('[data-act="histEditSet"][data-i="0"][data-d="0"]').click();
   await expect(page.locator('#historyList')).toContainText('40×8');
@@ -59,7 +75,7 @@ test('failed IndexedDB workout deletion keeps the committed session in history',
   await seedEditableState(page);
   rejectEmergencyExportAndEnter(page);
   await activateThenFailIndexedDb(page);
-  await page.locator('[data-act="view"][data-view="view-history"]').click();
+  await page.getByRole('button', { name: 'Historia', exact: true }).click();
   await page.locator('[data-act="histToggle"][data-i="0"]').click();
   await page.locator('[data-act="histDelete"][data-i="0"]').click();
   await expect(page.locator('#historyList')).toContainText('Plan syntetyczny');
@@ -313,6 +329,7 @@ test('blocks direct source-storage writes throughout the critical migration wind
 
 test('does not mark a set complete before IndexedDB confirms the write', async ({ page }) => {
   page.on('dialog', dialog => dialog.dismiss());
+  await installIndexedDbProfile(page, [{ id: 'push_a1', title: 'Push A1', exercises: [{ key: 'bench_flat', sets: 1, target: '8-12' }] }]);
   await page.locator('[data-act="startPlan"][data-plan="push_a1"]').click();
   await page.locator('#weight_0').fill('40');
   await page.locator('#reps_0').fill('8');
@@ -334,13 +351,14 @@ test('does not mark a set complete before IndexedDB confirms the write', async (
 
 test('does not report a body measurement saved when IndexedDB rejects it', async ({ page }) => {
   page.on('dialog', dialog => dialog.dismiss());
+  await installIndexedDbProfile(page);
   await page.evaluate(async () => {
     const runtime = window.__gymverseTestHarness.getStore();
     const preview = await runtime.previewMigration();
     await runtime.activateMigration(preview, { sourceExportVerified: true, v5ExportVerified: true });
     IDBFactory.prototype.open = () => { throw new DOMException('synthetic measurement write failure', 'UnknownError'); };
   });
-  await page.locator('[data-act="view"][data-view="view-stats"]').first().click();
+  await page.locator('.header-nav [data-act="view"][data-view="view-stats"]').click();
   await page.locator('#bodyInput').fill('80');
   const sourceBefore = await page.evaluate(() => localStorage.getItem('gymverse_body'));
   await page.locator('[data-act="bodySave"]').click();
@@ -352,13 +370,20 @@ test('does not report a body measurement saved when IndexedDB rejects it', async
 });
 
 test('keeps the iOS share action inside a second user gesture and explains saving to Files', async ({ page }) => {
+  await expect(page.locator('#stage6Welcome')).toBeVisible();
+  await page.locator('[data-act="stage6CreateProfile"]').click();
+  await page.locator('#newProfileName').fill('Profil syntetyczny');
+  for (let step=1;step<4;step++) await page.locator('#profileWizard [data-act="profileNext"]').click();
+  await page.locator('#profileWizard [data-act="createProfile"]').click();
+  await page.locator('#view-plan-choices [data-act="stage6Skip"]').first().click();
+  await page.locator('[data-act="openStorage"]').click();
   await page.evaluate(() => {
     Object.defineProperty(navigator, 'userAgent', { configurable: true, value: 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 Mobile' });
     Object.defineProperty(navigator, 'canShare', { configurable: true, value: () => true });
     window.__shareGestureActive = false;
     Object.defineProperty(navigator, 'share', { configurable: true, value: () => { window.__shareGestureActive = !!navigator.userActivation?.isActive; return Promise.resolve(); } });
   });
-  await page.locator('[data-act="export"]').first().click();
+  await page.locator('#view-storage [data-act="export"]').click();
   await expect(page.locator('#fileDeliveryPrompt')).toBeVisible();
   await expect(page.locator('#fileDeliveryInstructions')).toContainText('Zapisz w Plikach');
   expect(await page.evaluate(() => window.__shareGestureActive)).toBe(false);
@@ -408,7 +433,7 @@ test('restores a synthetic ZIP v5 atomically after cutover and idles the restore
       gymverse_history: [{ id: 'restored-synthetic', date: '2026-02-03T12:00:00.000Z', details: [{ exerciseId: 'bench_flat', weight: 55, reps: 6 }] }],
       gymverse_last_weights: { bench_flat: [{ weight: 55, reps: 6 }] },
       gymverse_body: [{ date: '2026-02-03', kg: 80 }],
-      gymverse_plans: [], gymverse_custom: {}, gymverse_active: { planId: 'synthetic', timerEndAt: 9999999999999, sets: [] },
+      gymverse_plans: [], gymverse_custom: {}, gymverse_active: { planId: 'synthetic', timerEndAt: 9999999999999, restState: { endsAt: 9999999999999, pausedLeft: null, duration: 60, completedStep: 0, completedSet: 1, completedName: 'Synthetic', targetStep: 0, targetSet: 2 }, sets: [] },
       gymverse_draft_v1: { version: 1, items: [{ planId: 'synthetic', sessionId: 's1', step: 0, setNumber: 1, weight: '55', reps: '6' }] },
       gymverse_rest: 180, gymverse_bar: 15
     }, { createdAt: '2026-02-04T00:00:00.000Z' });
@@ -426,9 +451,39 @@ test('restores a synthetic ZIP v5 atomically after cutover and idles the restore
   expect(result.weights.bench_flat[0].weight).toBe(55);
   expect(result.body[0].kg).toBe(80);
   expect(result.active.timerEndAt).toBe(0);
+  expect(result.active.restState).toBeUndefined();
   expect(result.drafts.items[0].weight).toBe('55');
   expect(result.rest).toBe(180);
   expect(result.bar).toBe(15);
+});
+
+test('restores auxiliary history and media for every non-active profile in ZIP v5', async ({ page }) => {
+  const result = await page.evaluate(async () => {
+    const runtime = window.__gymverseTestHarness.getStore();
+    const initialSource = await runtime.previewMigration();
+    await runtime.activateMigration(initialSource, { sourceExportVerified: true, v5ExportVerified: true });
+    const { createBackupV5, previewBackupV5, restoreBackupV5, readLegacyInterpretations, readCustomMedia } = await import('./src/gv-data.js');
+    const profileId = 'profile-second-0001';
+    const interpretation = { id: 'synthetic-history-rule', exerciseId: 'bench_flat', sessionIds: ['synthetic-session'], ruleVersion: 1, source: 'user_confirmed', confirmedAt: '2026-02-04T00:00:00.000Z', interpretation: { unit: 'user_confirmed' } };
+    const bytes = new Uint8Array([137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 0]);
+    const snapshot = {
+      gymverse_schema: 4, gymverse_history: [], gymverse_last_weights: {}, gymverse_body: [], gymverse_plans: [], gymverse_custom: {},
+      gymverse_profiles_v1: { schemaVersion: 1, activeProfileId: 'legacy-default-profile', profiles: [
+        { id: 'legacy-default-profile', name: 'Profil syntetyczny', createdAt: '2026-02-01T00:00:00.000Z', attributes: { age: null, sex: null, heightCm: null, weightKg: null, experience: null, equipment: [], restrictions: [] }, data: {} },
+        { id: profileId, name: 'Drugi profil syntetyczny', createdAt: '2026-02-02T00:00:00.000Z', attributes: { age: null, sex: null, heightCm: null, weightKg: null, experience: null, equipment: [], restrictions: [] }, data: {} }
+      ] }
+    };
+    const archive = await createBackupV5(snapshot, { profileAuxiliaries: [{ profileId, interpretations: [interpretation], media: [{ name: 'custom-media/synthetic.png', bytes }] }] });
+    const preview = await previewBackupV5(archive);
+    const restored = await restoreBackupV5(runtime.storage, preview, { confirmed: true, restoreActive: false, restoreDrafts: false });
+    const interpretations = await readLegacyInterpretations({ profileId });
+    const media = await readCustomMedia({ profileId });
+    return { restored, interpretations, media: media.map(item => ({ name: item.name, bytes: Array.from(item.bytes) })) };
+  });
+  expect(result.restored.status).toBe('restored');
+  expect(result.restored.profileAuxiliaries).toBe(2);
+  expect(result.interpretations.map(item => item.id)).toContain('synthetic-history-rule');
+  expect(result.media).toEqual([{ name: 'custom-media/synthetic.png', bytes: [137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 0] }]);
 });
 
 test('exports ZIP v5 from the active IndexedDB snapshot after cutover', async ({ page }) => {
@@ -583,6 +638,7 @@ test('restores a synthetic ZIP v5 through the application confirmation flow', as
   await page.evaluate(() => localStorage.setItem('gymverse_history', JSON.stringify([{ date: 'old synthetic state', details: [] }])));
   page.on('dialog', dialog => dialog.accept());
   await page.locator('#importFile').setInputFiles({ name: 'gymverse_backup_synthetic.zip', mimeType: 'application/zip', buffer: Buffer.from(archiveBytes) });
+  await page.locator('[data-backup-choice="restore"]') .click();
   await page.waitForFunction(() => {
     try { return JSON.parse(localStorage.getItem('gymverse_history') || '[]')[0]?.date === '2026-02-03T12:00:00.000Z'; }
     catch { return false; }
@@ -594,8 +650,10 @@ test('restores a synthetic ZIP v5 through the application confirmation flow', as
   expect(restored.active.startedAt).toBe(2);
   expect(restored.drafts.items).toHaveLength(1);
   const interpretations = await page.evaluate(async () => {
+    const store = window.__gymverseTestHarness.getStore();
+    const profileId = store.get('gymverse_profiles_v1')?.activeProfileId;
     const { readLegacyInterpretations, readCustomMedia } = await import('./src/gv-data.js');
-    return { interpretations: await readLegacyInterpretations(), media: await readCustomMedia() };
+    return { interpretations: await readLegacyInterpretations({ profileId }), media: await readCustomMedia({ profileId }) };
   });
   expect(interpretations.interpretations).toHaveLength(1);
   expect(interpretations.interpretations[0]).toMatchObject({ source: 'user_confirmed', exerciseId: 'synthetic' });
@@ -642,7 +700,7 @@ test('service worker installs and serves the backup module and ZIP codec offline
   await page.reload();
   await page.waitForFunction(() => !!navigator.serviceWorker.controller);
   const cached = await page.evaluate(async () => {
-    const cache = await caches.open('gymverse-v20');
+    const cache = await caches.open('gymverse-v55');
     return {
       module: !!await cache.match(new URL('src/gv-data.js', location.href).href),
       codec: !!await cache.match(new URL('src/vendor/zip.min.js', location.href).href)

@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://gymverse.invalid/schemas/exercise-presentation-extension-v1.schema.json",
+  "title": "Exercise presentation extension v1",
+  "description": "Local-candidate presentation registry. Does not replace or alter exercise-image-manifest v1.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["presentationContractVersion", "status", "records"],
+  "properties": {
+    "presentationContractVersion": { "const": 1 },
+    "status": { "const": "local-candidate" },
+    "records": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 34,
+      "items": { "$ref": "#/$defs/record" }
+    }
+  },
+  "$defs": {
+    "asset": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "mimeType", "width", "height", "sizeBytes", "sha256", "altText", "status"],
+      "properties": {
+        "path": { "type": "string", "pattern": "^src/data/exercise-images/selected/(technique|thumbnails)/[a-z0-9_]+__[a-z0-9_]+-(male|female)\\.webp$" },
+        "mimeType": { "const": "image/webp" },
+        "width": { "type": "integer", "minimum": 1 },
+        "height": { "type": "integer", "minimum": 1 },
+        "sizeBytes": { "type": "integer", "minimum": 1 },
+        "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "altText": { "type": "string", "minLength": 1 },
+        "status": { "const": "local-candidate" }
+      }
+    },
+    "sexViews": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["technique", "thumbnail"],
+      "properties": { "technique": { "$ref": "#/$defs/asset" }, "thumbnail": { "$ref": "#/$defs/asset" } }
+    },
+    "record": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["exerciseId", "variantId", "status", "positions", "bySex", "musclePresentation"],
+      "properties": {
+        "exerciseId": { "type": "string", "pattern": "^[a-z0-9_]+$" },
+        "variantId": { "type": "string", "pattern": "^[a-z0-9_]+$" },
+        "status": { "const": "local-candidate" },
+        "positions": { "type": "object", "additionalProperties": false, "required": ["lower", "raised"], "properties": { "lower": { "const": "left" }, "raised": { "const": "right" } } },
+        "labels": { "type": "object", "additionalProperties": false, "required": ["lower", "raised"], "properties": { "lower": { "type": "string", "minLength": 1 }, "raised": { "type": "string", "minLength": 1 } } },
+        "copy": { "type": "object", "additionalProperties": false, "required": ["lower", "raised", "details", "thumbnail"], "properties": { "lower": { "type": "string", "minLength": 1 }, "raised": { "type": "string", "minLength": 1 }, "details": { "type": "string", "minLength": 1 }, "thumbnail": { "type": "string", "minLength": 1 } } },
+        "bySex": { "type": "object", "additionalProperties": false, "required": ["male", "female"], "properties": { "male": { "$ref": "#/$defs/sexViews" }, "female": { "$ref": "#/$defs/sexViews" } } },
+        "musclePresentation": { "type": "object", "additionalProperties": false, "required": ["kind", "exerciseId"], "properties": { "kind": { "const": "atlas" }, "exerciseId": { "type": "string", "pattern": "^[a-z0-9_]+$" } } }
+      }
+    }
+  }
+}

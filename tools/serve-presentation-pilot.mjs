@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url';
 const root = await realpath(resolve(fileURLToPath(new URL('..', import.meta.url))));
 const port = Number(process.env.PORT || 41981);
 const mount = '/gymverse';
-const inputSnapshots = resolve(root, 'outputs/GV-EXERCISE-PRESENTATION-CONTRACT-AND-PILOT/snapshots/input');
+const inputSnapshots = resolve(root, 'tests/fixtures/exercise-presentation-pilot/snapshots/input');
 let release = process.env.PRESENTATION_RELEASE || 'production';
 const contentTypes = {
   '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.mjs': 'text/javascript; charset=utf-8',
@@ -32,7 +32,7 @@ const server = createServer(async (request, response) => {
     if (url.pathname === mount) { response.writeHead(308, { location: `${mount}/${url.search}` }); response.end(); return; }
     if (!url.pathname.startsWith(`${mount}/`)) { response.writeHead(404); response.end('Not found'); return; }
     const relative = decodeURIComponent(url.pathname.slice(mount.length + 1)) || 'index.html';
-    if (release === 'pilot-fail' && relative === 'outputs/GV-LAT-RAISE-MALE-FEMALE/selected/technique/lat_raise_stand__default-male.webp') {
+    if (release === 'pilot-fail' && relative === 'src/data/exercise-images/selected/technique/lat_raise_stand__default-male.webp') {
       response.writeHead(503, { 'content-type': 'text/plain; charset=utf-8', 'cache-control': 'no-store', 'x-pilot-release': release });
       response.end('synthetic required candidate asset failure'); return;
     }

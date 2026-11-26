@@ -1,0 +1,61 @@
+import { chromium, expect } from '@playwright/test';
+import fs from 'node:fs/promises';
+import {execFileSync} from 'node:child_process';
+import {createHash} from 'node:crypto';
+const url='https://piotrm1974.github.io/gymverse/';
+const out='outputs/GV-PHASE0-RELEASE';
+const hash=b=>createHash('sha256').update(b).digest('hex');
+const evidence={release:'fc6f1778483c3e623003be2479ce786be9baf1ae',publishedCommit:'e5b119251ac442796d399f123420412164a62813',synthetic:true,files:{}};
+for(const file of ['index.html','sw.js','src/gv-data.js','src/ui/signal.css']){
+ const response=await fetch(url+file); if(!response.ok)throw Error(file+': '+response.status);
+ const actual=Buffer.from(await response.arrayBuffer());
+ const expected=execFileSync('git',['show','fc6f177:'+file]);
+ if(hash(actual)!==hash(expected))throw Error('Public bytes differ: '+file);
+ evidence.files[file]=hash(actual);
+}
+const browser=await chromium.launch({channel:'msedge'});
+try {
+ const context=await browser.newContext({acceptDownloads:true,viewport:{width:390,height:844}});
+ const page=await context.newPage();const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.addInitScript(()=>Object.defineProperty(navigator,'canShare',{configurable:true,value:()=>false}));
+ page.on('dialog',d=>d.accept());
+ await page.goto(url);await page.locator('[data-act="export"]').first().waitFor();
+ await page.evaluate(()=>{
+  localStorage.setItem('gymverse_plans',JSON.stringify([{id:'release_synthetic',title:'Synthetic release test',exercises:[{key:'bench_flat',variantId:'default',sets:3,target:'8-12'}]}]));
+  localStorage.setItem('gymverse_history',JSON.stringify([{id:'release-history',date:'2026-01-01T12:00:00.000Z',planId:'release_synthetic',planTitle:'Synthetic release test',details:[75,70,65].map((weight,i)=>({id:'release-set-'+i,exerciseId:'bench_flat',variantId:'default',exerciseName:'Synthetic',setNumber:i+1,weight,reps:8}))}]));
+ });
+ await page.reload();await page.evaluate(()=>navigator.serviceWorker.ready);
+ await page.locator('[data-act="startPlan"][data-plan="release_synthetic"]').click();
+ await expect(page.locator('.prev-val')).toHaveText(['75 kg × 8','70 kg × 8','65 kg × 8']);
+ await page.locator('#weight_0').fill('77,5');await page.locator('#reps_0').fill('8');await page.locator('#btnDone_0').click();
+ await expect(page.locator('#btnDone_0')).toHaveClass(/completed/);
+ await page.locator('[data-act="swapOpen"]').first().click();await page.locator('[data-act="chooseSwap"][data-key="db_bench"]').click();
+ await expect(page.locator('#anatomyAtlas')).toHaveAttribute('data-exercise-id','db_bench');
+ await page.reload();await page.locator('[data-act="resume"]').click();
+ const saved=await page.evaluate(()=>JSON.parse(localStorage.getItem('gymverse_active')).sets);
+ expect(saved[0].key).toBe('bench_flat');expect(saved[0].weight).toBe(77.5);
+ await expect(page.locator('#exercisePresentationImage')).toHaveAttribute('src',/db_bench/);
+ await page.screenshot({path:out+'/public-light.png',fullPage:true});
+ await page.emulateMedia({colorScheme:'dark'});await page.screenshot({path:out+'/public-dark.png',fullPage:true});
+ await page.locator('[data-act="finish"]').click();
+ const history=await page.evaluate(()=>JSON.parse(localStorage.getItem('gymverse_history')));
+ expect(history.at(-1).details[0].weight).toBe(77.5);
+ await page.locator('.logo[data-view="view-plans"]').click();
+ await page.locator('[data-act="export"]').first().click();await page.locator('#fileDeliveryPrompt').waitFor();
+ const downloading=page.waitForEvent('download');await page.locator('[data-act="deliverPreparedFile"]').click();
+ const download=await downloading;const backup=out+'/published-v20-synthetic.zip';await download.saveAs(backup);
+ const restored=await browser.newContext();const p=await restored.newPage();p.on('dialog',d=>d.accept());
+ await p.goto(url);await p.evaluate(()=>navigator.serviceWorker.ready);await p.reload();
+ await expect.poll(()=>p.evaluate(()=>!!navigator.serviceWorker.controller)).toBe(true);
+ await restored.setOffline(true);await p.reload();
+ const reload=p.waitForEvent('framenavigated',{predicate:f=>f===p.mainFrame()});
+ await p.locator('#importFile').setInputFiles(backup);await reload;
+ await expect.poll(()=>p.evaluate(()=>JSON.parse(localStorage.getItem('gymverse_history')||'[]'))).toEqual(history);
+ await context.setOffline(true);await page.reload();
+ await expect(page.locator('[data-act="startPlan"][data-plan="release_synthetic"]')).toBeVisible();
+ expect(errors).toEqual([]);
+ evidence.checks=['public bytes match release','start and previous results','save and swap preserve original set','reload and resume','history save','UI ZIP download','offline restore in clean context','offline reload'];
+ evidence.cache=await page.evaluate(()=>caches.keys());expect(evidence.cache).toContain('gymverse-v20');
+ evidence.exportSha256=hash(await fs.readFile(backup));evidence.result='PASS';
+ await fs.writeFile(out+'/public-verification.json',JSON.stringify(evidence,null,2)+'\n');console.log(evidence);
+}finally{await browser.close();}

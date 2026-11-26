@@ -29,7 +29,7 @@ describe('GymNastika rebrand compatibility', () => {
     }
     expect(indexHtml).toContain("app: 'gymverse'");
     expect(indexHtml).toContain('GymVerseBaseB');
-    expect(serviceWorker).toContain("const CACHE = LOCAL_PRESENTATION_PILOT ? 'gymverse-v36-presentation-pilot' : 'gymverse-v20'");
+    expect(serviceWorker).toContain("const CACHE = LOCAL_PRESENTATION_PILOT ? 'gymverse-v36-presentation-pilot' : 'gymverse-v55'");
     expect(serviceWorker).toContain('GYMVERSE_COUNT_APP_CLIENTS');
     expect(serviceWorker).toContain("'manifest.webmanifest'");
   });

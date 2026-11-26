@@ -5,14 +5,19 @@ const output = 'outputs/GV-SESSION-RESULTS-AND-SWAPS';
 const detail = (setNumber, weight, reps, extra = {}) => ({ exerciseId: 'bench_flat', exerciseName: 'Stara nazwa', setNumber, weight, reps, ...extra });
 const session = (details, extra = {}) => ({ date: '2026-01-01T12:00:00.000Z', planId: 'synthetic_session', planTitle: 'Synthetic', details, ...extra });
 const three = () => session([detail(1, 75, 8), detail(2, 70, 10), detail(3, 65, 12)]);
+let seedSequence=0;
 async function seed(page, history = [], exercise = {}) {
-  await page.goto('/');
-  await page.evaluate(({ history, exercise }) => {
-    localStorage.clear(); sessionStorage.clear();
+  const seedId=String(++seedSequence);
+  await page.addInitScript(({ history, exercise, seedId }) => {
+    if(new URL(location.href).searchParams.get("fixture")!==seedId)return;
+    if(localStorage.getItem('7b-session-fixture')===seedId)return;
+    localStorage.clear();sessionStorage.clear();
+    localStorage.setItem('7b-session-fixture',seedId);
     localStorage.setItem('gymverse_plans', JSON.stringify([{ id: 'synthetic_session', title: 'Synthetic', exercises: [{ key: 'bench_flat', variantId: 'default', sets: 3, target: '8-12', ...exercise }] }]));
     localStorage.setItem('gymverse_history', JSON.stringify(history));
-  }, { history, exercise });
-  await page.reload();
+    localStorage.setItem('gymverse_profiles_v1', JSON.stringify({ schemaVersion: 1, activeProfileId: 'session-results-profile', profiles: [{ id: 'session-results-profile', name: 'Profil syntetyczny', attributes: { trainingGoal: 'fitness' }, data: {}, planPrograms: { schemaVersion: 1, assignedProgramId: null, programs: [] } }] }));
+  }, { history, exercise, seedId });
+  await page.goto('/?fixture='+seedId,{waitUntil:'domcontentloaded'});
   await page.locator('[data-act="startPlan"][data-plan="synthetic_session"]').click();
 }
 const state = page => page.evaluate(() => JSON.parse(localStorage.getItem('gymverse_active')));
@@ -21,6 +26,7 @@ async function save(page, i, weight = '40', reps = '8') {
   await page.locator('#reps_' + i).fill(reps);
   await page.locator('#btnDone_' + i).click();
   await expect(page.locator('#btnDone_' + i)).toHaveClass(/completed/);
+  if (await page.locator('#restScreen').isVisible()) await page.locator('#restScreen [data-act="timerSkip"]').click();
 }
 async function resume(page) {
   await page.reload();
@@ -57,6 +63,7 @@ for (const width of [320,375,390,430,1280]) for (const theme of ['light','dark']
     await mkdir(output,{recursive:true});
     await page.locator('.workout-control-card').screenshot({style: '#appHeader { visibility:hidden !important; }', path:`${output}/${info.project.name}-${width}-${theme}-series.png`});
     await page.getByRole('button',{name:'Historia',exact:true}).click();
+    await page.locator('#historyAddPanel > summary').click();
     await expect(page.locator('#histNewDate')).toBeVisible();
     const dateBounds=await page.locator('#histNewDate').evaluate(el=>{
       const r=el.getBoundingClientRect(),p=el.parentElement.getBoundingClientRect(),s=getComputedStyle(el.parentElement);
@@ -132,7 +139,7 @@ for(const completed of [0,1,2]) test(`swap after ${completed} sets preserves ide
   await resume(page);
   expect((await state(page)).sets).toEqual(before.sets);
   for(let i=completed;i<3;i++) await save(page,i,'22,5','10');
-  await page.locator('[data-act="timerSkip"]').click();
+  if (await page.locator('#restScreen').isVisible()) await page.locator('#restScreen [data-act="timerSkip"]').click();
   await page.locator('.workout-control-card').screenshot({style: '#appHeader { visibility:hidden !important; }', path:`${output}/${info.project.name}-swap-after-${completed}.png`});
   await page.locator('[data-act="finish"]').click();
   const history=await page.evaluate(()=>JSON.parse(localStorage.getItem('gymverse_history')));
@@ -174,6 +181,7 @@ test('manual history edits and deletion refresh previous values',async({page})=>
   await page.getByRole('button',{name:'Historia',exact:true}).click();
   page.once('dialog',d=>d.accept());
   await page.locator('[data-act="histDelete"]').first().click();
+  await page.locator('#historyAddPanel > summary').click();
   await page.locator('#histNewDate').fill('2026-01-02');
   await page.locator('[data-act="histNew"]').click();
   page.once('dialog',d=>d.accept('55x11'));

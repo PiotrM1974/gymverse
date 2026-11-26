@@ -3,15 +3,9 @@ export const EXERCISE_PRESENTATION_RELEASE_VERSION = 2;
 import { EXERCISE_CATALOG, EXERCISE_VARIANTS } from './catalog.js';
 const SEXES = ['male', 'female'];
 const ASSET_KEYS = ['path', 'mimeType', 'width', 'height', 'sizeBytes', 'sha256', 'altText', 'status'];
-const EXISTING_ROOTS = Object.freeze({
-  lat_raise_stand: 'outputs/GV-LAT-RAISE-MALE-FEMALE/selected/',
-  db_bench: 'outputs/GV-EXERCISE-IMAGES-THREE/selected/',
-  lat_pulldown_wide: 'outputs/GV-EXERCISE-IMAGES-THREE/selected/',
-  leg_press: 'outputs/GV-EXERCISE-IMAGES-THREE/selected/'
-});
 const CATALOG_IDS = new Set(EXERCISE_CATALOG.map(item => item.id));
 const VARIANT_KEYS = new Set(EXERCISE_VARIANTS.map(item => `${item.exerciseId}/${item.variantId}`));
-const rootFor = exerciseId => EXISTING_ROOTS[exerciseId] || 'outputs/GV-EXERCISE-IMAGES-COMPLETE/selected/';
+const rootFor = () => 'src/data/exercise-images/selected/';
 const SHA256 = /^[a-f0-9]{64}$/;
 
 const isObject = value => value !== null && typeof value === 'object' && !Array.isArray(value);

@@ -1,9 +1,23 @@
 import { test, expect } from '@playwright/test';
 
+// Older workout scenarios continue after explicitly skipping the new rest screen.
+test.beforeEach(async ({ page }) => { await page.addLocatorHandler(page.locator('#restScreen:not([hidden])'), async () => { await page.waitForFunction(() => document.querySelector('#sessionSaveStatus').hidden); await page.locator('#restScreen [data-act="timerSkip" ]').click(); }); });
+
 test.beforeEach(async ({ page }) => {
   await page.goto('/');
   await page.evaluate(() => { localStorage.clear(); sessionStorage.clear(); });
+  await page.evaluate(() => {
+    const plan = { id: 'push_a1', title: 'Push A1', exercises: [{ key: 'bench_flat', variantId: 'default', sets: 2, target: '8-12', restSeconds: 90 }] };
+    localStorage.setItem('gymverse_schema', '4');
+    localStorage.setItem('gymverse_plans', JSON.stringify([plan]));
+    localStorage.setItem('gymverse_profiles_v1', JSON.stringify({
+      schemaVersion: 1,
+      activeProfileId: 'workout-e2e-profile',
+      profiles: [{ id: 'workout-e2e-profile', name: 'Profil testowy', attributes: { age: 30, trainingGoal: 'hypertrophy', equipment: ['barbell', 'bench'], restrictions: [] }, data: {}, planPrograms: { schemaVersion: 1, assignedProgramId: null, programs: [] } }]
+    }));
+  });
   await page.reload();
+  await expect(page.locator('[data-act="startPlan"][data-plan="push_a1"]')).toBeVisible();
 });
 
 async function keepLegacyV4Merge(dialog) {

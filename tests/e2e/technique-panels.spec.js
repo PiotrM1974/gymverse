@@ -20,6 +20,7 @@ test('all accepted technique boards show both panels in the mobile workout card'
   }, entries.map(({ key, variantId }) => ({ key, variantId })));
   await page.reload();
   await page.locator('[data-act="startPlan"][data-plan="all_panels_synthetic"]').click();
+  await page.locator('.exercise-hero > summary').click();
 
   for (const [index, entry] of entries.entries()) {
     await expect(page.locator('#exercisePresentation')).toHaveAttribute('data-exercise-id', entry.key);

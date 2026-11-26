@@ -5,9 +5,14 @@ test('renders the exercise atlas and switches sex and view without touching work
   const stylesheet = await page.request.get('/src/features/anatomy/atlas.css');
   expect(stylesheet.ok()).toBeTruthy();
   expect(stylesheet.headers()['content-type']).toContain('text/css');
-  await page.evaluate(() => { localStorage.clear(); sessionStorage.clear(); });
+  await page.evaluate(() => {
+    localStorage.clear(); sessionStorage.clear();
+    localStorage.setItem('gymverse_profiles_v1', JSON.stringify({ schemaVersion: 1, activeProfileId: 'atlas-fixture', profiles: [{ id: 'atlas-fixture', name: 'Atlas test', data: {} }] }));
+  });
   await page.reload();
+  await expect(page.locator('[data-act="startPlan"][data-plan="push_a1"]')).toBeVisible();
   await page.locator('[data-act="startPlan"][data-plan="push_a1"]').click();
+  await page.locator('.exercise-hero > summary').click();
   for (let step = 0; step < 5 && await page.locator('#anatomyAtlas').evaluate(el => el.hidden); step += 1) {
     await page.locator('#btnNextStep').click();
   }
@@ -15,6 +20,7 @@ test('renders the exercise atlas and switches sex and view without touching work
   const atlas = page.locator('#anatomyAtlas');
   await page.locator('#trainingAtlasDisclosure > summary').click();
   await expect(atlas).toBeVisible();
+  expect(await atlas.locator('[data-atlas-view]').first().evaluate(button => button.getBoundingClientRect().height)).toBeGreaterThanOrEqual(44);
   await expect(atlas.locator('.anatomy-atlas__muscle--primary')).toHaveCount(2);
   await expect(atlas.locator('.anatomy-atlas__muscle--secondary')).toHaveCount(4);
   await page.locator('#exercisePresentation [data-presentation-sex="female"]').click();
@@ -34,6 +40,7 @@ test('renders the exercise atlas and switches sex and view without touching work
     await expect(atlas.locator('.anatomy-atlas__muscle--primary').first()).toBeVisible();
   }
   await page.evaluate(() => window.GymNastikaMuscleAtlas.update('leg_press', { showSexControl: true, showDisclosure: false }));
+  expect(await atlas.locator('[data-atlas-sex]').first().evaluate(button => button.getBoundingClientRect().height)).toBeGreaterThanOrEqual(44);
   await atlas.locator('[data-atlas-sex="male"]').click();
   await atlas.locator('[data-atlas-view="front"]').click();
   await page.evaluate(() => window.GymNastikaMuscleAtlas.update('leg_press', { showSexControl: true, showDisclosure: false }));

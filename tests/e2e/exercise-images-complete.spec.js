@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 import { mkdir } from 'node:fs/promises';
 import { resolve } from 'node:path';
 
-const appUrl = '/gymverse/';
+const appUrl = '/';
 const ids = ['bench_flat', 'db_incline', 'tri_rope', 'row_v', 'rear_delt', 'biceps_preacher', 'tri_machine', 'leg_curl', 'lat_pulldown_neutral', 'row_straight', 'db_fly', 'front_raise', 'lat_raise_seated', 'chest_machine', 'pec_deck', 'shoulder_press', 'face_pull', 'lat_raise_cable', 'hammer_curl', 'cable_curl', 'tri_overhead', 'row_machine', 'leg_extension', 'smith_squat', 'pullup', 'dips', 'pushup', 'lat_raise_stand', 'db_bench', 'lat_pulldown_wide', 'leg_press'];
 
 async function installPlan(page) {
@@ -16,6 +16,7 @@ async function installPlan(page) {
   }, ids);
   await page.reload();
   await page.locator('[data-act="startPlan"][data-plan="new_images_synthetic"]').click();
+  if (await page.locator('.exercise-hero > summary').count()) await page.locator('.exercise-hero > summary').click();
 }
 
 test('released two-panel boards, both captions and input state appear in ordinary workout cards without the pilot flag', async ({ page }) => {
@@ -58,11 +59,11 @@ test('released two-panel boards, both captions and input state appear in ordinar
 
 test('production images install into the ordinary offline cache and survive an offline restart', async ({ page }) => {
   await page.goto(appUrl);
-  await expect.poll(() => page.evaluate(async () => (await navigator.serviceWorker.getRegistration('/gymverse/'))?.active?.scriptURL || '')).toMatch(/\/gymverse\/sw\.js$/);
+  await expect.poll(() => page.evaluate(async () => (await navigator.serviceWorker.getRegistration('/'))?.active?.scriptURL || '')).toMatch(/\/sw\.js$/);
   await page.reload();
-  await expect.poll(() => page.evaluate(() => navigator.serviceWorker.controller?.scriptURL || '')).toMatch(/\/gymverse\/sw\.js$/);
+  await expect.poll(() => page.evaluate(() => navigator.serviceWorker.controller?.scriptURL || '')).toMatch(/\/sw\.js$/);
   await expect.poll(() => page.evaluate(async () => {
-    const cache = await caches.open('gymverse-v20');
+    const cache = await caches.open('gymverse-v55');
     return (await cache.keys()).filter(request => request.url.includes('/src/data/exercise-images/selected/')).length;
   })).toBe(136);
   await page.context().setOffline(true);
@@ -90,6 +91,7 @@ test('incline fly variant uses its own board without losing variant identity or 
   });
   await page.reload();
   await page.locator('[data-act="startPlan"][data-plan="incline_fly_synthetic"]').click();
+  if (await page.locator('.exercise-hero > summary').count()) await page.locator('.exercise-hero > summary').click();
   await expect(page.locator('#currentExVariant')).toContainText('skos');
   await page.locator('#weight_0').fill('42.5');
   await page.locator('#reps_0').fill('8');
@@ -125,6 +127,7 @@ test('corrected machines and distinct variants render in the workout card', asyn
   }, exercises);
   await page.reload();
   await page.locator('[data-act="startPlan"][data-plan="machine_review_synthetic"]').click();
+  if (await page.locator('.exercise-hero > summary').count()) await page.locator('.exercise-hero > summary').click();
   const screenshotDir = resolve('outputs/GV-EXERCISE-IMAGES-COMPLETE/screenshots');
   await mkdir(screenshotDir, { recursive: true });
   for (let index = 0; index < exercises.length; index += 1) {

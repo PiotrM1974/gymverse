@@ -78,7 +78,7 @@ export const EXERCISE_CATALOG = [
     ['przedni naramienny'], ['część obojczykowa piersiowego większego'], ['per_dumbbell', 'simultaneous', 'per_set', 2, 2], '§4.3'),
   baseExercise('lat_raise_seated', 'Unoszenie hantli bokiem siedząc', 'Barki', 'Dwa hantle, unoszenie bokiem siedząc',
     ['boczny naramienny'], ['nadgrzebieniowy', 'czworoboczny'], ['per_dumbbell', 'simultaneous', 'per_set', 2, 2], '§4.3'),
-  baseExercise('tri_machine', 'Prostowanie przedramion na maszynie do tricepsa', 'Triceps', 'Siedząca, obciążana talerzami maszyna do prostowania łokci z podparciem górnych części ramion — dokładnie typ z dostarczonej przez użytkownika fotografii',
+  baseExercise('tri_machine', 'Prostowanie przedramion na maszynie do tricepsa', 'Triceps', 'Siedząca maszyna ze stosem do prostowania łokci z podparciem górnych części ramion — wzorzec ACE 292',
     ['triceps'], [], ['displayed_load', 'machine_or_cable', 'per_set', 1, 2], '§4.5'),
   baseExercise('lat_pulldown_neutral', 'Ściąganie drążka wyciągu górnego do klatki - chwyt neutralny/wąski', 'Plecy', 'Wyciąg górny, wąski chwyt neutralny',
     ['najszerszy grzbietu'], ['biceps', 'obły większy', 'mięśnie międzyłopatkowe'], ['displayed_load', 'machine_or_cable', 'per_set', 1, 2], '§4.2'),

@@ -11,7 +11,7 @@ import {
 import { EXERCISE_IMAGE_MANIFEST, validateImageManifest } from '../../tools/image-manifest-validator.mjs';
 
 const asset = (sex, kind) => ({
-  path: `outputs/GV-LAT-RAISE-MALE-FEMALE/selected/${kind === 'technique' ? 'technique' : 'thumbnails'}/lat_raise_stand__default-${sex}.webp`,
+  path: `src/data/exercise-images/selected/${kind === 'technique' ? 'technique' : 'thumbnails'}/lat_raise_stand__default-${sex}.webp`,
   mimeType: 'image/webp',
   width: kind === 'technique' ? 768 : 256,
   height: kind === 'technique' ? 512 : 256,

@@ -7,3 +7,13 @@ playwright-report/
 private-exports/
 gymverse_backup_*.json
 artwork/masters/
+
+# Local project memory and generated release/test evidence; keep files on disk,
+# but do not include them in public release commits.
+/PROJECT_MEMORY.md
+/outputs/
+/outputs-smart-backup-*.log
+/.atlas-import-tmp/
+/playwright.header.config.js
+/design/gymnastika-redesign/**/*.png
+/stage11c-site-release-upload.zip

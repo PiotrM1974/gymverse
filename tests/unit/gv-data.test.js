@@ -118,6 +118,40 @@ describe('GV-DATA source snapshot inspection', () => {
   });
 });
 
+describe('profile registry backup compatibility', () => {
+  it('round-trips the complete local profile registry in the existing v5 ZIP format', async () => {
+    const profiles = {
+      schemaVersion: 1,
+      activeProfileId: 'legacy-default-profile',
+      profiles: [
+        { id: 'legacy-default-profile', name: 'Profil testowy', createdAt: '2026-01-01T00:00:00.000Z', attributes: { age: 34, sex: null, heightCm: null, weightKg: null, experience: null, equipment: ['machines'], restrictions: [] }, data: { gymverse_history: JSON.stringify([{ id: 'synthetic-session', date: '2026-01-01T10:00:00.000Z', details: [] }]) } },
+        { id: 'profile-second-0001', name: 'Drugi profil', createdAt: '2026-01-02T00:00:00.000Z', attributes: { age: null, sex: null, heightCm: null, weightKg: null, experience: null, equipment: [], restrictions: [] }, data: {} }
+      ]
+    };
+    const archive = await createBackupV5({ ...syntheticBackupSnapshot(), gymverse_profiles_v1: profiles }, { createdAt: '2026-01-03T00:00:00.000Z' });
+    const preview = await previewBackupV5(archive);
+    expect(preview.ok).toBe(true);
+    expect(preview.snapshot.gymverse_profiles_v1).toEqual(profiles);
+  });
+
+  it('round-trips auxiliary records and media for non-active profiles in the full ZIP backup', async () => {
+    const profileAuxiliaries = [{
+      profileId: 'profile-second-0001',
+      interpretations: [{ id: 'rule-second', exerciseId: 'bench_flat', sessionIds: ['session-second'], ruleVersion: 1, source: 'user_confirmed', confirmedAt: '2026-01-02T00:00:00.000Z', interpretation: { unit: 'user_confirmed' } }],
+      media: [{ name: 'custom-media/profile-second.png', bytes: new Uint8Array([137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 0]) }]
+    }];
+    const archive = await createBackupV5({ ...syntheticBackupSnapshot(), gymverse_profiles_v1: {
+      schemaVersion: 1, activeProfileId: 'legacy-default-profile',
+      profiles: [
+        { id: 'legacy-default-profile', name: 'Profil testowy', createdAt: '2026-01-01T00:00:00.000Z', attributes: { age: null, sex: null, heightCm: null, weightKg: null, experience: null, equipment: [], restrictions: [] }, data: {} },
+        { id: 'profile-second-0001', name: 'Drugi profil', createdAt: '2026-01-02T00:00:00.000Z', attributes: { age: null, sex: null, heightCm: null, weightKg: null, experience: null, equipment: [], restrictions: [] }, data: {} }
+      ]
+    } }, { profileAuxiliaries });
+    const preview = await previewBackupV5(archive);
+    expect(preview.profileAuxiliaries).toEqual(profileAuxiliaries);
+  });
+});
+
 describe('GV-DATA persistent history identifiers', () => {
   it('assigns repeatable legacy identifiers while preserving same-time sessions and multiplicity', () => {
     const legacy = [
@@ -170,6 +204,26 @@ describe('GV-DATA v5 backup', () => {
     expect(preview.counts.legacyInterpretations).toBe(1);
     expect(JSON.stringify({ counts: preview.counts, schemaKeys: preview.schemaKeys })).not.toContain('bench_flat');
     expect(JSON.stringify(snapshot)).toBe(before);
+  });
+
+  it('round-trips historical session context in ZIP v5 and rejects a mismatched day', async () => {
+    const snapshot=syntheticBackupSnapshot();
+    const context={kind:'program',profileId:'profile-a',dayPlanId:'synthetic',programId:'pg_'+'a'.repeat(32),programTitle:'Original program',dayNumber:1};
+    snapshot.gymverse_active.sessionContext=context;
+    snapshot.gymverse_history[0].planId='synthetic';
+    snapshot.gymverse_history[0].sessionContext=context;
+    const preview=await previewBackupV5(await createBackupV5(snapshot));
+    expect(preview.snapshot.gymverse_active.sessionContext).toEqual(context);
+    expect(preview.snapshot.gymverse_history[0].sessionContext).toEqual(context);
+    const empty=memoryStorage();
+    await restoreBackupV5(empty,preview,{confirmed:true,restoreActive:true,restoreDrafts:true});
+    expect(JSON.parse(empty.getItem('gymverse_active')).sessionContext).toEqual(context);
+    expect(JSON.parse(empty.getItem('gymverse_history'))[0].sessionContext).toEqual(context);
+    snapshot.gymverse_history[0].sessionContext={...context,dayPlanId:'other-day'};
+    await expect(createBackupV5(snapshot)).rejects.toThrow();
+    delete snapshot.gymverse_history[0].sessionContext;
+    delete snapshot.gymverse_active.sessionContext;
+    await expect(createBackupV5(snapshot)).resolves.toBeTruthy();
   });
 
   it('rejects a changed payload whose checksum no longer matches', async () => {
