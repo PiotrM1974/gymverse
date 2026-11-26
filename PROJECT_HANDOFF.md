@@ -71,3 +71,9 @@ Właściciel autoryzował przygotowanie wydania GymNastika 2.0 na GitHub. Produk
 Allowlista 11A+11B nadal wynosi 191 plików. Dokładnie te pliki są przygotowane lokalnie; 12 niezatwierdzonych alternatywnych boardów pozostało poza indeksem. `outputs/`, prywatna pamięć i archiwum uploadu stagingu nie są częścią wydania. Nie wykonano pełnej regresji 454 E2E. Świeży unit suite: 197/197; lokalny smoke test HTML, manifestu, Service Workera, fontu, ikony i MuscleMap: 200 dla wszystkich żądanych plików. WebKit/Edge E2E i fizyczny iPhone nie zostały uruchomione w tym przebiegu.
 
 Przed zmianą produkcji właściciel musi potwierdzić osobny eksport danych treningowych ze starej aplikacji na iPhonie. Do czasu potwierdzenia nie wolno scalać PR ani wdrażać na Pages. Zachować dokładny SHA i instrukcję rollbacku; nie przepisywać historii.
+
+### Stan kontroli GitHub 26.11.2026
+
+Gałąź `release/gymnastika-2.0-2026-11-26` została wypchnięta i PR [#11](https://github.com/PiotrM1974/gymverse/pull/11) jest otwarty jako Draft; HEAD wydania `37da783c7a89fe33747b942fa7fcf3c7a2d33ba2`. GitHub raportuje PR mergeable, ale nie ma statusów CI. Repo nie zawiera własnych workflowów w `.github/workflows`; GitHub API pokazuje aktywny, dynamiczny workflow `pages-build-deployment`. Ostatni przebieg tego workflow (#45352133258) zakończył się sukcesem na obecnym `main` SHA `e5b119251ac442796d399f123420412164a62813`. Dotychczasowy adres produkcyjny zwraca 200. Zatem scalenie do `main` uruchomi wbudowane GitHub Pages. PR nie został scalony.
+
+Właściciel nie potwierdził jeszcze osobnego eksportu danych treningowych na iPhonie. To blokuje merge/deploy; nie uznawać PR ani testów lokalnych za zakończenie publikacji. Ostatni krok wymaga potwierdzenia właściciela, następnie kontroli pełnej regresji raz na release candidate i dopiero wtedy osobnej decyzji o scaleniu.
