@@ -87,3 +87,13 @@ Przed zmianą produkcji właściciel musi potwierdzić osobny eksport danych tre
 Gałąź `release/gymnastika-2.0-2026-11-26` została wypchnięta i PR [#11](https://github.com/PiotrM1974/gymverse/pull/11) jest otwarty jako Draft; commit aplikacji `37da783c7a89fe33747b942fa7fcf3c7a2d33ba2`; aktualny HEAD gałęzi (po commicie dokumentacyjnym) `2212db73ac97dbf5d04511ab2789c677c19906ba`. GitHub raportuje PR mergeable, ale nie ma statusów CI. Repo nie zawiera własnych workflowów w `.github/workflows`; GitHub API pokazuje aktywny, dynamiczny workflow `pages-build-deployment`. Ostatni przebieg tego workflow (#45352133258) zakończył się sukcesem na obecnym `main` SHA `e5b119251ac442796d399f123420412164a62813`. Dotychczasowy adres produkcyjny zwraca 200. Zatem scalenie do `main` uruchomi wbudowane GitHub Pages. PR nie został scalony.
 
 Właściciel nie potwierdził jeszcze osobnego eksportu danych treningowych na iPhonie. To blokuje merge/deploy; nie uznawać PR ani testów lokalnych za zakończenie publikacji. Ostatni krok wymaga potwierdzenia właściciela, następnie kontroli pełnej regresji raz na release candidate i dopiero wtedy osobnej decyzji o scaleniu.
+
+## Lokalny follow-up UX po publikacji — 26 listopada 2026
+
+Lokalna poprawka opisana w docs/tasks/GV-POST-PRODUCTION-UX.md obejmuje ekran główny, menu kopii, odpoczynek w widoku treningu oraz dwie statystyki życia historii. Zapisane dane, aktywne profile, treningi i istniejące ZIP v5/JSON v4 pozostają w dotychczasowym magazynie i przepływach. Pomocnik statystyk pomija puste sesje i liczy tony przez dotychczasowe setLoad. Test E2E potwierdza rozdzielenie dwóch syntetycznych profili i odświeżenie po zmianach historii.
+
+Zrzut wykrył .home-action[hidden] regression; selektor CSS i test regresyjny naprawiają przyciski, które nie powinny być widoczne. Fixture profili w nowym teście został zabezpieczony przed reseedowaniem przy reload. Cache SW wynosi gymverse-v56; SW nie przejmuje aktualnie otwartych stron i nie usuwa localStorage/IndexedDB.
+
+Testy: npm run test:unit 200/200; Chromium celowane 6/6 (nowy UX 5/5, history-volume 1/1), włącznie z responsive 320/375/390/430 LIGHT/DARK i offline shell w Chromium. Pełne 454 E2E nie były uruchamiane; WebKit, rzeczywisty iPhone/Safari ani pełny import round-trip ZIP nie były częścią tej weryfikacji. Zrzuty ignorowane przez Git: outputs/GV-POST-PRODUCTION-UX/.
+
+Zmiany nie zostały opublikowane: brak commit, push, merge i deploy; bieżąca produkcja pozostaje wcześniejsza. Zachować worktree i nieśledzone alternatywne plansze Signal.

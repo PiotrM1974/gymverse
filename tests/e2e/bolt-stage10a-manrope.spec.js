@@ -88,7 +88,7 @@ test('local Manrope files and Polish glyphs are cached for offline use', async (
   await page.reload({ waitUntil: 'domcontentloaded' });
   await expect.poll(() => page.evaluate(() => Boolean(navigator.serviceWorker.controller))).toBe(true);
   const cached = await page.evaluate(async () => {
-    const cache = await caches.open('gymverse-v55');
+    const cache = await caches.open('gymverse-v56');
     return Promise.all(['manrope-latin-variable.woff2', 'manrope-latin-ext-variable.woff2'].map(async name => {
       const response = await cache.match(`./src/ui/fonts/${name}`);
       const bytes = response && new Uint8Array(await response.arrayBuffer());

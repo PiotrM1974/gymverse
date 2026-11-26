@@ -154,7 +154,7 @@ test('GV-MUSCLEMAP-QA-GATE visual, mobile and offline evidence', async ({ page }
     .filter(item => /anatomy\/|atlas\.css/.test(item.name))
     .map(item => ({ name: new URL(item.name).pathname, durationMs: Math.round(item.duration * 100) / 100, transferBytes: item.transferSize })));
   const cacheAudit = await page.evaluate(async () => {
-    const cache = await caches.open('gymverse-v55');
+    const cache = await caches.open('gymverse-v56');
     const paths = [
       'src/features/anatomy/atlas.js', 'src/features/anatomy/atlas.css', 'src/features/anatomy/highlight-engine.js',
       'src/data/anatomy/musclemap-diagrams.js', 'src/data/anatomy/atlas-data.js',
@@ -167,7 +167,7 @@ test('GV-MUSCLEMAP-QA-GATE visual, mobile and offline evidence', async ({ page }
     const keys = await cache.keys();
     return {
       cacheNames: await caches.keys(),
-      cacheVersion: 'gymverse-v55',
+      cacheVersion: 'gymverse-v56',
       paths: await Promise.all(paths.map(async path => ({ path, cached: Boolean(await cache.match(new URL(path, location.href).href)) }))),
       cacheEntryCount: keys.length
     };

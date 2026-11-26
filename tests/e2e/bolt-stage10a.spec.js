@@ -77,7 +77,7 @@ test('cached Signal shell and an opened workout remain usable without network',a
  await page.reload({waitUntil:'domcontentloaded'});
  await expect.poll(()=>page.evaluate(()=>Boolean(navigator.serviceWorker.controller))).toBe(true);
  const shell=await page.evaluate(async()=>{
-  const cache=await caches.open('gymverse-v55');
+  const cache=await caches.open('gymverse-v56');
   return {index:Boolean(await cache.match('./index.html')),css:Boolean(await cache.match('./src/ui/signal.css'))};
  });
  expect(shell).toEqual({index:true,css:true});
