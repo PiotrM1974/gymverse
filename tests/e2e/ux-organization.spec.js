@@ -50,7 +50,7 @@ test('day stepper caps weekdays and preserves entered duration across changes',a
 });
 test('saved programs are managed centrally and deletion preserves days and history',async({page})=>{
  await boot(page);const before=await raw(page);
- await page.locator('#view-plans .program-card').first().click();
+ await page.locator('#view-plans .program-card').first().locator('[data-act="programPreview"]').click();
  await expect(page.locator('#programPreviewBody [data-act="programDelete"]')).toHaveCount(0);
  await expect(page.locator('#programPreviewBody').getByRole('button',{name:'Usuń program',exact:true})).toHaveCount(0);
  await page.locator('.header-nav [data-view="view-plans"]').click();await page.locator('[data-act="editPlans"]').click();
@@ -77,6 +77,6 @@ test('settings expose existing profile-wide preferences and release info without
  await page.locator('.header-nav [data-view="view-plans"]').click();await page.getByRole('button',{name:'Ustawienia',exact:true}).click();await page.locator('#profileSelect').selectOption('profile-b');await expect(page.locator('.program-card')).toHaveCount(1);
  await page.getByRole('button',{name:'Ustawienia',exact:true}).click();await expect(page.locator('#settingsPreferences [data-act="rest"][data-sec="0"]')).toHaveAttribute('aria-pressed','true');
  await page.locator('.header-nav [data-view="view-plans"]').click();await page.getByRole('button',{name:'Ustawienia',exact:true}).click();await page.locator('#profileSelect').selectOption('profile-a');await expect(page.locator('.program-card')).toHaveCount(2);
- await page.locator('.program-card').first().click();await page.locator('[data-act="programDay"]').first().click();await page.locator('[data-act="programStart"]').click();
+ await page.locator('.program-card').first().locator('[data-act="programPreview"]').click();await page.locator('[data-act="programDay"]').first().click();await page.locator('[data-act="programStart"]').click();
  await expect(page.locator('#exerciseRestCurrent')).toContainText('1:00');expect(JSON.parse((await raw(page)).gymverse_rest)).toBe(180);
 });

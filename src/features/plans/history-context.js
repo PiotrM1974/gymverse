@@ -28,6 +28,28 @@ export function historyProgramContext(session){
  const context=session?.sessionContext;
  return validateSessionContext(context,session?.planId)&&context?context:{kind:'unknown'};
 }
+// Follow the current order using only sessions recorded for this program and profile.
+export function nextProgramDay(profileId, program, plans, sessions) {
+  const dayIds = program.dayPlanIds;
+  const startable = new Map(plans.filter(plan => plan.exercises?.length).map(plan => [plan.id, plan]));
+  let lastIndex = -1;
+  let lastTime = -Infinity;
+  for (const session of sessions) {
+    const context = historyProgramContext(session);
+    if (context.kind !== 'program' || context.profileId !== profileId || context.programId !== program.id) continue;
+    const index = dayIds.indexOf(context.dayPlanId);
+    const time = Date.parse(session.date);
+    if (index < 0 || !Number.isFinite(time) || time < lastTime || !session.details?.some(set => Number(set.reps) > 0)) continue;
+    lastIndex = index;
+    lastTime = time;
+  }
+  for (let offset = 1; offset <= dayIds.length; offset++) {
+    const index = (lastIndex + offset) % dayIds.length;
+    const plan = startable.get(dayIds[index]);
+    if (plan) return {plan, number: index + 1};
+  }
+  return null;
+}
 export function matchesHistoryScope(session,profile,scope={}){
  if(scope.programId&&historyProgramContext(session).programId!==scope.programId)return false;
  if(scope.dayId&&session.planId!==scope.dayId)return false;

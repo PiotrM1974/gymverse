@@ -45,7 +45,7 @@ for(const count of [1,3,6])for(const db of ['localStorage','indexedDB'])test('de
 });
 
 test('deletion preserves completed workout, tonnage, RIR, Previous and ZIP restoration',async({page,context})=>{
- await boot(page);await page.locator('.program-card[data-id="'+A+'"]').click();await page.locator('[data-act="programDay"]').first().click();await page.locator('[data-act="programStart"]').click();
+ await boot(page);await page.locator('.program-card[data-id="'+A+'"]').locator('[data-act="programPreview"]').click();await page.locator('[data-act="programDay"]').first().click();await page.locator('[data-act="programStart"]').click();
  await page.locator('.workout-extras > summary').click();await page.locator('[data-act="rir"][data-v="2"]').click();await expect.poll(async()=>JSON.parse((await raw(page)).gymverse_active).rir[0]).toBe(2);await expect(page.locator('#sessionSaveStatus')).toBeHidden();
  await page.locator('#weight_0').fill('40');await page.locator('#reps_0').fill('8');await page.locator('#btnDone_0').click();await expect(page.locator('#restScreen')).toBeVisible();await page.locator('#restScreen [data-act="timerSkip"]').click();
  await page.locator('#weight_0').fill('10');await page.locator('#reps_0').fill('10');await page.locator('#btnDone_0').click();await page.locator('[data-act="finish"]').click();
@@ -61,7 +61,7 @@ test('deletion preserves completed workout, tonnage, RIR, Previous and ZIP resto
 
 test('active workout in another tab blocks deletion and stale deletion cannot affect a switched profile',async({page,context})=>{
  await boot(page);await manage(page);const other=await context.newPage();other.on('dialog',d=>d.accept());await other.goto('/');await expect.poll(()=>other.evaluate(()=>!!window.__gymverseTestHarness)).toBe(true);
- await other.locator('.program-card[data-id="'+A+'"]').click();await other.locator('[data-act="programDay"]').first().click();await other.locator('[data-act="programStart"]').click();await other.locator('#weight_0').fill('45');await other.locator('#reps_0').fill('9');await other.locator('#btnDone_0').click();await expect(other.locator('#restScreen')).toBeVisible();await expect.poll(async()=>JSON.parse((await raw(other)).gymverse_active).restState?.pending).toBe(false);
+ await other.locator('.program-card[data-id="'+A+'"]').locator('[data-act="programPreview"]').click();await other.locator('[data-act="programDay"]').first().click();await other.locator('[data-act="programStart"]').click();await other.locator('#weight_0').fill('45');await other.locator('#reps_0').fill('9');await other.locator('#btnDone_0').click();await expect(other.locator('#restScreen')).toBeVisible();await expect.poll(async()=>JSON.parse((await raw(other)).gymverse_active).restState?.pending).toBe(false);
  const before=await raw(other);await page.locator('.managed-program[data-id="'+A+'"] [data-act="programDelete"]').click();await expect(page.locator('#toast')).toContainText('Najpierw zakończ');expect((await raw(page)).gymverse_profiles_v1).toBe(before.gymverse_profiles_v1);expect((await raw(page)).gymverse_active).toBe(before.gymverse_active);
  await other.locator('#restScreen [data-act="timerSkip"]').click();await switchTo(other,'profile-b');const switched=await raw(other);await page.locator('.managed-program[data-id="'+A+'"] [data-act="programDelete"]').click();await expect(page.locator('#toast')).toContainText('zmieniły się');expect((await raw(page)).gymverse_profiles_v1).toBe(switched.gymverse_profiles_v1);
  await switchTo(other,'profile-a');await other.locator('#resumeBox button').first().click();await expect(other.locator('#view-workout')).toHaveClass(/active/);expect(JSON.parse((await raw(other)).gymverse_active).sets[0]).toMatchObject({weight:45,reps:9});await other.close();
@@ -106,4 +106,77 @@ test('historical JSON v4 history imports without replacing archived day records'
  async function importFixture(value){await settings(page);await page.locator('#backupMenuToggle').click();const choosing=page.waitForEvent('filechooser');await page.locator('#backupActionMenu [data-act="legacyImportBtn"]').click();await (await choosing).setFiles({name:'synthetic-v4.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(value))});}
  await importFixture(fixture);await expect(page.locator('#toast')).toContainText('archiwalne');expect((await raw(page)).gymverse_plans).toBe(before.gymverse_plans);
  delete fixture.plans;await importFixture(fixture);await expect.poll(async()=>JSON.parse((await raw(page)).gymverse_history).length).toBe(fixture.history.length);const after=await raw(page);expect(after.gymverse_plans).toBe(before.gymverse_plans);expect(JSON.parse(after.gymverse_profiles_v1).profiles[0].planPrograms).toEqual(JSON.parse(before.gymverse_profiles_v1).profiles[0].planPrograms);await page.reload();await expect(page.locator('#planList .plan-card')).toHaveCount(1);
+});
+
+
+async function bootArchivedDefaults(page) {
+  await boot(page);
+  await page.evaluate(async () => {
+    const store = window.__gymverseTestHarness.getStore();
+    const registry = JSON.parse((await store.refreshSnapshot()).gymverse_profiles_v1);
+    registry.profiles[0].planPrograms = {
+      schemaVersion: 1, assignedProgramId: null, programs: [],
+      archivedDayPlanIds: ['push_a1', 'archived-custom']
+    };
+    const exercise = {key: 'bench_flat', variantId: 'default', sets: 1, target: '8'};
+    await store.transact({
+      gymverse_profiles_v1: registry,
+      gymverse_plans: [
+        {id: 'push_a1', title: 'Push A1', exercises: [exercise]},
+        {id: 'archived-custom', title: 'Inny zarchiwizowany trening', exercises: [exercise]},
+        {id: 'standalone', title: 'Plan do zastąpienia', exercises: [exercise]}
+      ]
+    });
+  });
+  await page.reload();
+  await expect(page.locator('#planList .plan-card h3')).toHaveText('Plan do zastąpienia');
+}
+
+for (const db of ['localStorage', 'indexedDB']) {
+  test('reset restores archived defaults without exposing other archived days in ' + db, async ({page}) => {
+    await bootArchivedDefaults(page);
+    if (db === 'indexedDB') await migrate(page);
+    const before = await raw(page);
+    await manage(page);
+    await page.locator('[data-act="peReset"]').click();
+    await expect(page.locator('#view-planedit [data-act="peOpen"]')).toHaveCount(4);
+    await home(page);
+    const titles = ['Push A1', 'Pull A1', 'Push A2', 'Pull A2'];
+    await expect(page.locator('#planList .plan-card h3')).toHaveText(titles);
+    await page.reload();
+    await expect(page.locator('#planList .plan-card h3')).toHaveText(titles);
+
+    const after = await raw(page);
+    const profiles = JSON.parse(after.gymverse_profiles_v1).profiles;
+    expect(profiles[0].planPrograms.archivedDayPlanIds).toEqual(['archived-custom']);
+    expect(profiles[1]).toEqual(JSON.parse(before.gymverse_profiles_v1).profiles[1]);
+    const findArchived = snapshot => JSON.parse(snapshot.gymverse_plans).find(plan => plan.id === 'archived-custom');
+    expect(findArchived(after)).toEqual(findArchived(before));
+    expect(after.gymverse_history).toBe(before.gymverse_history);
+  });
+}
+
+
+test('failed default reset rolls back plans and archive together', async ({page}) => {
+  await bootArchivedDefaults(page);
+  const before = await raw(page);
+  await page.evaluate(() => {
+    const setItem = Storage.prototype.setItem;
+    Storage.prototype.setItem = function (key, value) {
+      if (key === 'gymverse_profiles_v1') {
+        Storage.prototype.setItem = setItem;
+        throw new Error('synthetic profile write failure');
+      }
+      return setItem.call(this, key, value);
+    };
+  });
+  await manage(page);
+  await page.locator('[data-act="peReset"]').click();
+  await expect(page.locator('#toast')).toContainText('Przywrócenie domyślnych planów');
+  const after = await raw(page);
+  expect(after.gymverse_plans).toBe(before.gymverse_plans);
+  expect(after.gymverse_profiles_v1).toBe(before.gymverse_profiles_v1);
+
+  await page.locator('[data-act="peReset"]').click();
+  await expect(page.locator('#view-planedit [data-act="peOpen"]')).toHaveCount(4);
 });

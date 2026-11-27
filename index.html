@@ -123,7 +123,7 @@ header {
 .hero-target { color: var(--lime); font-size: 0.85rem; font-weight: 600; }
 .hero-hint { color: var(--text-muted); font-size: 0.8rem; margin-top: 6px; line-height: 1.35; }
 .hero-hint:empty { display: none; }
-.hero-warm { color: #9fd3ff; }
+.hero-warm { color: var(--accent-text); }
 .hero-alert { color: var(--orange); font-weight: 600; }
 .link-row { display: flex; justify-content: space-between; margin-bottom: 4px; }
 .rest-row, .rir-row { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; font-size: 0.8rem; color: var(--text-muted); }
@@ -258,7 +258,7 @@ select.select-custom, input.select-custom { width: 100%; background: var(--card-
 :root[data-theme="dark"]{color-scheme:dark;--bg:#0D1420;--card-bg:#1C2A3A;--card-sub:#24364A;--lime:#76A0FF;--lime-dim:#293E69;--text:#F6F8FB;--text-muted:#B0C0D0;--border:#374B5D;--danger:#FF938B;--orange:#FF7A32;--blue:#76A0FF;--push:#FF7A32;--push-soft:#503020;--pull:#35D6D0;--pull-soft:#1D494A}
 *{font-family:'Manrope',-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}body{padding-bottom:calc(110px + env(safe-area-inset-bottom,0px));background:var(--bg);color:var(--text)}header{position:sticky;top:0;padding:calc(env(safe-area-inset-top,0px) + 10px) max(16px,calc((100vw - 960px)/2)) 10px;background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(14px);border-color:var(--border);transition:padding .2s}header.compact{padding-top:calc(env(safe-area-inset-top,0px) + 5px);padding-bottom:5px}.logo{font:700 28px/.95 'Manrope',system-ui,sans-serif;letter-spacing:0}.logo span{color:var(--push)}.header-actions{gap:6px}.btn-icon{min-height:44px;border-radius:13px;background:var(--card-bg);border-color:var(--border);color:var(--text);cursor:pointer}.container{max-width:980px;padding:24px clamp(16px,4vw,34px)}h1,h2,h3,.plan-card h3,.exercise-meta{font-family:'Manrope',system-ui,sans-serif}.plan-grid{grid-template-columns:repeat(auto-fit,minmax(min(100%,360px),1fr));gap:14px}.plan-card{min-height:132px;padding:20px;background:var(--card-bg);border-radius:22px;border-color:var(--border);align-items:flex-start;flex-direction:column;gap:12px}.plan-card.next{border:2px solid #B88F00;padding:19px}.plan-card h3{font-size:1.65rem}.plan-card p{font-size:.95rem}.plan-arrow{align-self:flex-end;color:var(--lime)}.badge{background:#FFD223;color:#715C00;border-radius:999px;padding:5px 10px}.btn-primary{background:var(--lime);color:#fff;min-height:52px;border-radius:16px}.btn-secondary{background:var(--card-bg);border-color:var(--border);color:var(--text);min-height:48px;border-radius:14px}.btn-link{color:var(--blue);min-height:44px}.week-strip,.banner,.data-box,.exercise-hero,.chart-container,.stat-card,.hist-card,.compare-box,.records,.pe-ex{background:var(--card-bg);border-color:var(--border);border-radius:18px}.week-strip b,.hero-target,.stat-card .val,.records h4,.records li,.compare-box .up,.hist-stats,.rec-row .v{color:var(--lime)}.exercise-presentation__figure,.hero-img-box{background:#090b0e}.exercise-presentation__group button[aria-pressed="true"],.legacy-image-controls button[aria-pressed="true"]{border-color:var(--lime);background:var(--lime-dim);color:var(--lime)}.training-atlas-disclosure>summary{background:var(--card-bg);border-color:var(--border);min-height:48px;border-radius:14px}.rp{min-height:44px;padding:8px 12px;border-radius:12px;background:var(--card-bg);color:var(--text)}.rp.active,.pill.active{background:var(--lime);color:#fff;border-color:var(--lime)}.sets-table{border-spacing:0 8px}.set-row td{background:var(--card-bg);border-color:var(--border)}.input-cell,.select-custom,.body-row input,.pe-target{background:var(--card-sub);color:var(--text);border-color:var(--border);min-height:46px}.input-cell:focus{border-color:var(--lime)}.btn-done.ready{background:var(--lime);color:#fff;border-color:var(--lime)}.btn-done.completed{background:#00979E;color:#fff;border-color:#00979E}.bottom-bar{max-width:none;padding:10px max(16px,calc((100vw - 900px)/2)) calc(10px + env(safe-area-inset-bottom,0px));background:color-mix(in srgb,var(--card-bg) 94%,transparent);border-color:var(--border)}.timer-digits{color:var(--lime)}.btn-timer{min-height:44px;background:var(--card-sub);color:var(--text);border-color:var(--border)}#toast{background:var(--card-bg);border-color:var(--lime);color:var(--text)}:focus-visible{outline:3px solid var(--lime);outline-offset:2px}@media(max-width:560px){.container{padding:18px 16px}.plan-card{min-height:120px}.sets-table th{font-size:.66rem}.input-cell{width:58px}.bottom-bar{gap:8px}.timer-ctrls{gap:4px}.btn-timer{padding:8px}}
 </style>
-<link rel="stylesheet" href="src/ui/signal.css">
+<link rel="stylesheet" href="src/ui/signal.css?v=62">
 <style>
 .home-title-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:4px}.home-title-copy{min-width:0}.home-title-copy .screen-eyebrow{margin-bottom:4px}.home-title-copy .screen-title{margin:0}.home-action-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:10px 0}.home-action{display:flex;align-items:center;justify-content:center;min-width:0;min-height:48px;padding:9px 12px;border-radius:14px;text-align:center;line-height:1.25;white-space:normal;text-decoration:none}.home-action[hidden]{display:none!important}.home-action.btn-primary{background:var(--blue);color:#fff;border-color:var(--blue)}#deleteProfileButton{color:var(--danger);border-color:color-mix(in srgb,var(--danger) 48%,var(--border))}.assigned-program-actions.home-action-row{margin-top:12px}.backup-menu-wrap{position:relative;flex:0 0 auto}.backup-menu-toggle{width:48px;height:48px;min-width:48px;display:grid;place-items:center;border-radius:15px;background:var(--card-bg);border:1px solid var(--border);color:var(--blue);box-shadow:0 5px 18px #10243b14;cursor:pointer}.backup-menu-toggle svg{width:23px;height:23px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}.backup-action-menu{position:absolute;z-index:80;right:0;top:calc(100% + 8px);width:min(320px,calc(100vw - 32px));max-height:min(72vh,540px);overflow:auto;padding:12px;border:1px solid var(--border);border-radius:18px;background:var(--card-bg);box-shadow:0 16px 36px #10243b2a}.backup-action-menu p{margin:2px 4px 10px}.backup-action-menu button{width:100%;min-height:48px;margin:6px 0 0;padding:10px 12px;border-radius:13px;text-align:left;white-space:normal}.backup-action-menu button:disabled{opacity:.55;cursor:not-allowed}.backup-menu-note{font-size:.77rem;line-height:1.4}.lifetime-stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:12px 0}.lifetime-stat-card{min-width:0;min-height:108px;padding:14px 12px;border:1px solid var(--border);border-radius:18px;background:var(--card-bg);box-shadow:0 5px 18px #10243b0d}.lifetime-stat-label{display:block;color:var(--text-muted);font-size:.68rem;font-weight:700;letter-spacing:.07em;line-height:1.25}.lifetime-stat-value{display:block;margin-top:10px;color:var(--blue);font-size:clamp(1.25rem,6.1vw,2rem);font-weight:700;line-height:1.05;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}.lifetime-stat-unit{font-size:.75rem;font-weight:600;color:var(--text-muted)}
 </style>
@@ -292,9 +292,9 @@ select.select-custom, input.select-custom { width: 100%; background: var(--card-
     <input type="file" id="importFile" accept=".zip,.json,application/zip,application/json" style="display:none">
   </div>
 
-<div id="view-settings" class="view-section"><div class="view-head"><h1 class="screen-title">Ustawienia</h1><button class="btn-icon" data-act="view" data-view="view-plans" aria-label="Zamknij ustawienia">✕</button></div><section class="settings-card"><div class="settings-backup-heading"><div><h2>Kopie bezpieczeństwa</h2><p class="small muted">Zachowaj dane i przenieś je bezpiecznie.</p></div><div class="backup-menu-wrap" id="backupMenuWrap"><button type="button" class="backup-menu-toggle" id="backupMenuToggle" aria-label="Kopie bezpieczeństwa" title="Kopie bezpieczeństwa" aria-controls="backupActionMenu" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3h13l4 4v14H3V3h1z"/><path d="M7 3v6h10V3M7 21v-7h10v7M14 3v4"/></svg></button><div class="backup-action-menu" id="backupActionMenu" hidden aria-label="Akcje kopii bezpieczeństwa"><p class="small muted" id="backupInfo"></p><button class="btn-primary" data-act="export">Zapisz kopię</button><button class="btn-secondary" data-act="importBtn">Wczytaj kopię</button><button class="btn-secondary" data-act="openStorage">Otwórz kopie bezpieczeństwa</button><button class="btn-secondary" id="migrateDataButton" data-act="migrateData" disabled aria-describedby="backupMenuMigrationNote">Przygotuj bezpieczne przeniesienie danych</button><button class="btn-secondary" data-act="legacyImportBtn">Import JSON v4</button><button class="btn-secondary" data-act="exportProfile">Eksportuj profil</button><button class="btn-secondary" data-act="importProfile">Importuj profil</button><button class="btn-secondary" data-act="csv">Eksport CSV</button><p class="small muted backup-menu-note" id="backupMenuMigrationNote">Sprawdzanie, czy migracja jest dostępna…</p></div></div></div></section><section class="settings-card" id="settingsProfiles"><h2>Profile</h2><p id="settingsActiveProfile" class="small muted"></p><label class="profile-label" for="profileSelect">Profil</label><select id="profileSelect" class="select-custom" aria-label="Aktywny profil"></select><div class="profile-quick-actions"><button class="btn-secondary" data-act="addProfile">Dodaj profil</button></div><details id="profileManage"><summary>Zarządzaj profilami</summary><input id="profileImportFile" type="file" accept="application/json,.json" hidden><details style="margin-top:12px"><summary>Dodaj profil</summary><label for="newProfileName">Nazwa profilu</label><input id="newProfileName" class="select-custom" maxlength="60" autocomplete="name"><label for="newProfileAge">Wiek (opcjonalnie)</label><input id="newProfileAge" class="select-custom" type="number" min="1" max="120"><label for="newProfileSex">Płeć (opcjonalnie)</label><select id="newProfileSex" class="select-custom"><option value="">Nie podano</option><option value="female">Kobieta</option><option value="male">Mężczyzna</option><option value="other">Inna / wolę nie określać</option></select><label for="newProfileHeight">Wzrost cm (opcjonalnie)</label><input id="newProfileHeight" class="select-custom" type="number" min="80" max="250"><label for="newProfileWeight">Masa kg (opcjonalnie)</label><input id="newProfileWeight" class="select-custom" type="number" min="20" max="400" step="0.1"><label for="newProfileExperience">Doświadczenie (opcjonalnie)</label><select id="newProfileExperience" class="select-custom"><option value="">Nie podano</option><option value="beginner">Początkujące</option><option value="intermediate">Średnie</option><option value="advanced">Zaawansowane</option></select><label for="newProfileEquipment">Dostępny sprzęt (opcjonalnie)</label><select id="newProfileEquipment" class="select-custom" multiple size="5"><option value="bodyweight">Masa ciała</option><option value="dumbbells">Hantle</option><option value="barbell">Sztanga</option><option value="bench">Ławka</option><option value="cables">Wyciągi</option><option value="machines">Maszyny</option><option value="bands">Gumy</option><option value="pullup_bar">Drążek</option><option value="dip_bars">Poręcze</option></select><label for="newProfileRestrictions">Ruchy do pominięcia (opcjonalnie)</label><select id="newProfileRestrictions" class="select-custom" multiple size="4"><option value="overhead_press">Wyciskanie nad głową</option><option value="deep_knee_flexion">Głębokie ugięcie kolana</option><option value="hip_hinge">Skłon / zawias biodrowy</option><option value="floor_exercises">Ćwiczenia na podłodze</option></select><button class="btn-primary" data-act="createProfile">Utwórz profil</button></details><p class="small muted">Profile i treningi są przechowywane lokalnie na tym urządzeniu.</p></details></section><section class="settings-card" id="settingsPreferences"><h2>Globalne preferencje treningowe</h2><p class="small muted">Domyślne ustawienia dla treningów aktywnego profilu. Czas zapisany przy ćwiczeniu ma pierwszeństwo.</p><div id="settingsRestControls"></div><p class="small muted" id="settingsRestValue"></p><h3>Gryf w kalkulatorze</h3><div class="settings-preference-options"><button type="button" class="rp" data-act="bar" data-kg="20">20 kg</button><button type="button" class="rp" data-act="bar" data-kg="15">15 kg</button><button type="button" class="rp" data-act="bar" data-kg="10">10 kg</button></div><button class="btn-secondary" data-act="editProfile">Preferencje i sprzęt profilu</button></section><section class="settings-card" id="settingsAbout"><h2>O aplikacji</h2><p><strong>GymNastika 2.0.3</strong></p><p class="small muted">Plany, treningi, historia i postępy. Dane pozostają lokalnie na tym urządzeniu. Kopie bezpieczeństwa zapisujesz samodzielnie.</p></section></div>
+<div id="view-settings" class="view-section"><div class="view-head"><h1 class="screen-title">Ustawienia</h1><button class="btn-secondary view-back" data-act="view" data-view="view-plans">← Wróć do planów</button></div><section class="settings-card"><div class="settings-backup-heading"><div><h2>Kopie bezpieczeństwa</h2><p class="small muted">Zachowaj dane i przenieś je bezpiecznie.</p></div><div class="backup-menu-wrap" id="backupMenuWrap"><button type="button" class="backup-menu-toggle" id="backupMenuToggle" aria-label="Kopie bezpieczeństwa" title="Kopie bezpieczeństwa" aria-controls="backupActionMenu" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3h13l4 4v14H3V3h1z"/><path d="M7 3v6h10V3M7 21v-7h10v7M14 3v4"/></svg></button><div class="backup-action-menu" id="backupActionMenu" hidden aria-label="Akcje kopii bezpieczeństwa"><p class="small muted" id="backupInfo"></p><button class="btn-primary" data-act="export">Zapisz kopię</button><button class="btn-secondary" data-act="importBtn">Wczytaj kopię</button><button class="btn-secondary" data-act="openStorage">Otwórz kopie bezpieczeństwa</button><button class="btn-secondary" id="migrateDataButton" data-act="migrateData" disabled aria-describedby="backupMenuMigrationNote">Przygotuj bezpieczne przeniesienie danych</button><button class="btn-secondary" data-act="legacyImportBtn">Import JSON v4</button><button class="btn-secondary" data-act="exportProfile">Eksportuj profil</button><button class="btn-secondary" data-act="importProfile">Importuj profil</button><button class="btn-secondary" data-act="csv">Eksport CSV</button><p class="small muted backup-menu-note" id="backupMenuMigrationNote">Sprawdzanie, czy migracja jest dostępna…</p></div></div></div></section><section class="settings-card" id="settingsProfiles"><h2>Profile</h2><p id="settingsActiveProfile" class="small muted"></p><label class="profile-label" for="profileSelect">Profil</label><select id="profileSelect" class="select-custom" aria-label="Aktywny profil"></select><div class="profile-quick-actions"><button class="btn-secondary" data-act="addProfile">Dodaj profil</button></div><details id="profileManage"><summary>Zarządzaj profilami</summary><input id="profileImportFile" type="file" accept="application/json,.json" hidden><details style="margin-top:12px"><summary>Dodaj profil</summary><label for="newProfileName">Nazwa profilu</label><input id="newProfileName" class="select-custom" maxlength="60" autocomplete="name"><label for="newProfileAge">Wiek (opcjonalnie)</label><input id="newProfileAge" class="select-custom" type="number" min="1" max="120"><label for="newProfileSex">Płeć (opcjonalnie)</label><select id="newProfileSex" class="select-custom"><option value="">Nie podano</option><option value="female">Kobieta</option><option value="male">Mężczyzna</option><option value="other">Inna / wolę nie określać</option></select><label for="newProfileHeight">Wzrost cm (opcjonalnie)</label><input id="newProfileHeight" class="select-custom" type="number" min="80" max="250"><label for="newProfileWeight">Masa kg (opcjonalnie)</label><input id="newProfileWeight" class="select-custom" type="number" min="20" max="400" step="0.1"><label for="newProfileExperience">Doświadczenie (opcjonalnie)</label><select id="newProfileExperience" class="select-custom"><option value="">Nie podano</option><option value="beginner">Początkujące</option><option value="intermediate">Średnie</option><option value="advanced">Zaawansowane</option></select><label for="newProfileEquipment">Dostępny sprzęt (opcjonalnie)</label><select id="newProfileEquipment" class="select-custom" multiple size="5"><option value="bodyweight">Masa ciała</option><option value="dumbbells">Hantle</option><option value="barbell">Sztanga</option><option value="bench">Ławka</option><option value="cables">Wyciągi</option><option value="machines">Maszyny</option><option value="bands">Gumy</option><option value="pullup_bar">Drążek</option><option value="dip_bars">Poręcze</option></select><label for="newProfileRestrictions">Ruchy do pominięcia (opcjonalnie)</label><select id="newProfileRestrictions" class="select-custom" multiple size="4"><option value="overhead_press">Wyciskanie nad głową</option><option value="deep_knee_flexion">Głębokie ugięcie kolana</option><option value="hip_hinge">Skłon / zawias biodrowy</option><option value="floor_exercises">Ćwiczenia na podłodze</option></select><button class="btn-primary" data-act="createProfile">Utwórz profil</button></details><p class="small muted">Profile i treningi są przechowywane lokalnie na tym urządzeniu.</p></details></section><section class="settings-card" id="settingsPreferences"><h2>Globalne preferencje treningowe</h2><p class="small muted">Domyślne ustawienia dla treningów aktywnego profilu. Czas zapisany przy ćwiczeniu ma pierwszeństwo.</p><div id="settingsRestControls"></div><p class="small muted" id="settingsRestValue"></p><h3>Gryf w kalkulatorze</h3><div class="settings-preference-options"><button type="button" class="rp" data-act="bar" data-kg="20">20 kg</button><button type="button" class="rp" data-act="bar" data-kg="15">15 kg</button><button type="button" class="rp" data-act="bar" data-kg="10">10 kg</button></div><button class="btn-secondary" data-act="editProfile">Preferencje i sprzęt profilu</button></section><section class="settings-card" id="settingsAbout"><h2>O aplikacji</h2><p><strong>GymNastika 2.0.3</strong></p><p class="small muted">Plany, treningi, historia i postępy. Dane pozostają lokalnie na tym urządzeniu. Kopie bezpieczeństwa zapisujesz samodzielnie.</p></section></div>
 <div id="view-storage" class="view-section">
-  <div class="view-head"><h2>Kopie bezpieczeństwa</h2><button class="btn-icon" data-act="view" data-view="view-settings" aria-label="Zamknij">✕</button></div>
+  <div class="view-head"><h2>Kopie bezpieczeństwa</h2><button class="btn-secondary view-back" data-act="view" data-view="view-settings">← Wróć do ustawień</button></div>
   <p class="small muted">Dane pozostają na tym urządzeniu. Pełna kopia ZIP v5 obejmuje wszystkie lokalne profile, programy, historię, szkice i aktywne treningi.</p>
   <div class="storage-grid">
     <section class="storage-card"><span class="storage-kicker">PEŁNA KOPIA</span><h3>Zapisz pełną kopię</h3><p>Przygotuj plik, zapisz go poza aplikacją i potwierdź, że zapis się udał.</p><button class="btn-primary" data-act="export">Zapisz pełną kopię ZIP v5</button></section>
@@ -303,10 +303,10 @@ select.select-custom, input.select-custom { width: 100%; background: var(--card-
     <section class="storage-card"><span class="storage-kicker">JEDEN PROFIL</span><h3>Dane profilu</h3><p>Osobny eksport i import profilu w dotychczasowym formacie JSON.</p><button class="btn-secondary" data-act="exportProfile">Eksportuj aktywny profil</button><button class="btn-secondary" data-act="importProfile">Importuj profil</button></section>
   </div><div class="storage-extras"><button class="btn-link" data-act="csv">Eksport do CSV (Excel)</button><p class="small muted">Zapis do aplikacji Pliki na iPhonie wymaga działania użytkownika. Aplikacja nie sprawdza zawartości iCloud Drive.</p></div>
 </div>
-  <div id="view-plan-choices" class="view-section"><p class="screen-eyebrow">TWÓJ PLAN</p><h1 class="screen-title">Jak chcesz trenować?</h1><p class="stage6-intro">Wybierz sposób, który najlepiej Ci odpowiada.</p><div class="stage6-choice-grid"><button data-act="stage6Ready"><strong>Gotowy plan</strong><span>Przejrzyj dostępne treningi</span><b aria-hidden="true">→</b></button><button data-act="stage6Own"><strong>Własny plan</strong><span>Utwórz lub edytuj trening</span><b aria-hidden="true">→</b></button><button data-act="stage6Generator"><strong>Generator treningowy</strong><span>Skonfiguruj swoją propozycję</span><b aria-hidden="true">→</b></button><button data-act="stage6Skip"><strong>Pomiń na razie</strong><span>Wróć do planów</span><b aria-hidden="true">→</b></button></div><button class="btn-link" data-act="stage6Skip">← Wróć</button></div>
-  <div id="view-plan-library" class="view-section"><p class="screen-eyebrow">TWOJE TRENINGI</p><h1 class="screen-title">Wybierz plan</h1><p class="stage6-intro">Najpierw sprawdź szczegóły. Trening rozpoczniesz osobnym przyciskiem.</p><div id="stage6PlanList" class="stage6-choice-grid"></div><button class="btn-link" data-act="stage6OpenChoices">← Wróć do wyboru</button></div>
+  <div id="view-plan-choices" class="view-section"><p class="screen-eyebrow">TWÓJ PLAN</p><h1 class="screen-title">Jak chcesz trenować?</h1><p class="stage6-intro">Wybierz sposób, który najlepiej Ci odpowiada.</p><div class="stage6-choice-grid"><button data-act="stage6Ready"><strong>Gotowy plan</strong><span>Przejrzyj dostępne treningi</span><b aria-hidden="true">→</b></button><button data-act="stage6Own"><strong>Własny plan</strong><span>Utwórz lub edytuj trening</span><b aria-hidden="true">→</b></button><button data-act="stage6Generator"><strong>Generator treningowy</strong><span>Skonfiguruj swoją propozycję</span><b aria-hidden="true">→</b></button></div><button class="btn-link" data-act="stage6Skip">← Wróć do planów</button></div>
+  <div id="view-plan-library" class="view-section"><p class="screen-eyebrow">TWOJE TRENINGI</p><h1 class="screen-title">Wybierz plan</h1><p class="stage6-intro">Najpierw sprawdź szczegóły. Trening rozpoczniesz osobnym przyciskiem.</p><div id="stage6PlanList" class="stage6-choice-grid"></div><button class="btn-link" data-act="stage6OpenChoices">← Wróć do wyboru planu</button></div>
   <div id="view-plan-preview" class="view-section"><div id="stage6PreviewBody"></div><button id="stage6PreviewBack" class="btn-secondary" data-act="stage6Ready">← Wróć do planów</button></div>
-  <div id="view-program-preview" class="view-section"><div id="programPreviewBody"></div><button class="btn-secondary" data-act="stage6Ready">← Wróć do planów</button></div>
+  <div id="view-program-preview" class="view-section"><div id="programPreviewBody"></div><button type="button" id="programPreviewBack" class="btn-secondary view-back" data-act="view" data-view="view-plans">← Wróć do planów</button></div>
 
   <!-- WIDOK 2: TRENING NA ŻYWO -->
   <div id="view-workout" class="view-section">
@@ -421,13 +421,13 @@ select.select-custom, input.select-custom { width: 100%; background: var(--card-
     <div id="sumBackup"></div>
     <div class="humor-card"><h4>Skala tonażu</h4><p id="humorText"></p></div>
     <button class="btn-primary" data-act="shareSummary">📷 Udostępnij wynik jako obraz</button>
-    <button class="btn-secondary" data-act="view" data-view="view-plans">Wróć do menu głównego</button>
+    <button class="btn-secondary" data-act="view" data-view="view-plans">Wróć do planów</button>
     <button class="btn-secondary" data-act="view" data-view="view-stats">Pokaż statystyki</button>
   </div>
 
   <!-- WIDOK 4: PROGRES ĆWICZEŃ -->
   <div id="view-charts" class="view-section">
-    <div class="view-head"><h2>Progres ćwiczeń</h2><button class="btn-icon" data-act="view" data-view="view-plans">✕ Zamknij</button></div>
+    <div class="view-head"><h2>Progres ćwiczeń</h2></div>
     <label for="chartExerciseSelect">Ćwiczenie</label><select class="select-custom" id="chartExerciseSelect"></select><label for="chartVariantSelect">Wariant</label><select class="select-custom" id="chartVariantSelect"></select><button class="btn-secondary" data-act="chartHistory">Historia tego ćwiczenia</button>
     <div class="filter-pills">
       <button type="button" class="pill" data-act="range" data-range="week">Tydzień</button>
@@ -443,7 +443,8 @@ select.select-custom, input.select-custom { width: 100%; background: var(--card-
 
   <!-- WIDOK 5: HISTORIA -->
   <div id="view-history" class="view-section">
-    <div class="view-head"><h2>Historia treningów</h2><button class="btn-icon" data-act="view" data-view="view-plans">✕ Zamknij</button></div>
+    <div class="view-head"><h2>Historia treningów</h2></div>
+    <button type="button" id="historyBackToProgram" class="btn-secondary view-back" data-act="programBack" hidden>← Wróć do programu</button>
     <details id="historyAddPanel" class="chart-container history-add-panel">
       <summary>Dodaj trening z przeszłości</summary>
       <div class="history-add-fields">
@@ -452,13 +453,16 @@ select.select-custom, input.select-custom { width: 100%; background: var(--card-
         <button class="btn-secondary" style="margin-top:0" data-act="histNew">+ Dodaj trening i uzupełnij serie</button>
       </div>
     </details>
-    <section id="historyScope" class="history-scope"></section><div id="histFilter"></div>
+    <details id="historyFilters" class="history-scope">
+      <summary><span>Filtry historii</span><span id="historyFilterSummary" class="history-filter-summary"></span></summary>
+      <div id="historyScope" class="history-filter-fields"></div>
+    </details><div id="histFilter"></div>
     <div id="historyList"></div>
   </div>
 
   <!-- WIDOK 6: STATYSTYKI -->
   <div id="view-stats" class="view-section">
-    <div class="view-head"><h2>Statystyki</h2><button class="btn-icon" data-act="view" data-view="view-plans">✕ Zamknij</button></div>
+    <div class="view-head"><h2>Statystyki</h2></div>
     <section id="statsLifetime" class="lifetime-stats" aria-label="Statystyki całej historii"></section><button class="btn-secondary" data-act="view" data-view="view-history">Historia profilu</button><button class="btn-secondary" data-act="view" data-view="view-charts">Progres ćwiczeń</button><div class="stat-cards c2" id="statsTop"></div>
     <div class="chart-container"><h4>Tonaż – ostatnie 8 tygodni</h4><canvas id="chartWeeks"></canvas></div>
     <div class="chart-container"><h4>Kalendarz treningów (dotknij dnia)</h4><div id="calendar"></div></div>
@@ -481,7 +485,7 @@ select.select-custom, input.select-custom { width: 100%; background: var(--card-
 
   <!-- WIDOK 7: EDYTOR PLANÓW -->
   <div id="view-planedit" class="view-section">
-    <div class="view-head"><h2 id="planEditTitle">Edytuj plany</h2><button class="btn-icon" data-act="view" data-view="view-plans">✕ Zamknij</button></div>
+    <div class="view-head"><h2 id="planEditTitle">Edytuj plany</h2><button type="button" class="btn-secondary view-back" data-act="view" data-view="view-plans">← Wróć do planów</button></div>
     <div id="planEditBody"></div>
   </div>
 
@@ -536,7 +540,7 @@ function base64ToBytes(value) {
 const fmt = n => Number(n).toLocaleString('pl-PL', { maximumFractionDigits: 2 });
 const num = v => { const t = String(v).trim().replace(',', '.'); return /^\d+(\.\d+)?$/.test(t) ? parseFloat(t) : NaN; };
 const e1rm = (w, r) => r <= 1 ? w : Math.round(w * (1 + r / 30) * 10) / 10;
-const plSeries = n => n === 1 ? 'seria' : (n >= 2 && n <= 4 ? 'serie' : 'serii');
+const plSeries = n => n === 1 ? 'seria' : (n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % 100 > 14) ? 'serie' : 'serii');
 const byDate = (a, b) => new Date(a.date) - new Date(b.date);
 const pad2 = n => String(n).padStart(2, '0');
 const dkey = d => `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
@@ -826,22 +830,32 @@ async function transactProfileUpdates(updates) {
 async function savePlanChanges(nextPlans, options = {}) {
   if (PROGRAM_EDITOR_UI?.editing) return PROGRAM_EDITOR_UI.localSave(nextPlans, options);
   const basePlans=structuredClone(PLANS);
+  const restoredIds = new Set(options.restoreDefaults ? nextPlans.map(plan => plan.id) : []);
+  const previousArchive = new Set(options.restoreDefaults ? currentProgramProfile()?.planPrograms?.archivedDayPlanIds : []);
   try {
     await withPlanDataLock(async () => {
       const latest = await STORE.refreshSnapshot();
       const latestPlans = latest.gymverse_plans ? cleanPlans(JSON.parse(latest.gymverse_plans)) : defaultPlans();
       const {mergePlanChanges,mergeRecordChanges}=await import('./src/features/plans/plan-merge.js');
-      const mergedPlans=mergePlanChanges(basePlans,nextPlans,latestPlans);
+      const registry = latest.gymverse_profiles_v1 ? JSON.parse(latest.gymverse_profiles_v1) : null;
+      if (registry && registry.activeProfileId !== PROFILE_STATE?.activeProfileId) throw new Error('PLAN_DATA_STALE');
+      const profile = registry?.profiles.find(item => item.id === registry.activeProfileId);
+      const archivedIds = profile?.planPrograms?.archivedDayPlanIds ?? [];
+      const archive = new Set(archivedIds);
+      if ([...restoredIds].some(id => archive.has(id) !== previousArchive.has(id))) throw new Error('PLAN_DATA_STALE');
+      // A reset replaces visible plans and explicitly restores the four defaults.
+      // Other archived records remain available to history and drafts.
+      const baseForMerge = options.restoreDefaults
+        ? basePlans.filter(plan => !archive.has(plan.id) || restoredIds.has(plan.id))
+        : basePlans;
+      const mergedPlans=mergePlanChanges(baseForMerge,nextPlans,latestPlans);
       let mergedCustom=null;
       if (Object.hasOwn(options, 'custom')) {
         const latestCustom = latest.gymverse_custom ? cleanCustom(JSON.parse(latest.gymverse_custom)) : {};
         mergedCustom=mergeRecordChanges(CUSTOM,options.custom,latestCustom);
       }
-      const registry = latest.gymverse_profiles_v1 ? JSON.parse(latest.gymverse_profiles_v1) : null;
-      if (registry && registry.activeProfileId !== PROFILE_STATE?.activeProfileId) throw new Error('PLAN_DATA_STALE');
       const nextIds = new Set(mergedPlans.map(plan => plan.id));
       const removed = latestPlans.filter(plan => !nextIds.has(plan.id));
-      const profile = registry?.profiles.find(item => item.id === registry.activeProfileId);
       const programDays = new Set((profile?.planPrograms?.programs || []).flatMap(program => program.dayPlanIds));
       const latestActive = latest.gymverse_active ? JSON.parse(latest.gymverse_active) : null;
       const latestDrafts = latest.gymverse_draft_v1 ? JSON.parse(latest.gymverse_draft_v1)?.items || [] : [];
@@ -854,6 +868,11 @@ async function savePlanChanges(nextPlans, options = {}) {
         throw new Error('PLAN_DELETE_REFERENCED');
       }
       const updates = { gymverse_plans: mergedPlans };
+      const remainingArchive = archivedIds.filter(id => !restoredIds.has(id) || !nextIds.has(id));
+      if (remainingArchive.length !== archivedIds.length) {
+        profile.planPrograms.archivedDayPlanIds = remainingArchive;
+        updates.gymverse_profiles_v1 = registry;
+      }
       if (Object.hasOwn(options, 'custom')) updates.gymverse_custom = mergedCustom;
       try { await STORE.transact(updates); }
       catch (error) {
@@ -866,6 +885,7 @@ async function savePlanChanges(nextPlans, options = {}) {
         throw error;
       }
       PLANS = mergedPlans;
+      if (updates.gymverse_profiles_v1) PROFILE_STATE = registry;
       if (Object.hasOwn(options, 'custom')) { CUSTOM = mergedCustom; applyCustom(); }
     });
     return true;
@@ -1200,7 +1220,7 @@ function deloadSuggestion() {
 }
 
 /* ================== WIDOKI ================== */
-function switchView(id) {
+function switchView(id, {fromProgram = false} = {}) {
   if (PROGRAM_EDITOR_UI?.allowLeave(id) === false) return;
   if (PROFILE_STATE?.onboardingRequired === true && id !== 'view-plans') return;
   if(id!=='view-planedit')PROGRAM_EDITOR_UI?.leaveDay();
@@ -1208,7 +1228,7 @@ function switchView(id) {
   const t = $(id);
   if (t) t.classList.add('active');
   document.querySelectorAll('.header-nav [data-view]').forEach(button => {
-    if (button.dataset.view === id || (['view-planedit', 'view-program-editor', 'view-program-preview', 'view-workout', 'view-summary'].includes(id) && button.dataset.view === 'view-plans')) button.setAttribute('aria-current', 'page');
+    if (button.dataset.view === id || (['view-plan-choices', 'view-plan-library', 'view-plan-preview', 'view-planedit', 'view-program-editor', 'view-program-preview', 'view-workout', 'view-summary'].includes(id) && button.dataset.view === 'view-plans')) button.setAttribute('aria-current', 'page');
     else button.removeAttribute('aria-current');
   });
   window.scrollTo(0, 0);
@@ -1216,7 +1236,10 @@ function switchView(id) {
   if (id !== 'view-history') histFilterDay = null;
   if (id === 'view-plans') renderPlans();
   if (id === 'view-charts') { initChartsSelect(); refreshChartVariant(); updateCharts(); }
-  if (id === 'view-history') renderHistory();
+  if (id === 'view-history') {
+    $('historyBackToProgram').hidden = !fromProgram;
+    renderHistory();
+  }
   if (id === 'view-stats') renderStats();
   if (id === 'view-settings') { renderProfilePicker(); renderTrainingPreferences(); }
   if (id === 'view-planedit') renderPlanEditor();
@@ -1488,6 +1511,7 @@ async function switchActiveProfile(targetId) {
 }
 let PROGRAM_PREVIEW = null;
 let PROGRAM_DAY_CONTEXT = false;
+let HOME_PROGRAM_START = null;
 let PROGRAM_SAVE_BUSY = false;
 let INTEGRITY_UNCERTAIN = false;
 function currentProgramProfile(){return PROFILE_STATE?.profiles.find(p=>p.id===PROFILE_STATE.activeProfileId);}
@@ -1511,11 +1535,27 @@ function renderAssignedProgram(){
   const groups=profile?.planPrograms?.programs||[],ordered=[...groups.filter(p=>p.id===assigned),...groups.filter(p=>p.id!==assigned)];
   const artwork=currentPlanArtwork();
   const invalid=assigned&&!groups.some(p=>p.id===assigned);
+  HOME_PROGRAM_START = null;
   const box=$('assignedProgram');box.hidden=!groups.length&&!invalid;
   box.innerHTML=(invalid?'<p role="status">Nie można odczytać przypisanego programu. Otwórz bibliotekę i sprawdź przypisanie.</p>':'')+'<div class="plan-grid">'+ordered.map(program=>{
     const isActive=program.id===assigned,missing=program.dayPlanIds.some(id=>!getPlan(id));
     const art=artwork.get('program:'+program.id),cover=programEquipmentArtwork(art);
-    return `<button type="button" data-card-tint="${art.tint}" class="plan-card program-card ${isActive?'is-assigned':''}" data-act="programPreview" data-id="${esc(program.id)}" aria-label="Otwórz program ${esc(program.title)}"><span class="plan-card-top"><span class="program-card-label">Program</span>${isActive?'<span class="program-active-badge">Aktywny</span>':''}</span><div class="program-overview">${cover}<div><h3>${esc(program.title)}</h3><p>${programDayCountLabel(program.dayPlanIds.length)}${missing?' · Sprawdź brakujące dni':''}</p></div></div><span class="program-open">Otwórz program <span aria-hidden="true">→</span></span></button>`;
+    const next = isActive && !active ? HISTORY_HELPERS.nextProgramDay(profile.id, program, PLANS, history) : null;
+    if (next) {
+      HOME_PROGRAM_START = {
+        planId: next.plan.id,
+        assignment: PROGRAM_RELATIONS.programAssignmentSnapshot(PROFILE_STATE, profile.id, program.id, PLANS)
+      };
+    }
+    const title = esc(program.title);
+    return `<article data-card-tint="${art.tint}" class="plan-card program-card ${isActive?'is-assigned':''}" data-id="${esc(program.id)}">
+      <div class="plan-card-top"><span class="program-card-label">Program</span>${isActive?'<span class="program-active-badge">Aktywny</span>':''}</div>
+      <div class="program-overview">${cover}<div><h3>${title}</h3><p>${programDayCountLabel(program.dayPlanIds.length)}${missing?' · Sprawdź brakujące dni':''}</p></div></div>
+      ${next?`<p class="program-next-day"><strong class="program-next-label">Następny</strong> · Dzień ${next.number} · ${esc(next.plan.title)}</p>`:''}
+      <div class="program-card-actions">
+        ${next?`<button type="button" class="btn-primary program-quick-start" data-act="programQuickStart" data-day="${esc(next.plan.id)}" aria-label="Rozpocznij trening: dzień ${next.number}, ${esc(next.plan.title)}">Rozpocznij trening</button>`:''}
+        <button type="button" class="btn-secondary program-open" data-act="programPreview" data-id="${esc(program.id)}" aria-label="Otwórz program ${title}">Otwórz program <span aria-hidden="true">→</span></button>
+      </div></article>`;
   }).join('')+'</div>';
 }
 function renderStage6Library() {
@@ -1529,7 +1569,18 @@ function renderStage6Library() {
 function showProgramPreview(id,preserve=false){
   const profile=currentProgramProfile(), program=profile?.planPrograms?.programs.find(p=>p.id===id);
   if(!program || program.dayPlanIds.some(day=>!getPlan(day))) {toast('Nie można odczytać programu lub jego dni.');return;}
-  if(!preserve || !PROGRAM_PREVIEW || PROGRAM_PREVIEW.programId!==id || PROGRAM_PREVIEW.profileId!==profile.id) PROGRAM_PREVIEW={profileId:profile.id,programId:id,assignment:{profileId:profile.id,programId:id,assignedProgramId:profile.planPrograms?.assignedProgramId??null,program:structuredClone(program),days:program.dayPlanIds.map(id=>structuredClone(getPlan(id)))}};
+  if (!preserve || PROGRAM_PREVIEW?.programId !== id || PROGRAM_PREVIEW?.profileId !== profile.id) {
+    const origin = document.querySelector('.view-section.active')?.id;
+    const returnView = origin === 'view-plan-library' || origin === 'view-planedit' ? origin
+      : origin === 'view-program-editor' && PROGRAM_PREVIEW?.programId === id ? PROGRAM_PREVIEW.returnView
+      : 'view-plans';
+    PROGRAM_PREVIEW = {profileId: profile.id, programId: id, returnView,
+      assignment: PROGRAM_RELATIONS.programAssignmentSnapshot(PROFILE_STATE, profile.id, id, PLANS)};
+  }
+  const back = $('programPreviewBack');
+  back.dataset.view = PROGRAM_PREVIEW.returnView;
+  back.textContent = PROGRAM_PREVIEW.returnView === 'view-plan-library' ? '← Wróć do biblioteki planów'
+    : PROGRAM_PREVIEW.returnView === 'view-planedit' ? '← Wróć do edytora' : '← Wróć do planów';
   const assigned=profile.planPrograms.assignedProgramId===id;
   $('programPreviewBody').innerHTML=`<p class="screen-eyebrow">PODGLĄD PROGRAMU</p><h1 class="screen-title">${esc(program.title)}</h1><p>${programDayCountLabel(program.dayPlanIds.length)}</p><div class="stage6-choice-grid">${program.dayPlanIds.map((day,index)=>`<button data-act="programDay" data-id="${esc(day)}"><strong>Dzień ${index+1}</strong><span>${esc(getPlan(day).title)}</span><b aria-hidden="true">→</b></button>`).join('')}</div>${assigned?'<p class="program-active-note">Aktywny program tego profilu</p>':''}<div class="program-footer-actions"><button class="btn-secondary" data-act="programEdit" data-id="${esc(id)}">Edytuj program</button>${assigned?'<button class="btn-secondary" data-act="programClear">Usuń przypisanie</button>':`<button class="btn-primary" data-act="programAssign" data-id="${esc(id)}">Przypisz do profilu</button>`}<button class="btn-secondary" data-act="programHistory" data-id="${esc(id)}">Historia dni programu</button></div><p class="small muted">Usuwaniem zarządzasz w „Edytuj plany i ćwiczenia”. Dni i historia pozostają zachowane.</p>`;
   const details=document.createElement('section');details.id='programSelectedDay';details.hidden=true;$('programPreviewBody').querySelector('.stage6-choice-grid').after(details);
@@ -1555,7 +1606,11 @@ function showStage6Preview(id) {
     return `<li><span class="stage6-number">${index + 1}</span><div><strong>${esc(exName(exercise))}</strong><small>${esc(variantLabel)} · ${exercise.sets} serii · ${esc(exercise.target)} powt.</small><small>Przerwa ${Math.floor(rest / 60)}:${String(rest % 60).padStart(2,'0')}${exercise.restSeconds == null ? ' · według ustawień treningu' : ''}</small></div></li>`;
   }).join('');
   $('stage6PreviewBody').innerHTML = `<p class="screen-eyebrow">PODGLĄD PLANU</p><h1 class="screen-title">${esc(plan.title)}</h1><p class="stage6-intro">${exerciseCountLabel(plan.exercises.length)}${plan.dayOfWeek ? ` · ${esc(DAY_LABELS[plan.dayOfWeek])}` : ''}</p><ol class="stage6-exercises">${exercises || '<li>Ten plan nie ma jeszcze ćwiczeń.</li>'}</ol><button class="btn-primary" data-act="stage6Start" data-id="${esc(plan.id)}" ${plan.exercises.length ? '' : 'disabled'}>Rozpocznij trening</button>`;
-  const back=$('stage6PreviewBack');back.dataset.act=PROGRAM_DAY_CONTEXT?'programBack':'stage6Ready';back.textContent=PROGRAM_DAY_CONTEXT?'← Wróć do programu':'← Wróć do planów';
+  const back = $('stage6PreviewBack');
+  const fromLibrary = $('view-plan-library').classList.contains('active');
+  back.dataset.act = PROGRAM_DAY_CONTEXT ? 'programBack' : fromLibrary ? 'stage6Ready' : 'view';
+  back.dataset.view = 'view-plans';
+  back.textContent = PROGRAM_DAY_CONTEXT ? '← Wróć do programu' : fromLibrary ? '← Wróć do biblioteki planów' : '← Wróć do planów';
   switchView('view-plan-preview');
 }
 function enterIntegrityUncertain(){
@@ -1657,8 +1712,9 @@ function renderPlans() {
   renderProfilePicker();
   renderAssignedProgram();
   const done = lastDoneMap();
-  const next = nextPlanId();
-  const used=new Set((currentProgramProfile()?.planPrograms?.programs||[]).flatMap(program=>program.dayPlanIds));
+  const programData = currentProgramProfile()?.planPrograms;
+  const next = active || programData?.assignedProgramId ? null : nextPlanId();
+  const used = new Set((programData?.programs || []).flatMap(program => program.dayPlanIds));
   const list = visiblePlans().filter(plan=>!used.has(plan.id));
   $('standalonePlans').hidden=!list.length;
   const artwork=currentPlanArtwork();
@@ -1688,8 +1744,8 @@ function renderPlans() {
   const rb = $('resumeBox');
   if (active) {
     const plan = getPlan(active.planId);
-    rb.innerHTML = `<div class="banner"><p>Niedokończony trening: <b>${esc(plan.title)}</b> · zapisanych serii: ${active.sets.length}</p>
-      <div class="row"><button class="btn-primary" style="padding:12px;font-size:0.95rem" data-act="resume">Wznów</button>
+    rb.innerHTML = `<div class="banner"><p>Niedokończony trening: <b>${esc(plan?.title || 'Trening')}</b> · zapisanych serii: ${active.sets.length}</p>
+      <div class="row"><button class="btn-primary" style="padding:12px;font-size:0.95rem" data-act="resume">Wznów trening</button>
       <button class="btn-secondary" style="margin-top:0;padding:12px" data-act="resumeDiscard">Porzuć</button></div></div>`;
   } else {
     rb.innerHTML = '';
@@ -1904,7 +1960,8 @@ function handleExercisePresentationControl(event) {
   updateExercisePresentationAtlas(variantKey(state.currentExercise), { sharedSexControl: true, sex: state.sex });
 }
 
-async function startWorkout(planId,sourceProgramId=null) {
+async function startWorkout(planId,sourceProgramId=null,quickStart=null) {
+  if (quickStart && active) { openWorkout(); return; }
   const plan = getPlan(planId);
   if (!plan || !plan.exercises.length) { toast('Ten plan nie ma ćwiczeń'); return; }
   if (plan.exercises.some(e => e.variantId && !validVariant(e.key, e.variantId))) { toast('Plan zawiera nierozpoznany wariant ćwiczenia. Popraw go w edytorze.'); return; }
@@ -1914,20 +1971,41 @@ async function startWorkout(planId,sourceProgramId=null) {
     let profile=currentProgramProfile();
     if(sourceProgramId!==null){
       const latest=await STORE.refreshSnapshot();
-      const {matchesProgramAssignmentSnapshot}=await import('./src/features/plans/programs.js');
-      if(!PROGRAM_PREVIEW||sourceProgramId!==PROGRAM_PREVIEW.programId||!matchesProgramAssignmentSnapshot(JSON.parse(latest.gymverse_profiles_v1),PROGRAM_PREVIEW.assignment,cleanPlans(JSON.parse(latest.gymverse_plans||'[]'))))throw new Error('SESSION_PROGRAM_STALE');
-      const registry=JSON.parse(latest.gymverse_profiles_v1);
-      if(registry.activeProfileId!==PROFILE_STATE.activeProfileId||registry.activeProfileId!==PROGRAM_PREVIEW.profileId)throw new Error('SESSION_PROGRAM_STALE');
-      profile=registry.profiles.find(item=>item.id===registry.activeProfileId);
+      const expected = quickStart?.assignment ?? PROGRAM_PREVIEW?.assignment;
+      const registry = JSON.parse(latest.gymverse_profiles_v1 || 'null');
+      const latestPlans = cleanPlans(JSON.parse(latest.gymverse_plans || '[]'));
+      if (sourceProgramId !== expected?.programId || registry?.activeProfileId !== PROFILE_STATE?.activeProfileId
+        || !PROGRAM_RELATIONS.matchesProgramAssignmentSnapshot(registry, expected, latestPlans)) {
+        throw new Error('SESSION_PROGRAM_STALE');
+      }
+      profile = registry.profiles.find(item => item.id === registry.activeProfileId);
+      if (quickStart) {
+        if (JSON.parse(latest.gymverse_active || 'null')) throw new Error('SESSION_ALREADY_ACTIVE');
+        const next = HISTORY_HELPERS.nextProgramDay(profile.id, expected.program, latestPlans, JSON.parse(latest.gymverse_history || '[]'));
+        if (expected.assignedProgramId !== sourceProgramId || next?.plan.id !== planId) throw new Error('SESSION_PROGRAM_STALE');
+      }
     }
     const sessionContext=HISTORY_HELPERS.captureSessionContext(profile,planId,sourceProgramId);
     if (active && !await discardActive()) return;
-    active = { id: createUuid(), planId, sessionContext, exercises: JSON.parse(JSON.stringify(plan.exercises)), step: 0, sets: [], startedAt: Date.now(), timerEndAt: 0, swaps: {}, setCount: {}, rir: {} };
+    const newSession = { id: createUuid(), planId, sessionContext, exercises: JSON.parse(JSON.stringify(plan.exercises)), step: 0, sets: [], startedAt: Date.now(), timerEndAt: 0, swaps: {}, setCount: {}, rir: {} };
+    if (quickStart) {
+      if (JSON.parse(STORE.storage.getItem('gymverse_active') || 'null')) throw new Error('SESSION_ALREADY_ACTIVE');
+      await STORE.transact({gymverse_active: newSession});
+      active = newSession;
+      openWorkout();
+      return;
+    }
+    active = newSession;
     if (!await saveActive()) { active = null; return; }
     openWorkout();
   };
   try { if(sourceProgramId!==null)await withPlanDataLock(begin);else await begin(); }
-  catch (_) { toast('Program lub jego dzień zmienił się. Odśwież podgląd przed rozpoczęciem treningu.'); }
+  catch (error) {
+    if (error.message === 'SESSION_ALREADY_ACTIVE') toast('Trening już trwa w innej karcie. Wróć do niej lub odśwież aplikację, aby go wznowić.');
+    else if (error.message === 'SESSION_PROGRAM_STALE' || error.message === 'CROSS_TAB_CONFLICT') {
+      toast(quickStart ? 'Dane treningu się zmieniły. Odśwież aplikację i sprawdź następny dzień.' : 'Program lub jego dzień zmienił się. Odśwież podgląd przed rozpoczęciem treningu.');
+    } else toast(storageFailureMessage(error));
+  }
 }
 function openWorkout() {
   switchView('view-workout');
@@ -3097,9 +3175,9 @@ function renderStats() {
   const sk = streakWeeks();
   const dv = cur.vol - prev.vol;
   $('statsTop').innerHTML =
-    `<div class="stat-card"><div class="val">${cur.n}</div><div class="lbl">treningi w tym tygodniu (poprz. ${prev.n})</div></div>
+    `<div class="stat-card"><div class="val">${cur.n}</div><div class="lbl">${plWorkouts(cur.n)} w tym tygodniu (poprz. ${prev.n})</div></div>
      <div class="stat-card"><div class="val">${fmt(cur.vol)} kg</div><div class="lbl">tonaż ${prev.vol ? (dv >= 0 ? '▲ +' : '▼ −') + fmt(Math.abs(dv)) + ' vs poprz.' : 'w tym tygodniu'}</div></div>
-     <div class="stat-card"><div class="val">${cur.sets}</div><div class="lbl">serie w tym tygodniu</div></div>
+     <div class="stat-card"><div class="val">${cur.sets}</div><div class="lbl">${plSeries(cur.sets)} w tym tygodniu</div></div>
      <div class="stat-card"><div class="val">🔥 ${sk}</div><div class="lbl">${plWeeks(sk)} z rzędu</div></div>`;
 
   const labels = [], vals = [];
@@ -3225,9 +3303,25 @@ function renderHistoryScope(){
  const days=[...dayMap.values()];
  const keys=[...new Set(history.flatMap(s=>(s.details||[]).map(d=>d.exerciseId)))];
  const variants=[...new Set(history.flatMap(s=>(s.details||[]).filter(d=>!HISTORY_SCOPE.exerciseId||d.exerciseId===HISTORY_SCOPE.exerciseId).map(HISTORY_HELPERS.variantKey)))];
- const opts=(items,value)=>items.map(([id,label])=>`<option value="${esc(id)}" ${id===value?'selected':''}>${esc(label)}</option>`).join('');
- const filter=(field,label,placeholder,values,value)=>{const selectedOption=values.find(([id])=>id===value);const current=selectedOption?.[1]||placeholder;return `<label>${label}<select class="select-custom" data-history-scope="${field}" aria-label="${label}"><option value="">${placeholder}</option>${opts(values,value)}</select><small class="history-filter-current" data-filter-current="${field}">${esc(current)}</small></label>`;};
- $('historyScope').innerHTML=`${filter('programId','Program z chwili treningu','Wszystkie treningi profilu',programs.map(p=>[p.id,p.title]),HISTORY_SCOPE.programId)}${filter('dayId','Dzień programu / trening','Wszystkie dni',days.map((p,i)=>[p.id,(selected?'Dzień '+(i+1)+' · ':'')+p.title]),HISTORY_SCOPE.dayId)}${filter('exerciseId','Ćwiczenie','Wszystkie ćwiczenia',keys.map(k=>[k,nameOf(k)]),HISTORY_SCOPE.exerciseId)}${filter('variant','Wariant','Wszystkie warianty',variants.map(v=>[v,v==='__missing__'?'Brak zapisanego wariantu':v]),HISTORY_SCOPE.variant)}<p class="small muted">Filtr programu obejmuje tylko treningi z zapisanym programem w chwili rozpoczęcia. Starsze rekordy bez tej informacji pozostają w historii ogólnej.</p><button class="btn-secondary" data-act="historyReset">Wyczyść filtry</button><button class="btn-secondary" data-act="historyProgress">Progres wybranego ćwiczenia</button><button class="btn-link" data-act="view" data-view="view-stats">Statystyki profilu</button>`;
+ const fields = [
+   ['programId', 'Program z chwili treningu', 'Wszystkie treningi profilu', programs.map(p => [p.id, p.title])],
+   ['dayId', 'Dzień programu / trening', 'Wszystkie dni', days.map((p, i) => [p.id, (selected ? 'Dzień ' + (i + 1) + ' · ' : '') + p.title])],
+   ['exerciseId', 'Ćwiczenie', 'Wszystkie ćwiczenia', keys.map(key => [key, nameOf(key)])],
+   ['variant', 'Wariant', 'Wszystkie warianty', variants.map(variant => [variant, variant === '__missing__' ? 'Brak zapisanego wariantu' : variant])]
+ ];
+ const filterMarkup = fields.map(([field, label, placeholder, options]) => {
+   const choices = options.map(([id, text]) =>
+     `<option value="${esc(id)}" ${id === HISTORY_SCOPE[field] ? 'selected' : ''}>${esc(text)}</option>`).join('');
+   return `<label for="history-filter-${field}">${label}<select id="history-filter-${field}" class="select-custom" data-history-scope="${field}"><option value="">${placeholder}</option>${choices}</select></label>`;
+ }).join('');
+ const activeLabels = fields.flatMap(([field, , , options]) =>
+   options.filter(([id]) => id === HISTORY_SCOPE[field]).map(([, label]) => label));
+ $('historyFilterSummary').innerHTML = activeLabels.map(label => `<span>${esc(label)}</span>`).join('');
+ $('historyScope').innerHTML = `${filterMarkup}
+   <p class="small muted">Filtr programu obejmuje tylko treningi z zapisanym programem w chwili rozpoczęcia. Starsze rekordy bez tej informacji pozostają w historii ogólnej.</p>
+   <button class="btn-secondary" data-act="historyReset">Wyczyść filtry</button>
+   <button class="btn-secondary" data-act="historyProgress">Progres wybranego ćwiczenia</button>
+   <button class="btn-link" data-act="view" data-view="view-stats">Statystyki profilu</button>`;
 }
 function refreshChartVariant(){
  const sel=$('chartVariantSelect'),key=$('chartExerciseSelect').value,keep=sel.value;
@@ -3237,9 +3331,11 @@ function refreshChartVariant(){
 }
 document.addEventListener('change',event=>{
  const field=event.target.dataset.historyScope;if(!field)return;
+ const focused = document.activeElement === event.target;
  HISTORY_SCOPE[field]=event.target.value;
  if(field==='programId')HISTORY_SCOPE.dayId='';if(field==='exerciseId')HISTORY_SCOPE.variant='';
  renderHistory();
+ if (focused) $('history-filter-' + field)?.focus({preventScroll:true});
 });
 
 function renderHistory() {
@@ -3491,14 +3587,17 @@ function renderGeneratedPreview(state) {
       const variantText = exercise.variantId || item?.defaultVariant || 'domyślny katalogowy';
       return `<li data-exercise-id="${esc(exercise.key)}"><details class="generated-exercise-details"><summary>${releasedThumbnail(exercise)}<span class="generated-exercise-copy"><b>${esc(label)}</b><small>${exercise.sets} × ${esc(exercise.target)} powt. · przerwa ${restFor(exercise)} s</small></span><span class="exercise-disclosure-arrow" aria-hidden="true">›</span></summary><div class="generated-exercise-information"><p class="small muted">Wariant: ${esc(variantText)}</p><p class="small muted">Grupy mięśniowe: ${esc(groupText)} · Sprzęt: ${esc(equipmentText)}</p></div></details></li>`;
     }).join('');
-    return `<section id="generated-day-${planIndex}" class="data-box" style="margin:12px 0"><h4>${esc(plan.title)}</h4><p class="small muted">Orientacyjny czas: ${time ? `${time.low}–${time.high} min` : 'brak oszacowania'}.</p><ul style="list-style:none;padding:0;margin:0">${rows}</ul></section>`;
+    const weekday = plan.dayOfWeek ? days.get(plan.dayOfWeek) : '';
+    return `<section id="generated-day-${planIndex}" class="data-box" style="margin:12px 0"><h4>${esc(plan.title)}</h4><p class="small muted">${weekday ? esc(weekday) + ' · ' : ''}Orientacyjny czas: ${time ? `${time.low}–${time.high} min` : 'brak oszacowania'}.</p><ul style="list-style:none;padding:0;margin:0">${rows}</ul></section>`;
   })();
   const volume = preview.metrics.volume;
   const volumeLine = Object.keys(volume.weekly).filter(group => volume.weekly[group] > 0).map(group => `${groups.get(group) || group}: ${fmt(volume.weekly[group])} (główne ${volume.primary[group]}, pomocnicze ${volume.secondary[group]})`).join(' · ') || 'brak mapowanych serii';
   const warnings = [...result.notes, ...preview.metrics.findings.map(item => item.code === 'CATALOG_GAPS' ? `Braki katalogu: ${item.patterns.join(', ')}.` : '')].filter(Boolean);
-  const weekCards=preview.plans.map((plan,index)=>{const time=timeByPlan.get(plan.id);const label=plan.dayOfWeek?days.get(plan.dayOfWeek):'Elastycznie';return `<button type="button" class="btn-secondary" data-act="generatedDay" data-index="${index}" aria-pressed="${index===selectedIndex}" aria-label="Pokaż dzień ${index+1}: ${esc(plan.title)}">Dzień ${index+1}<span>${esc(plan.title)}</span><small>${esc(label)}${time?` · ${time.low}–${time.high} min`:''}</small></button>`;}).join('');
+  const weekCards = preview.plans.map((plan, index) =>
+    `<button type="button" class="btn-secondary" data-act="generatedDay" data-index="${index}" aria-pressed="${index === selectedIndex}" aria-label="Pokaż dzień ${index + 1}: ${esc(plan.title)}">Dzień ${index + 1}</button>`
+  ).join('');
   const scientific=`${warnings.length?`<h4>Dlaczego taki plan?</h4><ul class="small">${warnings.map(note => `<li>${esc(note)}</li>`).join('')}</ul>`:''}<p class="small muted">Badania opisują średnie grupowe, a nie wynik konkretnej osoby. Serie i zakres powtórzeń są roboczymi, edytowalnymi ustawieniami, a oszacowanie czasu i objętości nie stanowi pomiaru biologicznego. Dowody dotyczące optimum odpoczynku, zwłaszcza ponad 90 s, pozostają niejednoznaczne. Pełne źródła i ograniczenia generatora: docs/research/ (S01, S02, S04, S05, S06).</p>`;
-  return `<section id="generatorPreview" class="data-box"><h3>Twój wygenerowany plan</h3><p class="small muted">Niezapisana propozycja. Sprawdź wybrany dzień. Zapisz i przypisz program albo przejdź do osobnej edycji po zapisaniu.</p><div class="program-day-tabs" role="group" aria-label="Dni programu">${weekCards}</div><div class="generated-day-navigation"><button class="btn-secondary" data-act="generatedDay" data-index="${Math.max(0,selectedIndex-1)}" ${selectedIndex===0?'disabled':''}>← Poprzedni dzień</button><span>Dzień ${selectedIndex+1} z ${preview.plans.length}</span><button class="btn-secondary" data-act="generatedDay" data-index="${Math.min(preview.plans.length-1,selectedIndex+1)}" ${selectedIndex===preview.plans.length-1?'disabled':''}>Następny dzień →</button></div>${planMarkup}<details class="generator-preview-details"><summary>Uzasadnienie i ograniczenia</summary><p class="small">${esc(volumeLine)}</p>${scientific}</details><div class="nav-row"><button class="btn-primary" data-act="saveGeneratedPreview">Zapisz i ustaw jako mój program</button><button class="btn-secondary" data-act="saveGeneratedForEdit">Zapisz i przejdź do edycji</button><button class="btn-secondary" data-act="editGeneratorAnswers">Wróć do generatora</button><button class="btn-secondary" data-act="regeneratePlan">Wygeneruj ponownie</button><button class="btn-secondary" data-act="cancelGeneratedPreview">Anuluj</button></div></section>`;
+  return `<section id="generatorPreview" class="data-box"><h3>Twój wygenerowany plan</h3><p class="small muted">Niezapisana propozycja. Wybierz dzień, aby zobaczyć ćwiczenia.</p><div class="program-day-tabs" role="group" aria-label="Dni programu">${weekCards}</div><p class="small muted generated-day-status">Dzień ${selectedIndex+1} z ${preview.plans.length}</p>${planMarkup}<details class="generator-preview-details"><summary>Uzasadnienie i ograniczenia</summary><p class="small">${esc(volumeLine)}</p>${scientific}</details><div class="nav-row"><button class="btn-primary" data-act="saveGeneratedPreview">Zapisz i ustaw jako mój program</button><button class="btn-secondary" data-act="saveGeneratedForEdit">Zapisz i przejdź do edycji</button><button class="btn-secondary" data-act="editGeneratorAnswers">Wróć do generatora</button><button class="btn-secondary" data-act="regeneratePlan">Wygeneruj ponownie</button><button class="btn-secondary" data-act="cancelGeneratedPreview">Anuluj</button></div></section>`;
 }
 
 async function updateGeneratedPreviewMetrics(state) {
@@ -3717,7 +3816,7 @@ async function peDelPlan() {
 }
 async function peReset() {
   if (!confirm('Przywrócić 4 domyślne plany Push/Pull? Twoje zmiany w planach zostaną nadpisane (historia zostaje).')) return;
-  if (await savePlanChanges(defaultPlans(), { failureMessage: 'Przywrócenie domyślnych planów' })) renderPlanEditor();
+  if (await savePlanChanges(defaultPlans(), { restoreDefaults: true, failureMessage: 'Przywrócenie domyślnych planów' })) renderPlanEditor();
 }
 
 async function auditManualPlan() {
@@ -4228,9 +4327,13 @@ const ACTIONS = {
   programPreview: el => showProgramPreview(el.dataset.id),
   programNew: () => PROGRAM_EDITOR_UI.open(),
   programEdit: el => PROGRAM_EDITOR_UI.open(el.dataset.id,PROGRAM_PREVIEW?.selectedDay),
-  programHistory:el=>{HISTORY_SCOPE={programId:el.dataset.id,dayId:'',exerciseId:'',variant:''};switchView('view-history');},
+  programHistory:el=>{HISTORY_SCOPE={programId:el.dataset.id,dayId:'',exerciseId:'',variant:''};switchView('view-history',{fromProgram:true});},
   programDay: el => {showProgramSelectedDay(el.dataset.id);$('programSelectedDay')?.scrollIntoView({block:'start',behavior:'instant'});},
-  programStart: () => {if(PROGRAM_PREVIEW?.profileId===currentProgramProfile()?.id)startWorkout(PROGRAM_PREVIEW.selectedDay,PROGRAM_PREVIEW.programId);else toast('Profil lub program zmienił się. Odśwież podgląd.');},
+  programQuickStart: el => {
+    const next = HOME_PROGRAM_START;
+    if (next?.planId === el.dataset.day) return startWorkout(next.planId, next.assignment.programId, next);
+  },
+  programStart: () => {if(PROGRAM_PREVIEW?.profileId===currentProgramProfile()?.id)return startWorkout(PROGRAM_PREVIEW.selectedDay,PROGRAM_PREVIEW.programId);else toast('Profil lub program zmienił się. Odśwież podgląd.');},
   programBack: () => {if(PROGRAM_PREVIEW)showProgramPreview(PROGRAM_PREVIEW.programId,true);},
   programAssign: el => saveProgramAssignment(el.dataset.id),
   programDelete: el => deleteManagedProgram(el.dataset.id),
@@ -4463,7 +4566,7 @@ const ACTIONS = {
   histEditSet: el => histEditSet(Number(el.dataset.i), Number(el.dataset.d)),
   histAddSet: el => histAddSet(Number(el.dataset.i), el.dataset.k, el.dataset.v),
   histNew,
-  historyReset:()=>{HISTORY_SCOPE={programId:'',dayId:'',exerciseId:'',variant:''};histFilterDay=null;renderHistory();},
+  historyReset:()=>{HISTORY_SCOPE={programId:'',dayId:'',exerciseId:'',variant:''};histFilterDay=null;renderHistory();document.querySelector('[data-act="historyReset"]')?.focus({preventScroll:true});},
   historyProgress:()=>{const key=HISTORY_SCOPE.exerciseId;switchView('view-charts');if(key)$('chartExerciseSelect').value=key;refreshChartVariant();$('chartVariantSelect').value=HISTORY_SCOPE.variant;updateCharts();},
   chartHistory:()=>{HISTORY_SCOPE={programId:'',dayId:'',exerciseId:$('chartExerciseSelect').value,variant:$('chartVariantSelect').value};switchView('view-history');},
   historySession:el=>{const i=Number(el.dataset.i);HISTORY_SCOPE={programId:'',dayId:'',exerciseId:'',variant:''};histFilterDay=null;histOpen.add(i);switchView('view-history');$('hist_'+i)?.scrollIntoView({block:'center'});},
@@ -4679,7 +4782,7 @@ async function init() {
     if (Object.keys(initializedProfiles.updates).length) await transactProfileUpdates(initializedProfiles.updates);
     PROFILE_STATE = initializedProfiles.state;
     PROGRAM_RELATIONS=await import('./src/features/plans/programs.js');
-    HISTORY_HELPERS=await import('./src/features/plans/history-context.js');
+    HISTORY_HELPERS=await import('./src/features/plans/history-context.js?v=62');
     await loadState();
     await STORE.flush();
     $('migrateDataButton').disabled = STORE.mode !== 'localStorage';
