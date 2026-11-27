@@ -170,4 +170,19 @@ export function exportProfileSnapshot(state, currentSnapshot, profileId = state?
 
 export function importProfileSnapshot(state, payload, options = {}) {
   validateProfileState(state);
-  if (!record(payload) || payload.format !== 'gymverse-profile' || pa
+  if (!record(payload) || payload.format !== 'gymverse-profile' || payload.schemaVersion !== 1 || !record(payload.profile) || !record(payload.data)) throw new Error('PROFILE_IMPORT_INVALID');
+  const name = typeof payload.profile.name === 'string' ? payload.profile.name.trim().slice(0, 60) : '';
+  if (!name) throw new Error('PROFILE_IMPORT_INVALID');
+  if (Object.keys(payload.data).some(key => !APP_KEYS.includes(key) || typeof payload.data[key] !== 'string')) throw new Error('PROFILE_IMPORT_INVALID');
+  try { Object.values(payload.data).forEach(value => JSON.parse(value)); } catch { throw new Error('PROFILE_IMPORT_INVALID'); }
+  const id = options.id || newProfileId();
+  if (!id || !PROFILE_ID.test(id) || state.profiles.some(profile => profile.id === id)) throw new Error('PROFILE_ID_INVALID');
+  if (Object.hasOwn(payload.profile, 'planPrograms')) validatePlanPrograms(payload.profile.planPrograms, JSON.parse(payload.data.gymverse_plans || '[]'));
+  const profile = { id, name, createdAt: options.createdAt || new Date().toISOString(), attributes: normalizeAttributes(payload.profile.attributes || {}), ...(Object.hasOwn(payload.profile, 'planPrograms') ? {planPrograms: clone(payload.profile.planPrograms)} : {}), data: clone(payload.data) };
+  if (state.profiles.length >= 20) throw new Error('PROFILE_LIMIT_REACHED');
+  const next = { ...clone(state), profiles: [...clone(state.profiles), profile] };
+  return { state: next, profile: clone(profile) };
+}
+
+export const PROFILE_STORAGE_KEY = PROFILE_STATE_KEY;
+export const PROFILE_DATA_KEYS = APP_KEYS;
