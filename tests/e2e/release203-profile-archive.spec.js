@@ -59,11 +59,16 @@ test('deletion preserves completed workout, tonnage, RIR, Previous and ZIP resto
  await restored.locator('#planList [data-act="startPlan"]').click();await expect(restored.locator('.prev-val').first()).toContainText('40 kg × 8');await isolated.close();
 });
 
-test('active workout in another tab blocks deletion and stale deletion cannot affect a switched profile',async({page,context})=>{
+test('deletion preserves an active workout in another tab and stale deletion cannot affect a switched profile',async({page,context})=>{
  await boot(page);await manage(page);const other=await context.newPage();other.on('dialog',d=>d.accept());await other.goto('/');await expect.poll(()=>other.evaluate(()=>!!window.__gymverseTestHarness)).toBe(true);
  await other.locator('.program-card[data-id="'+A+'"]').locator('[data-act="programPreview"]').click();await other.locator('[data-act="programDay"]').first().click();await other.locator('[data-act="programStart"]').click();await other.locator('#weight_0').fill('45');await other.locator('#reps_0').fill('9');await other.locator('#btnDone_0').click();await expect(other.locator('#restScreen')).toBeVisible();await expect.poll(async()=>JSON.parse((await raw(other)).gymverse_active).restState?.pending).toBe(false);
- const before=await raw(other);await page.locator('.managed-program[data-id="'+A+'"] [data-act="programDelete"]').click();await expect(page.locator('#toast')).toContainText('Najpierw zakończ');expect((await raw(page)).gymverse_profiles_v1).toBe(before.gymverse_profiles_v1);expect((await raw(page)).gymverse_active).toBe(before.gymverse_active);
- await other.locator('#restScreen [data-act="timerSkip"]').click();await switchTo(other,'profile-b');const switched=await raw(other);await page.locator('.managed-program[data-id="'+A+'"] [data-act="programDelete"]').click();await expect(page.locator('#toast')).toContainText('zmieniły się');expect((await raw(page)).gymverse_profiles_v1).toBe(switched.gymverse_profiles_v1);
+ const before=await raw(other);await page.locator('.managed-program[data-id="'+A+'"] [data-act="programDelete"]').click();await expect(page.locator('#toast')).toContainText('Usunięto program');
+ const deleted=await raw(page);expect(deleted.gymverse_active).toBe(before.gymverse_active);expect(deleted.gymverse_history).toBe(before.gymverse_history);
+ expect(JSON.parse(deleted.gymverse_profiles_v1).profiles[0].planPrograms.programs.map(program=>program.id)).toEqual([B]);
+ await other.locator('#restScreen [data-act="timerSkip"]').click();
+ await expect.poll(async()=>JSON.parse((await raw(other)).gymverse_active).restState??null).toBeNull();
+ await other.reload();await expect.poll(()=>other.evaluate(()=>!!window.__gymverseTestHarness)).toBe(true);
+ await switchTo(other,'profile-b');const switched=await raw(other);await page.locator('.managed-program[data-id="'+B+'"] [data-act="programDelete"]').click();await expect(page.locator('#toast')).toContainText('zmieniły się');expect((await raw(page)).gymverse_profiles_v1).toBe(switched.gymverse_profiles_v1);
  await switchTo(other,'profile-a');await other.locator('#resumeBox button').first().click();await expect(other.locator('#view-workout')).toHaveClass(/active/);expect(JSON.parse((await raw(other)).gymverse_active).sets[0]).toMatchObject({weight:45,reps:9});await other.close();
 });
 

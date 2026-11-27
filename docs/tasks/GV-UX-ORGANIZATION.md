@@ -95,3 +95,15 @@ Nie wykonano commit, push, aktualizacji PR, merge ani publikacji. Te operacje po
 ## Przekazanie do2.0.3 — 26.11.2026
 
 Aktualny zakres wydania, autoryzacja i wyniki są w [GV-RELEASE-203](GV-RELEASE-203.md). Nowe dopasowania zatwierdzone przez właściciela zastępują wcześniejsze ustalenia: minus nie usuwa zaznaczeń; przycisk Usuń program usunięty z podglądu; istniejąca przerwa ogólna i ustawienie gryfu dostępne w Ustawieniach, dodano informację o wersji2.0.3. Cachev58, zachowany zaakceptowany wygląd. Chromium52/52 i WebKit9/9 to osobne przebiegi.
+
+## Usuwanie planów z zachowaniem wyników — 27.11.2026
+
+Właściciel zlecił usuwanie planów (m.in. Push A1 i Pull A1) bez usuwania zapisanych ćwiczeń, serii, ciężarów i danych wykorzystywanych w statystykach oraz progresie. Zmiana obejmuje ostatni samodzielny plan, dzień programu wielodniowego i cały program. Ostatni dzień programu jednodniowego usuwa się akcją „Usuń program”. W trakcie sesji w zarządzaniu są dostępne akcje usuwania.
+
+Usunięcie zmienia wyłącznie rejestr właściwego profilu i korzysta z istniejącego `planPrograms.archivedDayPlanIds`. Zachowany rekord techniczny obsługuje wcześniejsze treningi, wznowienie sesji i szkice. Nie można uruchomić nowej sesji ze starego widoku usuniętego planu ani przywrócić go przez stary szkic. Po usunięciu jednego dnia pozostałe dni i przypisanie programu zachowują identyfikatory i kolejność. Celowe użycie „Przywróć domyślne plany” wznawia dostępność planów domyślnych.
+
+Testy IndexedDB ujawniły rozbieżność między podsumowaniem treningu a trwałą historią przy równoległym odczycie. Zakończenie sesji używa teraz jednej transakcji i najnowszej historii ze wspólnego magazynu. Przed zapisem sprawdzane są profil, aktywna sesja i wynik zapisany w drugiej karcie. Podsumowanie pojawia się po potwierdzeniu zapisu. Brak zmiany formatu ZIP v5 i manifestu PWA. Lokalny cache v63.
+
+Przebiegi obejmują rzeczywisty zapis 40 × 8 z RIR 2, usunięcie ostatniego planu, odświeżenie, wykresy, 320 kg tonażu, ZIP v5, dwa tryby magazynu, drugą kartę, szkice i wznowienie. Fizyczny iPhone nie był częścią weryfikacji. Właściciel zlecił publikację na GitHub Pages. Test aktualizacji v62 na v63 pod /gymverse/ potwierdził zachowanie danych, start podczas wymiany Service Workera oraz usuwanie planu i zachowanie statystyk offline.
+
+Końcowa kontrola na aktualnym kodzie: 222/222 jednostkowych, 21/21 celowanych Chromium i 7/7 celowanych desktopowego WebKit.

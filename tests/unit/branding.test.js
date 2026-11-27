@@ -29,9 +29,9 @@ describe('GymNastika rebrand compatibility', () => {
     }
     expect(indexHtml).toContain("app: 'gymverse'");
     expect(indexHtml).toContain('GymVerseBaseB');
-    expect(serviceWorker).toContain("const CACHE = LOCAL_PRESENTATION_PILOT ? 'gymverse-v36-presentation-pilot' : 'gymverse-v62'");
-    // These files changed in v62. A still-active v59 worker must miss their old cache entries.
-    for (const url of ['src/ui/signal.css?v=62', 'src/features/plans/history-context.js?v=62']) {
+    expect(serviceWorker).toContain("const CACHE = LOCAL_PRESENTATION_PILOT ? 'gymverse-v36-presentation-pilot' : 'gymverse-v63'");
+    // Versioned URLs keep still-active workers from serving outdated code.
+    for (const url of ['src/ui/signal.css?v=62', 'src/features/plans/history-context.js?v=62', 'src/features/plans/programs.js?v=63']) {
       expect(indexHtml).toContain(url);
       expect(serviceWorker).toContain("'" + url + "'");
     }

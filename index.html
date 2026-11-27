@@ -836,7 +836,7 @@ async function savePlanChanges(nextPlans, options = {}) {
     await withPlanDataLock(async () => {
       const latest = await STORE.refreshSnapshot();
       const latestPlans = latest.gymverse_plans ? cleanPlans(JSON.parse(latest.gymverse_plans)) : defaultPlans();
-      const {mergePlanChanges,mergeRecordChanges}=await import('./src/features/plans/plan-merge.js');
+      const {mergePlanChanges,mergeRecordChanges,sameDataValue}=await import('./src/features/plans/plan-merge.js');
       const registry = latest.gymverse_profiles_v1 ? JSON.parse(latest.gymverse_profiles_v1) : null;
       if (registry && registry.activeProfileId !== PROFILE_STATE?.activeProfileId) throw new Error('PLAN_DATA_STALE');
       const profile = registry?.profiles.find(item => item.id === registry.activeProfileId);
@@ -848,6 +848,8 @@ async function savePlanChanges(nextPlans, options = {}) {
       const baseForMerge = options.restoreDefaults
         ? basePlans.filter(plan => !archive.has(plan.id) || restoredIds.has(plan.id))
         : basePlans;
+      if (!options.restoreDefaults && basePlans.some(plan =>
+        archive.has(plan.id) && !sameDataValue(plan, nextPlans.find(item => item.id === plan.id)))) throw new Error('PLAN_DATA_STALE');
       const mergedPlans=mergePlanChanges(baseForMerge,nextPlans,latestPlans);
       let mergedCustom=null;
       if (Object.hasOwn(options, 'custom')) {
@@ -1053,7 +1055,7 @@ function deriveHistoryIndexes(sessions, savedLastSets = lastSets) {
   });
   return { lastSets: nextLastSets, lastRir: nextLastRir, names };
 }
-async function commitHistoryChanges(nextHistory, failureMessage) {
+async function commitHistoryChanges(nextHistory, failureMessage, newPlanId = null) {
   const candidate = JSON.parse(JSON.stringify(nextHistory));
   const indexes = deriveHistoryIndexes(candidate);
   const expectedHistory=JSON.stringify(history),expectedProfileId=PROFILE_STATE?.activeProfileId;
@@ -1064,6 +1066,10 @@ async function commitHistoryChanges(nextHistory, failureMessage) {
       const registry=JSON.parse(before.gymverse_profiles_v1||'null');
       const latestHistory=DATA_IDS.ensureStableHistoryIds(JSON.parse(before.gymverse_history||'[]').map(session=>normalizeSession(session)).filter(Boolean));
       if(registry?.activeProfileId!==expectedProfileId||JSON.stringify(latestHistory)!==expectedHistory)throw Error('HISTORY_STATE_STALE');
+      if (newPlanId) {
+        const profile = registry.profiles.find(item => item.id === expectedProfileId);
+        if (PROGRAM_RELATIONS.archivedProgramDayIds(profile).has(newPlanId)) throw Error('HISTORY_PLAN_ARCHIVED');
+      }
       attemptedWrite=true;
       await STORE.transact({ gymverse_history: candidate, gymverse_last_weights: indexes.lastSets });
     });
@@ -1072,6 +1078,7 @@ async function commitHistoryChanges(nextHistory, failureMessage) {
     let uncertain=!!error.integrityUncertain;
     if(attemptedWrite&&!uncertain){try{const after=await STORE.refreshSnapshot();uncertain=['gymverse_history','gymverse_last_weights'].some(key=>(after[key]??null)!==(before[key]??null));}catch{uncertain=true;}}
     if(uncertain){enterIntegrityUncertain();toast('Integralność danych jest niepewna. Dalsze zapisy zostały zablokowane.');return false;}
+    if(error.message==='HISTORY_PLAN_ARCHIVED'){toast('Plan usunięto w innej karcie. Odśwież aplikację i wybierz inny plan.');return false;}
     if(error.message==='HISTORY_STATE_STALE'||error.message==='CROSS_TAB_CONFLICT'){toast('Historia zmieniła się lub przełączono profil w innej karcie. Nie zapisano zmiany. Odśwież aplikację przed ponowieniem.');return false;}
     toast(`Nie zapisano: ${failureMessage}. W historii i ciężarach zachowano poprzednie dane.`);
     return false;
@@ -1102,10 +1109,6 @@ async function commitActiveState(nextActive, extraUpdates = {}) {
     await offerEmergencyExport(history, lastSets, nextActive);
     return false;
   }
-}
-
-function lastWeightsFor(sessions) {
-  return BASE_B.deriveLastWeights(sessions, lastSets);
 }
 
 async function loadState() {
@@ -1678,34 +1681,47 @@ async function refreshProgramView(){
     PROFILE_STATE=state;PLANS=nextPlans;PROGRAM_PREVIEW=null;switchView('view-plan-library');toast('Odświeżono widok programów.');
   }catch(_){toast('Nie udało się odświeżyć widoku. Dane nie zostały zmienione.');}
 }
-async function deleteManagedProgram(id){
-  if(INTEGRITY_UNCERTAIN||PLAN_EDIT_MODE!=='own'||!$('view-planedit').classList.contains('active'))return;
-  const expected=MANAGED_PROGRAM_SNAPSHOTS.get(id);if(!expected)return;
-  if(!confirm('Usunąć ten program? Jego dni znikną z list treningów. Historia i zapisane dane pozostaną zachowane.'))return;
+async function deleteSavedPlan({ programId, planId }){
+  if(INTEGRITY_UNCERTAIN||PLAN_EDIT_MODE!=='own'||PROGRAM_EDITOR_UI?.editing||!$('view-planedit').classList.contains('active'))return;
+  const profileId = currentProgramProfile()?.id;
+  const expectedProgram = programId ? MANAGED_PROGRAM_SNAPSHOTS.get(programId) : null;
+  const expectedPlan = planId ? structuredClone(getPlan(planId)) : null;
+  if (!profileId || (programId && !expectedProgram) || (planId && !expectedPlan)) return;
+  const target = planId ? 'plan „' + expectedPlan.title + '”' : 'program „' + expectedProgram.program.title + '”';
+  if (!confirm('Usunąć ' + target + '? Historia i trwający trening zostaną zachowane.')) return;
   let before;
   try{
     await withPlanDataLock(async()=>{
       before=await STORE.refreshSnapshot();
       const registry=JSON.parse(before.gymverse_profiles_v1||'null');
-      const {matchesProgramAssignmentSnapshot,deleteProgram,validatePlanPrograms}=await import('./src/features/plans/programs.js');
-      if(!matchesProgramAssignmentSnapshot(registry,expected,before.gymverse_plans?cleanPlans(JSON.parse(before.gymverse_plans)):PLANS))throw Error('PROGRAM_PREVIEW_STALE');
-      const index=registry.profiles.findIndex(profile=>profile.id===expected.profileId);
-      if(index<0)throw Error('PROGRAM_PREVIEW_STALE');
+      const {sameDataValue}=await import('./src/features/plans/plan-merge.js');
       const plans=before.gymverse_plans?cleanPlans(JSON.parse(before.gymverse_plans)):defaultPlans();
-      const session=JSON.parse(before.gymverse_active||'null');
-      if(session&&(session.programId===id||session.sessionContext?.programId===id||expected.program.dayPlanIds.includes(session.planId)))throw Error('PROGRAM_ACTIVE_SESSION');
-      const next=structuredClone(registry);next.profiles[index]=deleteProgram(next.profiles[index],id);validatePlanPrograms(next.profiles[index].planPrograms,plans);
+      const index=registry?.profiles.findIndex(profile=>profile.id===profileId) ?? -1;
+      if (registry?.activeProfileId !== profileId || index < 0) throw Error('PLAN_DATA_STALE');
+      const profile = registry.profiles[index];
+      const owner = profile.planPrograms?.programs.find(program => program.dayPlanIds.includes(planId));
+      if ((expectedProgram && !PROGRAM_RELATIONS.matchesProgramAssignmentSnapshot(registry, expectedProgram, plans)) ||
+          (planId && ((owner?.id ?? null) !== (programId ?? null) || !sameDataValue(plans.find(plan => plan.id === planId), expectedPlan)))) {
+        throw Error('PLAN_DATA_STALE');
+      }
+      const next=structuredClone(registry);
+      next.profiles[index] = planId
+        ? PROGRAM_RELATIONS.archivePlan(profile, plans, planId)
+        : PROGRAM_RELATIONS.deleteProgram(profile, programId);
+      PROGRAM_RELATIONS.validatePlanPrograms(next.profiles[index].planPrograms, plans);
       await STORE.transact({gymverse_profiles_v1:next});await STORE.flush();
       const after=await STORE.refreshSnapshot();if(JSON.stringify(JSON.parse(after.gymverse_profiles_v1))!==JSON.stringify(next)){const error=Error('PROGRAM_READBACK_FAILED');error.integrityUncertain=true;throw error;}
-      PROFILE_STATE=next;PROGRAM_PREVIEW=null;renderAssignedProgram();renderPlanEditor();toast('Usunięto program i ukryto jego dni. Historia pozostała zachowana.');
+      PROFILE_STATE=next;PLANS=plans;PROGRAM_PREVIEW=null;editPlanId=null;
+      renderAssignedProgram();renderPlanEditor();
+      toast((planId ? 'Usunięto plan.' : 'Usunięto program.') + ' Historia pozostała zachowana.');
     });
   }catch(error){
     let uncertain=!!error.integrityUncertain;
     if(before&&!uncertain){try{uncertain=(await STORE.refreshSnapshot()).gymverse_profiles_v1!==before.gymverse_profiles_v1;}catch{uncertain=true;}}
     if(uncertain){enterIntegrityUncertain();toast('Integralność danych jest niepewna. Zapisy zostały zablokowane.');}
-    else if(error.message==='PROGRAM_ACTIVE_SESSION')toast('Najpierw zakończ aktywny trening tego programu. Sesja i jej wyniki pozostają zachowane.');
-    else if(error.message==='PROGRAM_PREVIEW_STALE'||error.message==='CROSS_TAB_CONFLICT')toast('Program lub przypisanie zmieniły się w innym oknie. Odśwież widok programów.');
-    else toast('Nie usunięto programu. Jego dni treningowe i historia pozostały.');
+    else if(error.message==='PLAN_DATA_STALE'||error.message==='CROSS_TAB_CONFLICT')toast('Plany lub profil zmieniły się w innym oknie. Odśwież aplikację i ponów usuwanie.');
+    else if(error.message==='PLAN_DATA_LOCK_UNAVAILABLE')toast('Przeglądarka nie zapewnia bezpiecznej synchronizacji kart. Nie usunięto planu ani programu.');
+    else toast('Nie usunięto ' + (planId ? 'planu' : 'programu') + '. Historia pozostała zachowana.');
   }
 }
 function renderPlans() {
@@ -1962,25 +1978,30 @@ function handleExercisePresentationControl(event) {
 
 async function startWorkout(planId,sourceProgramId=null,quickStart=null) {
   if (quickStart && active) { openWorkout(); return; }
-  const plan = getPlan(planId);
+  const plan = visiblePlans().find(item => item.id === planId);
   if (!plan || !plan.exercises.length) { toast('Ten plan nie ma ćwiczeń'); return; }
   if (plan.exercises.some(e => e.variantId && !validVariant(e.key, e.variantId))) { toast('Plan zawiera nierozpoznany wariant ćwiczenia. Popraw go w edytorze.'); return; }
   if (active && active.planId !== planId && !confirm('Masz niedokończony trening. Porzucić go i zacząć nowy?')) return;
   if (active && active.planId === planId) { openWorkout(); return; }
   const begin=async()=>{
-    let profile=currentProgramProfile();
+    const latest = await STORE.refreshSnapshot();
+    const registry = JSON.parse(latest.gymverse_profiles_v1 || 'null');
+    const profile = registry?.profiles.find(item => item.id === registry.activeProfileId);
+    if (!profile || profile.id !== PROFILE_STATE?.activeProfileId || PROGRAM_RELATIONS.archivedProgramDayIds(profile).has(planId)) {
+      throw new Error(sourceProgramId === null ? 'SESSION_PLAN_STALE' : 'SESSION_PROGRAM_STALE');
+    }
+    const savedSession = JSON.parse(latest.gymverse_active || 'null');
+    if (savedSession || active) {
+      const {sameDataValue} = await import('./src/features/plans/plan-merge.js');
+      if (quickStart || !sameDataValue(savedSession, active)) throw new Error('SESSION_ALREADY_ACTIVE');
+    }
     if(sourceProgramId!==null){
-      const latest=await STORE.refreshSnapshot();
       const expected = quickStart?.assignment ?? PROGRAM_PREVIEW?.assignment;
-      const registry = JSON.parse(latest.gymverse_profiles_v1 || 'null');
       const latestPlans = cleanPlans(JSON.parse(latest.gymverse_plans || '[]'));
-      if (sourceProgramId !== expected?.programId || registry?.activeProfileId !== PROFILE_STATE?.activeProfileId
-        || !PROGRAM_RELATIONS.matchesProgramAssignmentSnapshot(registry, expected, latestPlans)) {
+      if (sourceProgramId !== expected?.programId || !PROGRAM_RELATIONS.matchesProgramAssignmentSnapshot(registry, expected, latestPlans)) {
         throw new Error('SESSION_PROGRAM_STALE');
       }
-      profile = registry.profiles.find(item => item.id === registry.activeProfileId);
       if (quickStart) {
-        if (JSON.parse(latest.gymverse_active || 'null')) throw new Error('SESSION_ALREADY_ACTIVE');
         const next = HISTORY_HELPERS.nextProgramDay(profile.id, expected.program, latestPlans, JSON.parse(latest.gymverse_history || '[]'));
         if (expected.assignedProgramId !== sourceProgramId || next?.plan.id !== planId) throw new Error('SESSION_PROGRAM_STALE');
       }
@@ -1999,9 +2020,10 @@ async function startWorkout(planId,sourceProgramId=null,quickStart=null) {
     if (!await saveActive()) { active = null; return; }
     openWorkout();
   };
-  try { if(sourceProgramId!==null)await withPlanDataLock(begin);else await begin(); }
+  try { if(sourceProgramId!==null || navigator.locks?.request)await withPlanDataLock(begin);else await begin(); }
   catch (error) {
     if (error.message === 'SESSION_ALREADY_ACTIVE') toast('Trening już trwa w innej karcie. Wróć do niej lub odśwież aplikację, aby go wznowić.');
+    else if (error.message === 'SESSION_PLAN_STALE') toast('Plan lub profil zmienił się w innym oknie. Odśwież aplikację przed rozpoczęciem treningu.');
     else if (error.message === 'SESSION_PROGRAM_STALE' || error.message === 'CROSS_TAB_CONFLICT') {
       toast(quickStart ? 'Dane treningu się zmieniły. Odśwież aplikację i sprawdź następny dzień.' : 'Program lub jego dzień zmienił się. Odśwież podgląd przed rozpoczęciem treningu.');
     } else toast(storageFailureMessage(error));
@@ -2573,6 +2595,7 @@ function findRecords(sets) {
 }
 
 async function finishWorkout(fromNext) {
+  const profileId = PROFILE_STATE?.activeProfileId;
   const plan = activePlan();
   if (!flushDraftsForStep(active.step)) return;
   try { await STORE.flush(); }
@@ -2611,25 +2634,56 @@ async function finishWorkout(fromNext) {
   if (Object.hasOwn(active,'sessionContext')) entry.sessionContext=structuredClone(active.sessionContext);
   if (Object.keys(rir).length) entry.rir = rir;
   if (Array.isArray(active.rirArchive) && active.rirArchive.length) entry.rirArchive = active.rirArchive;
-  const nextHistory = DATA_IDS.ensureStableHistoryIds(history.concat(entry));
-  const nextLastSets = lastWeightsFor(nextHistory);
-  const sessionId = String(active.startedAt || active.planId);
-  const nextDrafts = BASE_B.draftPayloadWithout(STORE.storage, item => item.planId === active.planId && item.sessionId === sessionId);
-  try {
-    BASE_B.persistJsonTransaction(STORE.storage, {
+  let nextHistory = DATA_IDS.ensureStableHistoryIds(history.concat(entry));
+  let viewHistory = nextHistory;
+  let nextLastSets = BASE_B.deriveLastWeights(viewHistory, lastSets);
+  const finished = active;
+  const sessionId = String(finished.startedAt || finished.planId);
+  const savedSetValues = sets => sets?.map(set => set && [set.id, set.key, set.variantId, set.setNumber, set.weight, set.reps, set.rir]);
+  const commit = async () => {
+    const before = await STORE.refreshSnapshot();
+    const registry = JSON.parse(before.gymverse_profiles_v1 || 'null');
+    const {sameDataValue} = await import('./src/features/plans/plan-merge.js');
+    const session = DATA_IDS.addStableIdentifiers({gymverse_active: JSON.parse(before.gymverse_active || 'null')}).gymverse_active;
+    const savedHistory = JSON.parse(before.gymverse_history || '[]');
+    if (registry?.activeProfileId !== profileId || session?.id !== entry.id ||
+        !Array.isArray(savedHistory) || savedHistory.some(item => item?.id === entry.id) ||
+        !sameDataValue(savedSetValues(session.sets), savedSetValues(finished.sets)) ||
+        !sameDataValue(session.rir || {}, finished.rir || {})) throw Error('FINISH_SESSION_STALE');
+    // Keep saved records as loaded; the normalizer is for the in-memory view.
+    nextHistory = savedHistory.concat(entry);
+    viewHistory = DATA_IDS.ensureStableHistoryIds(nextHistory.map(item => normalizeSession(item)).filter(Boolean));
+    nextLastSets = BASE_B.deriveLastWeights(viewHistory, JSON.parse(before.gymverse_last_weights || '{}'));
+    const updates = {
       gymverse_history: nextHistory,
       gymverse_last_weights: nextLastSets,
       gymverse_active: null,
-      [BASE_B.DRAFT_KEY]: nextDrafts
-    });
-    await STORE.flush();
+      [BASE_B.DRAFT_KEY]: BASE_B.draftPayloadWithout(STORE.storage, item => item.planId === finished.planId && item.sessionId === sessionId)
+    };
+    try {
+      await STORE.transact(updates);
+    } catch (error) {
+      if (error.message !== 'CROSS_TAB_CONFLICT') {
+        try {
+          const after = await STORE.refreshSnapshot();
+          if (Object.keys(updates).some(key => (after[key] ?? null) !== (before[key] ?? null))) error.integrityUncertain = true;
+        } catch (_) { error.integrityUncertain = true; }
+      }
+      throw error;
+    }
+  };
+  try {
+    if (navigator.locks?.request) await withPlanDataLock(commit);
+    else await commit();
   } catch (error) {
-    toast(storageFailureMessage(error));
-    if (error.rollbackErrors && error.rollbackErrors.length) {enterIntegrityUncertain();toast('Nie udało się w pełni odtworzyć poprzedniego zapisu. Pobierz awaryjny JSON przed zamknięciem aplikacji.');}
+    toast(error.message === 'FINISH_SESSION_STALE'
+      ? 'Trening zmienił się w innym oknie. Odśwież aplikację przed ponowieniem zapisu.'
+      : storageFailureMessage(error));
+    if (error.integrityUncertain) {enterIntegrityUncertain();toast('Nie udało się w pełni odtworzyć poprzedniego zapisu. Pobierz awaryjny JSON przed zamknięciem aplikacji.');}
     offerEmergencyExport(nextHistory, nextLastSets);
     return;
   }
-  history = nextHistory;
+  history = viewHistory;
   lastSets = nextLastSets;
   rebuildLastSets(true);
   active = null;
@@ -3108,7 +3162,7 @@ function renderProgressionReview(exerciseId) {
   const analyzer = window.GymNastikaProgression?.analyzeExerciseProgression;
   if (!analyzer) { box.textContent = 'Analiza zapisanych wyników jest niedostępna.'; return; }
   const selectedVariant=$('chartVariantSelect').value;
-  const plans = PLANS.filter(plan => plan.exercises?.some(exercise => exercise.key === exerciseId && (!selectedVariant||HISTORY_HELPERS.variantKey(exercise)===selectedVariant)));
+  const plans = visiblePlans().filter(plan => plan.exercises?.some(exercise => exercise.key === exerciseId && (!selectedVariant||HISTORY_HELPERS.variantKey(exercise)===selectedVariant)));
   if (!plans.length) { box.innerHTML = '<h3>Progresja</h3><p class="small muted">To ćwiczenie nie należy do zapisanego planu z celem powtórzeń, więc nie proponujemy zmiany.</p>'; return; }
   const reasons = {
     INSUFFICIENT_SESSIONS: 'Zapisano mniej niż dwa treningi tego ćwiczenia.',
@@ -3132,7 +3186,7 @@ function renderProgressionReview(exerciseId) {
 }
 
 async function acceptProgressionReview(el) {
-  const plan = PLANS.find(item => item.id === el.dataset.planId);
+  const plan = visiblePlans().find(item => item.id === el.dataset.planId);
   const exerciseId = el.dataset.exerciseId;
   const result = window.GymNastikaProgression?.analyzeExerciseProgression({ exerciseId, plan, history:HISTORY_HELPERS.progressionHistory(history,plan,exerciseId), catalog: EXERCISE_METADATA || [] });
   if (!plan || !result?.proposal) { toast('Dane treningowe zmieniły się. Odśwież analizę przed zapisaniem decyzji.'); updateCharts(); return; }
@@ -3342,8 +3396,9 @@ function renderHistory() {
   renderHistoryScope();
   const ps = $('histNewPlan');
   const keep = ps.value;
-  ps.innerHTML = PLANS.map(p => `<option value="${esc(p.id)}">${esc(p.title)}</option>`).join('');
-  if (keep && getPlan(keep)) ps.value = keep;
+  const plans = visiblePlans();
+  ps.innerHTML = plans.map(p => `<option value="${esc(p.id)}">${esc(p.title)}</option>`).join('');
+  if (keep && plans.some(plan => plan.id === keep)) ps.value = keep;
   const di = $('histNewDate');
   di.max = dkey(new Date());
   if (histPrefillDate) { di.value = histPrefillDate; histPrefillDate = null; }
@@ -3450,7 +3505,7 @@ async function histAddSet(i, key, variantId) {
 }
 
 async function histNew() {
-  const plan = getPlan($('histNewPlan').value);
+  const plan = visiblePlans().find(item => item.id === $('histNewPlan').value);
   const v = $('histNewDate').value;
   if (!plan) { toast('Wybierz plan'); return; }
   const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(v);
@@ -3459,7 +3514,7 @@ async function histNew() {
   if (isNaN(dt) || dt.getTime() > Date.now() + DAY) { toast('Data nie może być z przyszłości'); return; }
   const nextHistory = JSON.parse(JSON.stringify(history));
   nextHistory.push({ id: createUuid(), date: dt.toISOString(), planId: plan.id, planTitle: plan.title, totalVolume: 0, totalReps: 0, details: [] });
-  if (!await commitHistoryChanges(nextHistory, `Nowy trening ${plan.title} (${dkey(dt)})`)) return;
+  if (!await commitHistoryChanges(nextHistory, `Nowy trening ${plan.title} (${dkey(dt)})`, plan.id)) return;
   histOpen.add(history.length - 1);
   renderHistory();
   toast('Dodano trening – dotknij „+ seria", aby wpisać serie');
@@ -3639,7 +3694,7 @@ async function swapGeneratedPreviewExercise(el) {
 function renderPlanEditor() {
   renderPlanEditorContent();
   PROGRAM_EDITOR_UI?.decorateDay();
-  if (PLAN_EDIT_MODE === 'own' && !editPlanId) {
+  if (PLAN_EDIT_MODE === 'own' && !editPlanId && !active) {
     const button=document.createElement('button');button.className='btn-primary';button.dataset.act='programNew';button.textContent='+ Utwórz program wielodniowy';$('planEditBody').prepend(button);
     const drafts=document.createElement('section');drafts.id='managedDrafts';$('planEditBody').append(drafts);renderManagedDrafts(drafts);
   }
@@ -3676,10 +3731,24 @@ function renderPlanEditorContent() {
     const profile=currentProgramProfile(),programs=profile?.planPrograms?.programs||[],used=new Set(programs.flatMap(p=>p.dayPlanIds));
     MANAGED_PROGRAM_SNAPSHOTS.clear();
     for(const p of programs)MANAGED_PROGRAM_SNAPSHOTS.set(p.id,{profileId:profile.id,programId:p.id,assignedProgramId:profile.planPrograms.assignedProgramId??null,program:structuredClone(p),days:p.dayPlanIds.map(id=>structuredClone(getPlan(id)))});
-    box.innerHTML = '<h2>Zapisane programy</h2><div class="managed-programs">'+programs.map(p=>`<article class="managed-program settings-card" data-id="${esc(p.id)}"><h3>${esc(p.title)}</h3><p>${programDayCountLabel(p.dayPlanIds.length)}${p.id===profile.planPrograms.assignedProgramId?' · Aktywny':''}</p><div class="program-actions"><button class="btn-secondary" data-act="programEdit" data-id="${esc(p.id)}">Edytuj program</button><button class="btn-secondary danger" data-act="programDelete" data-id="${esc(p.id)}">Usuń program</button></div></article>`).join('')+'</div><h2>Samodzielne treningi</h2><div class="plan-grid">' + visiblePlans().filter(p=>!used.has(p.id)).map(p => {
+    const deletePlanButton = (plan, programId='') => `<button class="btn-secondary danger" data-act="managedPlanDelete" data-id="${esc(plan.id)}" data-program="${esc(programId)}" aria-label="Usuń plan ${esc(plan.title)}">Usuń plan</button>`;
+    const programCards = programs.map(program => {
+      const id = esc(program.id);
+      const days = program.dayPlanIds.map((dayId, index) => {
+        const plan = getPlan(dayId);
+        return plan ? `<div class="program-actions"><span>${index + 1}. ${esc(plan.title)}</span>${deletePlanButton(plan,program.id)}</div>` : '';
+      }).join('');
+      const edit = active ? '' : `<button class="btn-secondary" data-act="programEdit" data-id="${id}">Edytuj program</button>`;
+      return `<article class="managed-program settings-card" data-id="${id}"><h3>${esc(program.title)}</h3><p>${programDayCountLabel(program.dayPlanIds.length)}${program.id===profile.planPrograms.assignedProgramId?' · Aktywny':''}</p><div class="program-actions">${edit}<button class="btn-secondary danger" data-act="programDelete" data-id="${id}">Usuń program</button></div>${program.dayPlanIds.length>1 ? `<details class="settings-subgroup"><summary>Usuń pojedynczy dzień</summary>${days}</details>` : ''}</article>`;
+    }).join('');
+    const standaloneCards = visiblePlans().filter(p=>!used.has(p.id)).map(p => {
+      if (active) return `<article class="settings-card"><h3>${esc(p.title)}</h3>${deletePlanButton(p)}</article>`;
       const type = /^push/i.test(p.title) ? 'push' : /^pull/i.test(p.title) ? 'pull' : 'other';
       return `<div class="plan-card ${type}" data-act="peOpen" data-id="${esc(p.id)}" role="button" tabindex="0" aria-label="Edytuj plan ${esc(p.title)}"><span class="plan-type">${type === 'other' ? 'PLAN' : type.toUpperCase()}</span><div><h3>${esc(p.title)}</h3><p>${exerciseCountLabel(p.exercises.length)}</p></div><div class="plan-arrow" aria-hidden="true">✎</div></div>`;
-    }).join('') + '</div><button class="btn-link danger" style="width:100%" data-act="peReset">Przywróć domyślne plany</button>';
+    }).join('');
+    const activeNote = active ? '<p class="small muted">Trwa trening. Możesz usunąć plan i wrócić do rozpoczętej sesji.</p>' : '';
+    const reset = active ? '' : '<button class="btn-link danger" style="width:100%" data-act="peReset">Przywróć domyślne plany</button>';
+    box.innerHTML = activeNote + '<h2>Zapisane programy</h2><div class="managed-programs">' + programCards + '</div><h2>Samodzielne treningi</h2><div class="plan-grid">' + (standaloneCards || '<p class="small muted">Brak samodzielnych treningów.</p>') + '</div>' + reset;
     return;
   }
   const p = getPlan(editPlanId);
@@ -3804,15 +3873,8 @@ async function peNew() {
   editPlanId = id;
   renderPlanEditor();
 }
-async function peDelPlan() {
-  const p = peEdit();
-  if (!p) return;
-  if (PLANS.length <= 1) { toast('Musi zostać przynajmniej jeden plan'); return; }
-  if (!confirm(`Usunąć plan „${p.title}"? Historia treningów zostanie.`)) return;
-  const nextPlans = PLANS.filter(x => x.id !== p.id);
-  if (!await savePlanChanges(nextPlans, { failureMessage: `Usunięcie planu „${p.title}”` })) return;
-  editPlanId = null;
-  renderPlanEditor();
+function peDelPlan() {
+  if (editPlanId) return deleteSavedPlan({planId: editPlanId});
 }
 async function peReset() {
   if (!confirm('Przywrócić 4 domyślne plany Push/Pull? Twoje zmiany w planach zostaną nadpisane (historia zostaje).')) return;
@@ -4336,7 +4398,8 @@ const ACTIONS = {
   programStart: () => {if(PROGRAM_PREVIEW?.profileId===currentProgramProfile()?.id)return startWorkout(PROGRAM_PREVIEW.selectedDay,PROGRAM_PREVIEW.programId);else toast('Profil lub program zmienił się. Odśwież podgląd.');},
   programBack: () => {if(PROGRAM_PREVIEW)showProgramPreview(PROGRAM_PREVIEW.programId,true);},
   programAssign: el => saveProgramAssignment(el.dataset.id),
-  programDelete: el => deleteManagedProgram(el.dataset.id),
+  programDelete: el => deleteSavedPlan({programId: el.dataset.id}),
+  managedPlanDelete: el => deleteSavedPlan({planId: el.dataset.id, programId: el.dataset.program || null}),
   managedDraftDiscard: el=>discardManagedDraft(el.dataset.id),
   managedDraftResume: async el=>{const item=MANAGED_DRAFT_SNAPSHOTS.get(el.dataset.id);if(!item)return;if(item.draft.generatorAnswers){PLAN_EDIT_MODE='generator';await ACTIONS.generatorResume(el);}else await PROGRAM_EDITOR_UI.resumeWorkingDraft(el.dataset.id);},
   programRefresh: refreshProgramView,
@@ -4530,7 +4593,7 @@ const ACTIONS = {
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   },
   importProfile: () => $('profileImportFile').click(),
-  editPlans: () => { if (active) { toast('Najpierw zakończ lub porzuć trwający trening'); return; } PLAN_EDIT_MODE='own';GENERATOR_WIZARD=null;GENERATOR_RECOVERY=null;switchView('view-planedit'); },
+  editPlans: () => { PLAN_EDIT_MODE='own';GENERATOR_WIZARD=null;GENERATOR_RECOVERY=null;switchView('view-planedit'); },
   peOpen: el => { editPlanId = el.dataset.id; renderPlanEditor(); window.scrollTo(0, 0); },
   auditPlan: auditManualPlan,
   generatorNext: () => {
@@ -4781,7 +4844,7 @@ async function init() {
     const initializedProfiles = bootstrapProfileState(await STORE.exportSnapshot());
     if (Object.keys(initializedProfiles.updates).length) await transactProfileUpdates(initializedProfiles.updates);
     PROFILE_STATE = initializedProfiles.state;
-    PROGRAM_RELATIONS=await import('./src/features/plans/programs.js');
+    PROGRAM_RELATIONS=await import('./src/features/plans/programs.js?v=63');
     HISTORY_HELPERS=await import('./src/features/plans/history-context.js?v=62');
     await loadState();
     await STORE.flush();

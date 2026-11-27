@@ -30,6 +30,16 @@ export function updateProgram(profile,plans,id,input){
 // Retain day records for history/drafts; live program references always remain usable.
 export function archivedProgramDayIds(profile){const data=profile?.planPrograms;const used=new Set((data?.programs||[]).flatMap(p=>p.dayPlanIds));return new Set((data?.archivedDayPlanIds||[]).filter(id=>!used.has(id)));}
 export function deleteProgram(profile,id){const next=container(profile);if(!next.programs.some(p=>p.id===id))throw new Error('PROGRAM_NOT_FOUND');const removed=next.programs.find(p=>p.id===id);next.programs=next.programs.filter(p=>p.id!==id);const used=new Set(next.programs.flatMap(p=>p.dayPlanIds));next.archivedDayPlanIds=[...new Set([...(next.archivedDayPlanIds||[]),...removed.dayPlanIds])].filter(day=>!used.has(day));if(next.assignedProgramId===id)next.assignedProgramId=null;validatePlanPrograms(next);return {...clone(profile),planPrograms:next};}
+export function archivePlan(profile, plans, id) {
+  const next = container(profile);
+  if (!plans.some(plan => plan.id === id) || archivedProgramDayIds(profile).has(id)) throw new Error('PLAN_DATA_STALE');
+  const program = next.programs.find(item => item.dayPlanIds.includes(id));
+  if (program?.dayPlanIds.length === 1) return deleteProgram(profile, program.id);
+  if (program) program.dayPlanIds = program.dayPlanIds.filter(dayId => dayId !== id);
+  next.archivedDayPlanIds = [...new Set([...(next.archivedDayPlanIds || []), id])];
+  validatePlanPrograms(next, plans);
+  return { ...clone(profile), planPrograms: next };
+}
 export function readProgramDays(profile,plans,id){const data=container(profile);validatePlanPrograms(data,plans);const program=data.programs.find(p=>p.id===id);if(!program)throw new Error('PROGRAM_NOT_FOUND');return program.dayPlanIds.map(day=>clone(plans.find(plan=>plan.id===day)));}
 export function readAssignedProgram(profile,plans){if(!profile.planPrograms)return null;validatePlanPrograms(profile.planPrograms,plans);const id=profile.planPrograms.assignedProgramId;return id===null?null:clone(profile.planPrograms.programs.find(p=>p.id===id));}
 export function assignProgram(profile,plans,id){if(!profile.planPrograms){if(id===null)return clone(profile);throw new Error('PROGRAM_NOT_FOUND');}const next=container(profile);validatePlanPrograms(next,plans);if(id!==null&&!next.programs.some(p=>p.id===id))throw new Error('PROGRAM_NOT_FOUND');next.assignedProgramId=id;validatePlanPrograms(next,plans);return {...clone(profile),planPrograms:next};}
