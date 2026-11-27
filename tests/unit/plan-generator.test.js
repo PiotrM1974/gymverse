@@ -39,6 +39,30 @@ describe('evidence-aware plan generator', () => {
     expect(result.coverage.missing).toEqual(expect.arrayContaining(['hip_hinge', 'calves', 'core']));
     expect(result.plan.requiresReview).toBe(true);
   });
+  it('prefers different full-body exercise sets across days while staying inside selected muscle groups', () => {
+    const focus = ['chest', 'back', 'quads', 'hamstrings', 'glutes', 'shoulders', 'biceps', 'triceps'];
+    const result = generatePlan({ profile: adult, preferences: { daysPerWeek: 3, split: 'full_body', sessionMinutes: 45, focus }, catalog: EXERCISE_CATALOG });
+    expect(result.ok).toBe(true);
+    const sets = result.plans.map(plan => plan.exercises.map(exercise => exercise.key).sort());
+    expect(new Set(sets.map(set => JSON.stringify(set))).size).toBeGreaterThan(1);
+    for (const plan of result.plans) for (const exercise of plan.exercises) {
+      expect(focus.some(group => GENERATOR_CATALOG_MAP[exercise.key].groups.includes(group))).toBe(true);
+    }
+  });
+  it('keeps upper/lower exercises within each day role and varies repeated roles when alternatives exist', () => {
+    const focus = ['chest', 'back', 'quads', 'hamstrings', 'glutes', 'shoulders', 'biceps', 'triceps'];
+    const result = generatePlan({ profile: adult, preferences: { daysPerWeek: 4, split: 'upper_lower', sessionMinutes: 45, focus }, catalog: EXERCISE_CATALOG });
+    expect(result.ok).toBe(true);
+    const upper = new Set(['chest', 'back', 'shoulders', 'biceps', 'triceps']);
+    const lower = new Set(['quads', 'hamstrings', 'glutes']);
+    for (const [index, plan] of result.plans.entries()) {
+      const dayGroups = index % 2 === 0 ? upper : lower;
+      for (const exercise of plan.exercises) {
+        expect(GENERATOR_CATALOG_MAP[exercise.key].groups.some(group => dayGroups.has(group))).toBe(true);
+      }
+    }
+    expect(result.plans[0].exercises.map(exercise => exercise.key).sort()).not.toEqual(result.plans[2].exercises.map(exercise => exercise.key).sort());
+  });
   it('does not generate an adult prescription for minors', () => {
     expect(generatePlan({ profile: { ...adult, age: 17 }, preferences: { daysPerWeek: 3 }, catalog: EXERCISE_CATALOG })).toMatchObject({ ok: false, reason: 'ADULTS_ONLY' });
   });

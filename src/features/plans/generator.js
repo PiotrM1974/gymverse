@@ -98,10 +98,8 @@ export function generatePlan({ profile, preferences = {}, catalog = [] } = {}) {
     if (restrictions.has(map.pattern) || [...restrictions].some(key => BLOCKED[key]?.has(map.pattern))) return false;
     return true;
   });
-  candidates.sort((a, b) => {
-    const score = item => favorites.has(item.id) ? 0 : recent.has(item.id) ? 1 : 2;
-    return score(a) - score(b);
-  });
+  const preferenceRank = item => favorites.has(item.id) ? 0 : recent.has(item.id) ? 1 : 2;
+  candidates.sort((a, b) => preferenceRank(a) - preferenceRank(b));
   const covered = new Set(candidates.flatMap(item => MAP[item.id].groups));
   const missingGroups = focus.filter(group => !covered.has(group));
   if (candidates.length < 2 || missingGroups.length) return failure('INSUFFICIENT_CATALOG_COVERAGE', { availableExerciseIds: candidates.map(item => item.id), missingGroups });
@@ -114,6 +112,7 @@ export function generatePlan({ profile, preferences = {}, catalog = [] } = {}) {
     ? `Jedna seria i zakres ${goal === 'strength' ? '4–6' : '8–12'} powtórzeń to ostrożna heurystyka do edycji dla osoby wracającej po przerwie, nie indywidualna recepta.`
     : goal === 'strength' ? 'Dwie serie i 4–6 powtórzeń to ustawienia robocze do edycji; nie są indywidualną receptą ani wskazaniem ciężaru.' : 'Dwie serie i 8–12 powtórzeń to ustawienia robocze do edycji, nie indywidualna recepta.';
   const planId = generationId();
+  const weeklyExerciseUse = new Map();
   const sessions = Array.from({ length: daysPerWeek }, (_, day) => {
     const dayFocus = resolvedSplit === 'full_body'
       ? focus
@@ -126,11 +125,18 @@ export function generatePlan({ profile, preferences = {}, catalog = [] } = {}) {
             : customSplitFocus[day];
     const chosen = [];
     const used = new Set();
+    const dayCandidates = candidates.filter(item => dayFocus.some(group => MAP[item.id].groups.includes(group)));
+    const dayRank = (a, b) => {
+      const score = item => preferenceRank(item) * 2 + (weeklyExerciseUse.get(item.id) || 0) * 3;
+      return score(a) - score(b);
+    };
     for (const group of dayFocus) {
-      const item = candidates.find(candidate => !used.has(candidate.id) && MAP[candidate.id].groups.includes(group));
+      if (chosen.length >= targetCount) break;
+      const item = dayCandidates.filter(candidate => !used.has(candidate.id) && MAP[candidate.id].groups.includes(group)).sort(dayRank)[0];
       if (item) { chosen.push(item); used.add(item.id); }
     }
-    for (const item of candidates) if (chosen.length < targetCount && !used.has(item.id)) { chosen.push(item); used.add(item.id); }
+    for (const item of dayCandidates.slice().sort(dayRank)) if (chosen.length < targetCount && !used.has(item.id)) { chosen.push(item); used.add(item.id); }
+    for (const item of chosen) weeklyExerciseUse.set(item.id, (weeklyExerciseUse.get(item.id) || 0) + 1);
     const splitLabel = resolvedSplit === 'full_body' ? 'Całe ciało' : resolvedSplit === 'upper_lower' ? (day % 2 ? 'Dół' : 'Góra') : resolvedSplit === 'push_pull' ? (day % 2 ? 'Pull' : 'Push') : resolvedSplit === 'push_pull_legs' ? ['Push', 'Pull', 'Nogi'][day % 3] : `Własny ${day + 1}`;
     return { id: `generated-${planId}-${day + 1}`, title: `Do sprawdzenia · ${splitLabel} · dzień ${day + 1}`, ...(scheduleDays.length ? { dayOfWeek: scheduleDays[day] } : {}), exercises: chosen.slice(0, targetCount).map(item => ({ key: item.id, sets: setsPerExercise, target: goal === 'strength' ? '4-6' : '8-12' })) };
   });
@@ -197,46 +203,4 @@ export function analyzeManualPlans({ plans = [], profile = {}, catalog = [] } = 
       const sets = Number.isInteger(Number(exercise.sets)) ? Math.min(12, Math.max(1, Number(exercise.sets))) : 0;
       setCount += sets;
       const mapping = MAP[exercise.key];
-      if (!mapping || !catalogIds.has(exercise.key)) {
-        unmappedExerciseIds.add(exercise.key);
-        restSeconds += Math.max(0, sets - 1) * (Number(exercise.restSeconds) || 90);
-        continue;
-      }
-      const equipmentMatches = mapping.equipmentMode === 'any'
-        ? mapping.equipment.some(item => equipment.has(item))
-        : mapping.equipment.every(item => equipment.has(item));
-      if (equipment.size && !equipmentMatches) equipmentMissingIds.add(exercise.key);
-      const excluded = restrictions.has(exercise.key) || restrictions.has(mapping.pattern) || [...restrictions].some(key => BLOCKED[key]?.has(mapping.pattern));
-      if (excluded) excludedExerciseIds.add(exercise.key);
-      if (mapping.groups[0]) volume.primary[mapping.groups[0]] += sets;
-      mapping.groups.slice(1).forEach(group => { if (Object.hasOwn(volume.secondary, group)) volume.secondary[group] += sets; });
-      const compound = ['horizontal_push', 'horizontal_pull', 'vertical_pull', 'knee_dominant'].includes(mapping.pattern);
-      restSeconds += Math.max(0, sets - 1) * (Number(exercise.restSeconds) || (compound ? 180 : 90));
-    }
-    const activeSeconds = setCount * 40 + restSeconds + exerciseCount * 35 + 360;
-    const low = Math.ceil(activeSeconds / 60);
-    timeByPlan.push({ planId: plan.id, title: String(plan.title || 'Plan'), low, high: low + Math.max(5, Math.ceil(exerciseCount * 1.5)) });
-  }
-
-  const weekly = Object.fromEntries(GROUPS.map(group => [group, volume.primary[group] + volume.secondary[group] * 0.5]));
-  const findings = [];
-  if (!equipment.size) findings.push({ code: 'EQUIPMENT_NOT_SET' });
-  if (equipmentMissingIds.size) findings.push({ code: 'EQUIPMENT_MISSING', exerciseIds: [...equipmentMissingIds] });
-  if (excludedExerciseIds.size) findings.push({ code: 'PROFILE_EXCLUSION', exerciseIds: [...excludedExerciseIds] });
-  if (unmappedExerciseIds.size) findings.push({ code: 'UNMAPPED_EXERCISE', exerciseIds: [...unmappedExerciseIds] });
-  const duplicateDays = [...scheduledDays].filter(([, ids]) => ids.length > 1).map(([day]) => day);
-  if (duplicateDays.length) findings.push({ code: 'DUPLICATE_WEEKDAY', days: duplicateDays });
-  if (GAP_PATTERNS.length) findings.push({ code: 'CATALOG_GAPS', patterns: [...GAP_PATTERNS] });
-  findings.push({ code: 'REVIEW_REQUIRED' });
-
-  return {
-    ok: true,
-    volume: { ...volume, weekly, model: 'Catalog-based estimate; secondary sets are shown separately and weighted at 0.5 only for the weekly estimate.' },
-    timeByPlan,
-    weeklyTimeEstimateMinutes: { low: timeByPlan.reduce((sum, item) => sum + item.low, 0), high: timeByPlan.reduce((sum, item) => sum + item.high, 0) },
-    unmappedExerciseIds: [...unmappedExerciseIds],
-    findings
-  };
-}
-
-export const GENERATOR_CATALOG_MAP = Object.freeze(MAP);
+      if (!m
