@@ -203,4 +203,46 @@ export function analyzeManualPlans({ plans = [], profile = {}, catalog = [] } = 
       const sets = Number.isInteger(Number(exercise.sets)) ? Math.min(12, Math.max(1, Number(exercise.sets))) : 0;
       setCount += sets;
       const mapping = MAP[exercise.key];
-      if (!m
+      if (!mapping || !catalogIds.has(exercise.key)) {
+        unmappedExerciseIds.add(exercise.key);
+        restSeconds += Math.max(0, sets - 1) * (Number(exercise.restSeconds) || 90);
+        continue;
+      }
+      const equipmentMatches = mapping.equipmentMode === 'any'
+        ? mapping.equipment.some(item => equipment.has(item))
+        : mapping.equipment.every(item => equipment.has(item));
+      if (equipment.size && !equipmentMatches) equipmentMissingIds.add(exercise.key);
+      const excluded = restrictions.has(exercise.key) || restrictions.has(mapping.pattern) || [...restrictions].some(key => BLOCKED[key]?.has(mapping.pattern));
+      if (excluded) excludedExerciseIds.add(exercise.key);
+      if (mapping.groups[0]) volume.primary[mapping.groups[0]] += sets;
+      mapping.groups.slice(1).forEach(group => { if (Object.hasOwn(volume.secondary, group)) volume.secondary[group] += sets; });
+      const compound = ['horizontal_push', 'horizontal_pull', 'vertical_pull', 'knee_dominant'].includes(mapping.pattern);
+      restSeconds += Math.max(0, sets - 1) * (Number(exercise.restSeconds) || (compound ? 180 : 90));
+    }
+    const activeSeconds = setCount * 40 + restSeconds + exerciseCount * 35 + 360;
+    const low = Math.ceil(activeSeconds / 60);
+    timeByPlan.push({ planId: plan.id, title: String(plan.title || 'Plan'), low, high: low + Math.max(5, Math.ceil(exerciseCount * 1.5)) });
+  }
+
+  const weekly = Object.fromEntries(GROUPS.map(group => [group, volume.primary[group] + volume.secondary[group] * 0.5]));
+  const findings = [];
+  if (!equipment.size) findings.push({ code: 'EQUIPMENT_NOT_SET' });
+  if (equipmentMissingIds.size) findings.push({ code: 'EQUIPMENT_MISSING', exerciseIds: [...equipmentMissingIds] });
+  if (excludedExerciseIds.size) findings.push({ code: 'PROFILE_EXCLUSION', exerciseIds: [...excludedExerciseIds] });
+  if (unmappedExerciseIds.size) findings.push({ code: 'UNMAPPED_EXERCISE', exerciseIds: [...unmappedExerciseIds] });
+  const duplicateDays = [...scheduledDays].filter(([, ids]) => ids.length > 1).map(([day]) => day);
+  if (duplicateDays.length) findings.push({ code: 'DUPLICATE_WEEKDAY', days: duplicateDays });
+  if (GAP_PATTERNS.length) findings.push({ code: 'CATALOG_GAPS', patterns: [...GAP_PATTERNS] });
+  findings.push({ code: 'REVIEW_REQUIRED' });
+
+  return {
+    ok: true,
+    volume: { ...volume, weekly, model: 'Catalog-based estimate; secondary sets are shown separately and weighted at 0.5 only for the weekly estimate.' },
+    timeByPlan,
+    weeklyTimeEstimateMinutes: { low: timeByPlan.reduce((sum, item) => sum + item.low, 0), high: timeByPlan.reduce((sum, item) => sum + item.high, 0) },
+    unmappedExerciseIds: [...unmappedExerciseIds],
+    findings
+  };
+}
+
+export const GENERATOR_CATALOG_MAP = Object.freeze(MAP);

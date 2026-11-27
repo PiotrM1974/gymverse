@@ -57,4 +57,46 @@ self.addEventListener('install', event => {
 self.addEventListener('activate', e => {
   e.waitUntil(
     caches.keys()
-      .then(keys => Promise.all(keys.filter(k => k.startsWith('gymverse-') &&
+      .then(keys => Promise.all(keys.filter(k => k.startsWith('gymverse-') && k !== CACHE).map(k => caches.delete(k))))
+  );
+});
+
+self.addEventListener('message', event => {
+  if (!event.data || event.data.type !== 'GYMVERSE_COUNT_APP_CLIENTS' || !event.ports || !event.ports[0]) return;
+  event.waitUntil(self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(clients => {
+    const scopePath = new URL(self.registration.scope).pathname;
+    const appClients = clients.filter(client => {
+      try { return new URL(client.url).pathname.startsWith(scopePath); } catch (_) { return false; }
+    });
+    event.ports[0].postMessage({ type: 'GYMVERSE_APP_CLIENT_COUNT', count: appClients.length });
+  }).catch(() => event.ports[0].postMessage({ type: 'GYMVERSE_APP_CLIENT_COUNT', error: true })));
+});
+
+self.addEventListener('fetch', e => {
+  const req = e.request;
+  if (req.method !== 'GET') return;
+  const url = new URL(req.url);
+  if (url.origin !== location.origin) return;
+
+  // Strona: sieć, a offline wyłącznie powłoka zapisana przez udaną instalację worker'a.
+  if (req.mode === 'navigate' || url.pathname.endsWith('/index.html')) {
+    e.respondWith(
+      fetch(req)
+        .catch(() => caches.open(CACHE).then(c => c.match(req).then(r => r || c.match('index.html').then(index => index || c.match('./')))))
+    );
+    return;
+  }
+
+  // Obrazki i reszta: z cache, a w tle odświeżenie.
+  e.respondWith(
+    caches.open(CACHE).then(cache => cache.match(req).then(cached => {
+      const net = fetch(req)
+        .then(res => {
+          if (res && res.ok) { const copy = res.clone(); cache.put(req, copy); }
+          return res;
+        })
+        .catch(() => cached);
+      return cached || net;
+    }))
+  );
+});
