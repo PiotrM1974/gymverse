@@ -1,3 +1,31 @@
+## GitHub Pages v62 — gotowość wydania, 27.11.2026
+
+Baza wydania: main 38731a7f4ac78fd1fc9e3325bf36ce80630a240a (produkcyjne v59). Właściciel autoryzował publikację na GitHub. Wydanie obejmuje trzy zestawy zmian opisane niżej, bez pozostałych pomysłów z planu. App version 2.0.3, shell cache v62.
+
+Kontrola aktualizacji wykryła niezgodność przy pierwszym przeładowaniu: worker v59 podawał stary moduł historii do nowego HTML, przez co ekran startowy przerwał renderowanie. Zmienione arkusz i moduł mają teraz adresy z wersją, precache zawiera te same adresy. Ponowienie v59 → v62 w tym samym originie /gymverse/ przeszło także offline. Porównanie syntetycznych rekordów potwierdziło zachowanie profilu, planów, historii, ustawień i trwałego szkicu. Nie zmieniono schematu, manifestu ani cyklu aktywacji service workera.
+
+Przed publikacją: jednostkowe 222/222, Chromium 9/9 celowanych, desktopowy WebKit 5/5 celowanych, osobny test aktualizacji Chromium z otwartą kartą v59. Brak pełnej regresji E2E i testu fizycznego iPhone'a.
+
+## Lokalny start następnego treningu i nawigacja — 27.11.2026
+
+Aktywny program pokazuje następny dostępny dzień według obecnej kolejności i ostatniej zapisanej sesji tego programu z tego samego profilu. Przycisk rozpoczyna sesję w jednym kroku. Gdy sesja już trwa, na stronie głównej pierwszeństwo ma wznowienie. Szybki start używa wspólnej blokady, sprawdza aktualny program, plany i historię, a transakcja odmawia nadpisania sesji rozpoczętej w drugiej karcie. Bez zmian schematu danych. Cache lokalnego kandydata: v62.
+
+Główne zakładki korzystają z górnej nawigacji. Podgląd programu wraca do ekranu, z którego go otwarto, a historia otwarta z programu ma powrót do niego. Kafelki tworzenia i edycji mają identyczną szerokość i wysokość. Pomiar przy 320, 375 i 390 px w LIGHT/DARK. Zrzuty w lokalnym outputs/GV-HOME-QUICK-START.
+
+Testy: jednostkowe 222/222, Chromium 16/16 + 3/3 zależnych, desktopowy WebKit 3/3. Po drobnych korektach oznaczenia i rozmiaru kafelków przeszły osobne ponowienia Chromium 2/2 i 1/1. Zmiany lokalne, bez publikacji.
+
+## Lokalne poprawki po audycie graficznym — 27.11.2026
+
+Rozgrzewka używa koloru tekstowego Signal z odpowiedniego motywu. Filtry Historii są domyślnie zwinięte, z podsumowaniem aktywnych kryteriów. Podgląd generatora wybiera dzień jednym zestawem przycisków, a pełną nazwę, grafik i czas pokazuje przy ćwiczeniach wybranego dnia. Statystyki tygodnia odmieniają liczbę treningów i serii. Zaktualizowano cache PWA do v61. W worktree nadal jest lokalna poprawka przywracania domyślnych planów.
+
+Weryfikacja: jednostkowe 221/221, Chromium 2/2 wizualne (13 widoków LIGHT/DARK przy 320/375/390/430 px) i 6/6 na zależnych ścieżkach, desktopowy WebKit 2/2 Historia. Zrzuty w lokalnej galerii outputs/GV-GRAPHICS-POLISH. Bez publikacji.
+
+## Lokalna poprawka przywracania planów — 27.11.2026
+
+Po usunięciu programu z domyślnym dniem funkcja „Przywróć domyślne plany” mogła zapisać cztery plany, ale wyświetlić tylko trzy. Przywrócenie usuwa teraz oznaczenia archiwum wyłącznie dla przywróconych domyślnych dni w tej samej transakcji co zapis planów. Pozostałe rekordy archiwalne, historia i inne profile są zachowane. Zmiana oznaczenia w drugiej karcie blokuje zapis ze starej migawki. Cache lokalnej poprawki: v60. Produkcyjne 2.0.3 pozostaje na v59.
+
+Test regresyjny odtworzył błąd (3 zamiast 4). Po poprawce: 221/221 jednostkowych, Chromium 5/5 i desktopowy WebKit 3/3. Sprawdzono localStorage, IndexedDB, odświeżenie, wycofanie po odmowie zapisu oraz offline w Chromium. Poprawka lokalna, bez commita i publikacji.
+
 # PR #14 final corrections — 26 November 2026
 
 Current candidate supersedes previous 2.0.3 notes: profile switching is exclusively in Settings; home has a read-only active profile name. An open profile form blocks switching, and profile writes compare the UI registry snapshot inside the existing data lock. First-start bootstrap remains supported.

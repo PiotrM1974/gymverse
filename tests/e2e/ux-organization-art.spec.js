@@ -25,7 +25,7 @@ test('programs use equipment artwork while the active group uses the exact exerc
  const chosen=await covers();expect(new Set(chosen.map(c=>c.art)).size).toBe(3);
  await page.reload();await expect(page.locator('.program-card')).toHaveCount(3);expect(await covers()).toEqual(chosen);
  await expect.poll(()=>page.locator('.program-card img').evaluateAll(images=>images.every(i=>i.complete&&i.naturalWidth===384))).toBe(true);
- await page.locator('.program-card').nth(1).click();await page.locator('[data-act="programDay"]').click();await page.locator('[data-act="programStart"]').click();await expect(page.locator('.workout-heading-art')).toHaveAttribute('src',/db_bench__default-male.webp$/);
+ await page.locator('.program-card').nth(1).locator('[data-act="programPreview"]').click();await page.locator('[data-act="programDay"]').click();await page.locator('[data-act="programStart"]').click();await expect(page.locator('.workout-heading-art')).toHaveAttribute('src',/db_bench__default-male.webp$/);
  expect((await raw(page)).gymverse_plans).toBe(before.gymverse_plans);expect((await raw(page)).gymverse_profiles_v1).toBe(before.gymverse_profiles_v1);
 });
 

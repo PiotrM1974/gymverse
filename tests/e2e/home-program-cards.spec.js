@@ -30,7 +30,7 @@ for(const count of [1,3,6])test(`home shows one card for a ${count}-day program 
   await expect(page.locator('#standalonePlans .plan-card')).toHaveCount(1);
   await expect(page.locator('#standalonePlans')).toContainText('Samodzielne treningi');
   await expect(page.locator('#standalonePlans [data-plan="standalone"]')).toContainText('PUSH');
-  await cards.first().press('Enter');await expect(page.locator('[data-act="programDay"]')).toHaveCount(count);
+  await cards.first().locator('[data-act="programPreview"]').press('Enter');await expect(page.locator('[data-act="programDay"]')).toHaveCount(count);
   await expect(page.locator('#programSelectedDay')).toBeHidden();
   for(let i=0;i<count;i++){
     await page.locator('[data-act="programDay"][data-id="day-'+i+'"]').click();
@@ -53,7 +53,7 @@ test('chosen program day starts with its real program and day identity',async({p
 
 test('home assignment switching and profile isolation survive reload without changing days',async({page})=>{
   await boot(page);const before=await raw(page);
-  await page.locator('#view-plans .program-card[data-id="'+B+'"]').click();
+  await page.locator('#view-plans .program-card[data-id="'+B+'"]').locator('[data-act="programPreview"]').click();
   await page.locator('[data-act="programAssign"]').click();
   await expect(page.locator('#view-plans .program-card').first()).toHaveAttribute('data-id',B);
   await expect(page.locator('#view-plans .program-card[data-id="'+A+'"]')).not.toContainText('Aktywny');
@@ -71,7 +71,7 @@ test('home assignment switching and profile isolation survive reload without cha
 
 test('program card preserves session resume timer RIR history and previous results',async({page})=>{
   await boot(page);const before=await raw(page);
-  await page.locator('#view-plans .program-card[data-id="'+A+'"]').click();await page.locator('[data-act="programDay"][data-id="day-1"]').click();await page.locator('[data-act="programStart"]').click();
+  await page.locator('#view-plans .program-card[data-id="'+A+'"]').locator('[data-act="programPreview"]').click();await page.locator('[data-act="programDay"][data-id="day-1"]').click();await page.locator('[data-act="programStart"]').click();
   await expect(page.locator('#weight_0')).toBeVisible();await page.locator('.workout-extras > summary').click();await page.locator('[data-act="rir"][data-v="2"]').click();
   await expect(page.locator('#sessionSaveStatus')).toBeHidden();await page.locator('#weight_0').fill('40');await page.locator('#reps_0').fill('8');await page.locator('#btnDone_0').click();
   await expect(page.locator('#restScreen')).toBeVisible();const saved=JSON.parse((await raw(page)).gymverse_active);expect(saved.restState.duration).toBe(60);
@@ -83,7 +83,7 @@ test('program card preserves session resume timer RIR history and previous resul
   const after=await raw(page),session=JSON.parse(after.gymverse_history)[0];
   expect(session.planId).toBe('day-1');expect(session.sessionContext).toEqual(saved.sessionContext);expect(session.details[0]).toMatchObject({exerciseId:'bench_flat',weight:40,reps:8,rir:2});
   expect(after.gymverse_plans).toBe(before.gymverse_plans);
-  await home(page);await page.locator('#view-plans .program-card[data-id="'+A+'"]').click();await page.locator('[data-act="programDay"][data-id="day-1"]').click();await page.locator('[data-act="programStart"]').click();
+  await home(page);await page.locator('#view-plans .program-card[data-id="'+A+'"]').locator('[data-act="programPreview"]').click();await page.locator('[data-act="programDay"][data-id="day-1"]').click();await page.locator('[data-act="programStart"]').click();
   await expect(page.locator('.prev-val').first()).toContainText('40 kg × 8');
 });
 
@@ -92,19 +92,98 @@ test('four-day home program and day details fit Signal light dark mobile widths'
   async function capture(name){for(const theme of ['light','dark'])for(const width of [320,375,390]){
     await page.setViewportSize({width,height:844});await page.evaluate(value=>document.documentElement.dataset.theme=value,theme);
     expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),`${name} ${theme} ${width}`).toBe(true);
+    if (name === 'home') {
+      const [create, edit] = await page.locator('#view-plans .home-action-row > .home-action').evaluateAll(buttons =>
+        buttons.map(button => {
+          const {width, height} = button.getBoundingClientRect();
+          return {width,height};
+        }));
+      expect(create).toEqual(edit);
+      if (width === 320) await page.locator('#view-plans .home-action-row').screenshot({
+        path:'outputs/GV-HOME-QUICK-START/actions-'+theme+'-320.png',animations:'disabled'
+      });
+    }
     await page.evaluate(()=>window.scrollTo(0,0));await expect.poll(()=>page.evaluate(()=>window.scrollY)).toBe(0);
-    if(width===390)await page.screenshot({path:`outputs/GV-20202-HOME/${name}-${theme}-390.png`,fullPage:true,animations:'disabled'});
+    if(width===320||width===390)await page.screenshot({path:`outputs/GV-HOME-QUICK-START/${name}-${theme}-${width}.png`,fullPage:true,animations:'disabled'});
   }}
-  await capture('home');await page.locator('#standalonePlans').screenshot({path:'outputs/GV-20202-HOME/standalone-dark-390.png',animations:'disabled'});
-  await page.locator('#view-plans .program-card[data-id="'+A+'"]').click();await expect(page.locator('#programSelectedDay')).toBeHidden();await capture('program');
+  await capture('home');await page.locator('#standalonePlans').screenshot({path:'outputs/GV-HOME-QUICK-START/standalone-dark-390.png',animations:'disabled'});
+  await page.locator('#view-plans .program-card[data-id="'+A+'"]').locator('[data-act="programPreview"]').click();await expect(page.locator('#programSelectedDay')).toBeHidden();await capture('program');
   await page.locator('[data-act="programDay"][data-id="day-1"]').click();await capture('day-two');
 });
 
 for(const related of [false,true])test(`program start ${related?'rejects changed selected day':'allows unrelated day change'} under the shared lock`,async({page})=>{
-  await boot(page);await page.locator('#view-plans .program-card[data-id="'+A+'"]').click();await page.locator('[data-act="programDay"][data-id="day-1"]').click();
+  await boot(page);await page.locator('#view-plans .program-card[data-id="'+A+'"]').locator('[data-act="programPreview"]').click();await page.locator('[data-act="programDay"][data-id="day-1"]').click();
   await page.evaluate(async related=>{const store=window.__gymverseTestHarness.getStore(),snapshot=await store.refreshSnapshot(),plans=JSON.parse(snapshot.gymverse_plans);plans.find(plan=>plan.id===(related?'day-1':'standalone')).title='Zmieniony dzień';await store.transact({gymverse_plans:plans});},related);
   const before=await raw(page);await page.locator('[data-act="programStart"]').click();
   if(related){await expect(page.locator('#toast')).toContainText('Odśwież podgląd');expect((await raw(page)).gymverse_active).toBe(before.gymverse_active);}
   else{await expect(page.locator('#view-workout')).toHaveClass(/active/);expect(JSON.parse((await raw(page)).gymverse_active).sessionContext.programId).toBe(A);}
   expect((await raw(page)).gymverse_plans).toBe(before.gymverse_plans);
+});
+
+
+test('home starts the suggested day and prioritizes resuming the saved session', async ({page}) => {
+  await boot(page);
+  const quick = page.locator('[data-act="programQuickStart"]');
+  await expect(quick).toHaveCount(1);
+  await expect(page.locator('#standalonePlans .badge')).toHaveCount(0);
+  await expect(page.locator('.program-next-day')).toHaveText('Następny · Dzień 1 · PUSH');
+  await quick.press('Enter');
+  await expect(page.locator('#weight_0')).toBeVisible();
+  const active = JSON.parse((await raw(page)).gymverse_active);
+  expect(active.sessionContext).toMatchObject({kind:'program',programId:A,dayPlanId:'day-0',dayNumber:1});
+
+  await home(page);
+  await expect(quick).toHaveCount(0);
+  const resume = page.getByRole('button',{name:'Wznów trening'});
+  await expect(resume).toBeVisible();
+  await resume.click();
+  expect(JSON.parse((await raw(page)).gymverse_active).id).toBe(active.id);
+
+  await page.locator('#weight_0').fill('40');
+  await page.locator('#reps_0').fill('8');
+  await page.locator('#btnDone_0').click();
+  await expect(page.locator('#restScreen')).toBeVisible();
+  await page.locator('#restScreen [data-act="timerSkip"]').click();
+  await page.locator('[data-act="finish"]').click();
+  await expect.poll(async()=>JSON.parse((await raw(page)).gymverse_history).length).toBe(1);
+  await home(page);
+  await expect(page.locator('.program-next-day')).toHaveText('Następny · Dzień 2 · PULL');
+  await expect(quick).toHaveAttribute('data-day','day-1');
+});
+
+test('quick start from a stale tab preserves the workout started in another tab', async ({page,context}) => {
+  await boot(page);
+  await expect(page.locator('[data-act="programQuickStart"]')).toBeVisible();
+  const other = await context.newPage();
+  await other.goto('/');
+  await other.locator('[data-act="programQuickStart"]').click();
+  await expect(other.locator('#weight_0')).toBeVisible();
+  const before = (await raw(other)).gymverse_active;
+
+  await page.locator('[data-act="programQuickStart"]').click();
+  await expect(page.locator('#toast')).toContainText('Trening już trwa w innej karcie');
+  await expect(page.locator('#view-plans')).toHaveClass(/active/);
+  expect((await raw(page)).gymverse_active).toBe(before);
+  await other.close();
+});
+
+test('primary tabs use the header and detail views return to the right screen', async ({page}) => {
+  await boot(page);
+  const open = page.locator('#view-plans [data-act="programPreview"]').first();
+  await open.click();
+  await page.locator('#view-program-preview [data-act="programHistory"]').click();
+  await expect(page.locator('#view-history')).toHaveClass(/active/);
+  await page.getByRole('button',{name:'Wróć do programu'}).click();
+  await expect(page.locator('#view-program-preview')).toHaveClass(/active/);
+  await page.locator('#programPreviewBack').click();
+  await expect(page.locator('#view-plans')).toHaveClass(/active/);
+  await libraryProgram(page);
+  await expect(page.locator('#programPreviewBack')).toHaveText('← Wróć do biblioteki planów');
+  await page.locator('#programPreviewBack').click();
+  await expect(page.locator('#view-plan-library')).toHaveClass(/active/);
+  for (const view of ['view-history','view-stats','view-charts']) {
+    await page.locator('.header-nav [data-view="'+view+'"]').click();
+    await expect(page.locator('#'+view+' .view-head button')).toHaveCount(0);
+  }
+  await expect(page.locator('#historyBackToProgram')).toBeHidden();
 });

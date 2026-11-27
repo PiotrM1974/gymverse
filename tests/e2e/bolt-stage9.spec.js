@@ -28,7 +28,7 @@ test('starting day from program persists its original context in active session 
  expect(saved.sessionContext).toEqual(context);expect(saved.details[0]).toMatchObject({exerciseId:'bench_flat',weight:40,reps:8});
  await page.locator('.header-nav [data-view="view-history"]').click();
  await expect(page.locator('.hist-card')).toContainText('Program podczas treningu: Pierwotny program · Dzień 2');
- await page.locator('[data-history-scope="programId"]').selectOption(programId);
+ await page.locator('#historyFilters > summary').click();await page.locator('[data-history-scope="programId"]').selectOption(programId);
  await expect(page.locator('.hist-card')).toHaveCount(1);
  await page.evaluate(async()=>{
   const store=window.__gymverseTestHarness.getStore();
@@ -39,7 +39,7 @@ test('starting day from program persists its original context in active session 
  });
  await page.reload({waitUntil:'domcontentloaded'});await expect.poll(()=>page.evaluate(()=>!!window.__gymverseTestHarness)).toBe(true);
  await page.locator('.header-nav [data-view="view-history"]').click();
- await page.locator('[data-history-scope="programId"]').selectOption(programId);
+ await page.locator('#historyFilters > summary').click();await page.locator('[data-history-scope="programId"]').selectOption(programId);
  await expect(page.locator('.hist-card')).toContainText('Program podczas treningu: Pierwotny program · Dzień 2');
  expect((await page.evaluate(()=>JSON.parse(localStorage.getItem('gymverse_history'))[0])).sessionContext).toEqual(context);
 });
@@ -56,7 +56,7 @@ test('standalone start and old session stay distinct even when their day current
  await page.evaluate(async()=>{const store=window.__gymverseTestHarness.getStore();const registry=store.get('gymverse_profiles_v1');registry.profiles[0].planPrograms.programs[0].dayPlanIds.splice(1,0,'day-two');await store.transact({gymverse_profiles_v1:registry});const history=store.get('gymverse_history');history.push({id:'old-session',planId:'day-two',planTitle:'Dzień 2',date:'2026-01-01T10:00:00.000Z',details:[{id:'old-set',exerciseId:'bench_flat',weight:30,reps:8,setNumber:1}]});await store.transact({gymverse_history:history});});
  await page.reload({waitUntil:'domcontentloaded'});await expect.poll(()=>page.evaluate(()=>!!window.__gymverseTestHarness)).toBe(true);await page.locator('.header-nav [data-view="view-history"]').click();
  await expect(page.locator('.hist-card')).toHaveCount(2);await expect(page.locator('.hist-card').filter({hasText:'Trening samodzielny'})).toHaveCount(1);await expect(page.locator('.hist-card').filter({hasText:'Program nieustalony'})).toHaveCount(1);
- await page.locator('[data-history-scope="programId"]').selectOption(programId);await expect(page.locator('.hist-card')).toHaveCount(0);
+ await page.locator('#historyFilters > summary').click();await page.locator('[data-history-scope="programId"]').selectOption(programId);await expect(page.locator('.hist-card')).toHaveCount(0);
 });
 
 test('program start rejects a stale preview changed by another tab and releases the shared lock',async({page,context})=>{

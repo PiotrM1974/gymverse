@@ -688,7 +688,28 @@ body.stage6-onboarding .stage6-welcome { max-width:540px;margin:clamp(14px,7vh,7
 /* A light timeline gives real sessions a clear reading order. */
 #view-history .chart-container { padding:14px;border-radius:15px; }
 #view-history .chart-container h4 { margin-bottom:10px;color:var(--text);font-size:16px;font-weight:600; }
-#view-history .history-scope { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px 12px;padding:14px;border-radius:15px; }
+#view-history .history-scope { padding:0 14px;border-radius:15px; }
+.history-scope > summary {
+  display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:5px 12px;
+  min-height:48px;padding:8px 0;cursor:pointer;font-weight:600;list-style:none;
+}
+.history-scope > summary::-webkit-details-marker { display:none; }
+.history-scope > summary::after {
+  content:"";grid-column:2;grid-row:1;width:7px;height:7px;margin-right:4px;
+  border:solid var(--accent-text);border-width:0 2px 2px 0;transform:rotate(45deg);
+}
+.history-scope[open] > summary::after { transform:rotate(225deg); }
+.history-scope > summary:focus-visible { outline:2px solid var(--accent-text);outline-offset:2px; }
+.history-filter-summary { grid-column:1/-1;display:flex;flex-wrap:wrap;gap:4px; }
+.history-filter-summary:empty { display:none; }
+.history-filter-summary > span {
+  min-width:0;max-width:100%;padding:2px 8px;border-radius:8px;
+  background:var(--lime-dim);color:var(--accent-text);font-size:12px;overflow-wrap:anywhere;
+}
+.history-filter-fields {
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 12px;
+  border-top:1px solid var(--border);padding:12px 0 14px;
+}
 #view-history .history-scope label { min-width:0;font-size:12px;font-weight:600; }
 #view-history .history-scope select { box-sizing:border-box;max-width:100%;font-size:min(1rem,20px);overflow:hidden;text-overflow:ellipsis;white-space:nowrap; }
 #view-history .history-scope :is(p,button) { grid-column:1/-1; }
@@ -749,27 +770,24 @@ body.stage6-onboarding .stage6-welcome { max-width:540px;margin:clamp(14px,7vh,7
   #view-storage .storage-card { padding:15px; }
 }
 @media(max-width:360px) {
-  #view-history .history-scope { grid-template-columns:1fr; }
+  #view-history .history-filter-fields { grid-template-columns:1fr; }
   .program-editor .program-selected-day { padding:12px; }
   .program-editor .program-actions > button { flex-basis:118px; }
   :is(#view-stats,#view-charts) .chart-container { padding:12px; }
-  #view-history .history-scope { padding:12px; }
+  #view-history .history-scope { padding-inline:12px; }
 }
 @media(prefers-reduced-motion:reduce) {
   .view-section.active { animation:none; }
 }
 /* Premium 10B final UX: compact generated preview, readable history filters, and small-screen chart hierarchy. */
-.history-filter-current { display:block;margin:4px 2px 8px;color:var(--text-muted);font-size:12px;font-weight:400;line-height:1.4;overflow-wrap:anywhere; }
 .history-add-panel { padding:14px 16px; }
 .history-add-panel > summary,.generator-preview-details > summary,.preview-exercise-details > summary { min-height:44px;display:flex;align-items:center;cursor:pointer;font-weight:600;line-height:1.4; }
 .history-add-fields { display:grid;grid-template-columns:minmax(0,1fr);gap:8px;margin-top:12px; }
 .history-add-fields label { margin:4px 0 0;font-size:13px;font-weight:600; }
 .history-add-fields > button { min-height:46px; }
-#generatorPreview .program-day-tabs button { min-height:72px; }
-#generatorPreview .program-day-tabs button small { display:block;margin-top:4px;color:var(--text-muted);font-size:11px;font-weight:400;line-height:1.35; }
-#generatorPreview .generated-day-navigation { display:flex;align-items:center;justify-content:space-between;gap:8px;margin:12px 0; }
-#generatorPreview .generated-day-navigation button { min-height:44px;min-width:0;padding:9px 11px; }
-#generatorPreview .generated-day-navigation span { text-align:center;font-size:12px;color:var(--text-muted); }
+#generatorPreview .program-day-tabs { grid-template-columns:repeat(3,minmax(0,1fr));margin:12px 0 6px; }
+#generatorPreview .program-day-tabs button { min-height:44px;padding:7px 4px;text-align:center; }
+#generatorPreview .generated-day-status { margin:0; }
 #generatorPreview .generator-preview-details { margin:16px 0;padding:12px;border:1px solid var(--border);border-radius:12px;background:var(--card-sub); }
 #generatorPreview .preview-exercise-details { margin-top:5px; }
 #generatorPreview .preview-exercise-details summary { min-height:36px;font-size:12px;color:var(--text-muted); }
@@ -781,7 +799,7 @@ body.stage6-onboarding .stage6-welcome { max-width:540px;margin:clamp(14px,7vh,7
 #view-stats .stat-card .lbl { font-size:12px;line-height:1.4; }
 #view-charts .chart-container h4,#view-stats .chart-container h4 { line-height:1.4;overflow-wrap:anywhere; }
 @media(max-width:430px) {
-  #view-history .history-scope { grid-template-columns:1fr; }
+  #view-history .history-filter-fields { grid-template-columns:1fr; }
   #view-history .history-scope label { font-size:13px; }
 }
 
@@ -856,7 +874,7 @@ body.stage6-onboarding .stage6-welcome { max-width:540px;margin:clamp(14px,7vh,7
 .program-overview{display:flex;gap:14px;align-items:center;margin:12px 0;}.program-overview>div{min-width:0;flex:1;}
 .program-overview h3{margin-top:0!important;}
 .program-cover{width:84px;height:92px;object-fit:contain;border-radius:18px;background:var(--push-soft);flex-shrink:0;}
-.program-card.is-assigned .program-open{background:var(--accent-fill);color:var(--on-accent);}
+.program-card.is-assigned:not(:has(.program-quick-start)) .program-open{background:var(--accent-fill);color:var(--on-accent);}
 .program-active-badge{background:var(--pull-soft);color:var(--pull-text);border-radius:9px;}
 #view-plans .program-card{box-shadow:0 5px 16px #10243b09;border-radius:21px;}
 .home-action-row>.home-action:nth-child(1){background:var(--push-soft);color:var(--push-text);border:1px solid transparent;}
@@ -874,7 +892,6 @@ body.stage6-onboarding .stage6-welcome { max-width:540px;margin:clamp(14px,7vh,7
 .lifetime-stat-label{font-weight:600;letter-spacing:.02em;font-size:12px;line-height:1.4;}
 #view-stats #statsTop .stat-card:nth-child(1){background:var(--pull-soft);}
 #view-stats #statsTop .stat-card:nth-child(2){background:var(--legs-soft);}
-@media(min-width:375px){#generatorPreview .program-day-tabs:has(>button:nth-child(3):last-child){grid-template-columns:repeat(3,minmax(0,1fr));}}
 @media(max-width:350px){.program-cover{width:64px;height:76px;}.program-overview{gap:10px;}}
 
 .generated-exercise-details{border-top:1px solid var(--border);}
@@ -931,7 +948,8 @@ body::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none
 }
 #view-plans .plan-grid{row-gap:30px;}
 #view-plans #standalonePlans{margin-top:25px;}
-#view-plans .home-action-row{margin-top:26px;}
+#view-plans .home-action-row{margin-top:26px;align-items:stretch;}
+#view-plans .home-action-row>.home-action{width:100%;align-self:stretch;margin:0;}
 @media(hover:hover) and (pointer:fine){#view-plans .plan-card[data-card-tint]:hover{transform:translateY(-3px);box-shadow:inset 1px 2px 1px var(--plan-glint),inset -2px -4px 5px var(--plan-bevel),0 3px 0 var(--tile-side),0 7px 0 var(--tile-side),0 12px 0 var(--tile-side),0 15px 3px -1px var(--plan-bevel),0 28px 32px -9px var(--plan-cast);}}
 #view-plans .plan-card[data-card-tint]:active{transform:translateY(5px);box-shadow:inset 1px 2px 1px var(--plan-glint),inset -2px -3px 4px var(--plan-bevel),0 2px 0 var(--tile-side),0 4px 0 var(--tile-side),0 12px 17px -7px var(--plan-cast);}
 @media(prefers-reduced-motion:reduce){#view-plans .plan-card[data-card-tint],#view-plans .plan-card[data-card-tint]:is(:hover,:active){transition:none;transform:none;}}
@@ -947,3 +965,21 @@ body::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none
 #view-plans .home-active-profile {margin:2px 0 0;font-size:14px;line-height:1.5;font-weight:600;overflow-wrap:anywhere;}
 body.stage6-profile-entry #view-plans .profile-box #profileHeading {font-size:20px;text-transform:none;letter-spacing:0;}
 #settingsProfiles #profileSelect {width:100%;margin:6px 0 14px;}
+
+/* Primary training action and contextual back links. */
+#view-plans .program-card {cursor:default;}
+.program-card-actions {display:grid;width:100%;gap:7px;}
+.program-card-actions > button {width:100%;min-height:44px;margin:0;}
+.program-card .program-open {text-align:left;border:0;}
+.program-quick-start {font-size:14px;}
+#view-plans .program-card .program-next-day {font-size:13px;color:var(--accent-text);line-height:1.35;overflow-wrap:anywhere;}
+#view-plans .program-next-label {color:var(--yellow-text);background:var(--yellow-soft);border:1px solid var(--yellow-line);padding:2px 6px;border-radius:6px;}
+.view-back {min-height:44px;width:auto;max-width:100%;margin:0 0 10px;padding:8px 12px;text-align:left;font-size:13px;white-space:normal;}
+.view-back[hidden] {display:none;}
+.view-head > .view-back {flex:none;}
+#historyBackToProgram {margin-bottom:14px;}
+@media (max-width:430px) {
+  :is(#view-plans,#view-history,#view-stats,#view-charts) .view-head {margin-bottom:12px;}
+  #view-plans .program-card.is-assigned {gap:9px;}
+  :is(#view-settings,#view-planedit,#view-storage) .view-head {flex-wrap:wrap;align-items:flex-start;gap:6px;}
+}
