@@ -1,3 +1,7 @@
+## Lokalna poprawka usuwania planów — 27.11.2026
+
+W zarządzaniu planami można usunąć ostatni samodzielny plan, pojedynczy dzień programu wielodniowego lub cały program, także w czasie sesji. Archiwizacja w istniejącym rejestrze profilu zachowuje historię, aktywny trening, szkice i dane potrzebne statystykom. Zakończenie treningu zapisuje historię, ciężary i zamknięcie sesji jedną transakcją opartą na aktualnym magazynie. Cache lokalny v63. Testy: 222/222 jednostkowych, 21/21 Chromium i 7/7 desktopowego WebKit. Właściciel zlecił publikację v63 na GitHub Pages. Kontrolowana aktualizacja z v62 na tym samym originie potwierdziła zachowanie danych i usuwanie planu offline. [Zakres i sprawdzone przypadki](docs/tasks/GV-UX-ORGANIZATION.md#usuwanie-planów-z-zachowaniem-wyników--27112026)
+
 ## GitHub Pages v62 — gotowość wydania, 27.11.2026
 
 Baza wydania: main 38731a7f4ac78fd1fc9e3325bf36ce80630a240a (produkcyjne v59). Właściciel autoryzował publikację na GitHub. Wydanie obejmuje trzy zestawy zmian opisane niżej, bez pozostałych pomysłów z planu. App version 2.0.3, shell cache v62.

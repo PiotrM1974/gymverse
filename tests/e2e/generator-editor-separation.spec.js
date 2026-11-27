@@ -322,17 +322,21 @@ test('manual exercise add reorder remove and independent plan deletion preserve 
   await page.locator('[data-act="peDel"][data-i="0"]').click();
   await expect.poll(async()=>JSON.parse((await page.evaluate(()=>window.__gymverseTestHarness.getStore().refreshSnapshot())).gymverse_plans)[0].exercises.map(ex=>ex.key)).toEqual(['bench_flat']);
   const plans=await page.evaluate(async()=>JSON.parse((await window.__gymverseTestHarness.getStore().refreshSnapshot()).gymverse_plans));
-  const kept=plans.slice(1);await page.locator('[data-act="peDelPlan"]').click();
-  await expect.poll(async()=>JSON.parse((await page.evaluate(()=>window.__gymverseTestHarness.getStore().refreshSnapshot())).gymverse_plans)).toEqual(kept);
+  await page.locator('[data-act="peDelPlan"]').click();
+  await expect(page.locator('#view-planedit [data-act="peOpen"]')).toHaveCount(2);
+  const after=await page.evaluate(()=>window.__gymverseTestHarness.getStore().refreshSnapshot());
+  expect(JSON.parse(after.gymverse_plans)).toEqual(plans);
+  expect(JSON.parse(after.gymverse_profiles_v1).profiles[0].planPrograms.archivedDayPlanIds).toEqual([plans[0].id]);
 });
 
-test('day referenced by a durable program draft cannot be deleted',async({page})=>{
+test('deleting a day preserves the durable draft and hides the day from saved plans',async({page})=>{
   await boot(page);await seedEditablePlans(page);
   const before=await page.evaluate(async()=>{
     const store=window.__gymverseTestHarness.getStore(),raw=await store.refreshSnapshot(),{createProgramDraft,attachDraftDay}=await import('./src/features/plans/program-editor.js'),{saveWorkingDraft}=await import('./src/features/plans/program-drafts.js');
     const draft=createProgramDraft(JSON.parse(raw.gymverse_profiles_v1),JSON.parse(raw.gymverse_plans));attachDraftDay(draft,'plan-a');await saveWorkingDraft(store,{id:'synthetic-durable',revision:null,draft,selected:'plan-a',custom:{},baseCustom:{}});return store.refreshSnapshot();
   });
-  await openOwnPlan(page,0);await page.locator('[data-act="peDelPlan"]').click();await expect(page.locator('#toast')).toContainText('niezapisanym szkicu programu');
+  await openOwnPlan(page,0);await page.locator('[data-act="peDelPlan"]').click();await expect(page.locator('#toast')).toContainText('Usunięto plan');
+  await expect(page.locator('#view-planedit [data-act="peOpen"][data-id="plan-a"]')).toHaveCount(0);
   const after=await page.evaluate(()=>window.__gymverseTestHarness.getStore().refreshSnapshot());expect(after.gymverse_plans).toBe(before.gymverse_plans);expect(after.gymverse_program_drafts_v1).toBe(before.gymverse_program_drafts_v1);
 });
 
@@ -349,7 +353,11 @@ test('deleting one historical workout preserves plans and the other session',asy
 test('generator and plan merge module are available offline in the new worker cache',async({page,context})=>{
   await boot(page);await page.evaluate(()=>navigator.serviceWorker.ready);await page.reload();
   expect(await page.evaluate(()=>!!navigator.serviceWorker.controller)).toBe(true);
-  expect(await page.evaluate(async()=>!!await (await caches.open('gymverse-v62')).match(new URL('./src/features/plans/plan-merge.js',location.href)))).toBe(true);
+  expect(await page.evaluate(async()=>{
+    const cache=await caches.open('gymverse-v63');
+    return !!await cache.match(new URL('./src/features/plans/plan-merge.js',location.href))
+      && !!await cache.match(new URL('./src/features/plans/programs.js?v=63',location.href));
+  })).toBe(true);
   await context.setOffline(true);await page.reload();await enterGenerator(page);await generate(page,1);await page.locator('[data-act="saveGeneratedPreview"]').click();await expect(page.locator('#view-plans')).toHaveClass(/active/);
   const raw=await page.evaluate(()=>window.__gymverseTestHarness.getStore().refreshSnapshot());expect(JSON.parse(raw.gymverse_profiles_v1).profiles[0].planPrograms.assignedProgramId).toMatch(/^pg_[a-f0-9]{32}$/);await context.setOffline(false);
 });
