@@ -26,6 +26,17 @@ function newProfileId() {
   return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
 }
 
+function initialBodyWeight(profile, date) {
+  const kg = profile?.attributes?.weightKg;
+  if (!Number.isFinite(kg) || kg < 20 || kg > 400) return null;
+  const measurementDate = typeof date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(date)
+    ? date
+    : typeof profile?.createdAt === 'string' && /^\d{4}-\d{2}-\d{2}/.test(profile.createdAt)
+      ? profile.createdAt.slice(0, 10)
+      : new Date().toISOString().slice(0, 10);
+  return JSON.stringify([{ date: measurementDate, kg }]);
+}
+
 function normalizeAttributes(input = {}) {
   if (!record(input)) throw new Error('PROFILE_ATTRIBUTES_INVALID');
   const { age = null, sex = null, heightCm = null, weightKg = null, experience = null, returnAfterBreak = null, equipment = [], restrictions = [] } = input;
@@ -66,7 +77,12 @@ export function bootstrapProfileState(snapshot, options = {}) {
   snapshot=withoutProgramDrafts(snapshot);
   if (!record(snapshot) || Object.keys(snapshot).some(key => !APP_KEYS.includes(key) && key !== PROFILE_STATE_KEY)) throw new Error('PROFILE_SNAPSHOT_INVALID');
   const prior = readProfileState(snapshot);
-  if (prior) return { state: prior, updates: {} };
+  if (prior) {
+    const active = prior.profiles.find(profile => profile.id === prior.activeProfileId);
+    const updates = snapshot.gymverse_body == null ? { gymverse_body: initialBodyWeight(active, options.bodyMeasurementDate) } : {};
+    if (updates.gymverse_body == null) return { state: prior, updates: {} };
+    return { state: prior, updates };
+  }
   const id = options.id || 'legacy-default-profile';
   const hasLegacyData = Object.keys(snapshot).length > 0;
   const state = { schemaVersion: 1, activeProfileId: id, onboardingRequired: !hasLegacyData, legacyUpgradePending: hasLegacyData, profiles: [{ id, name: 'Mój profil', createdAt: options.createdAt || new Date(0).toISOString(), data: clone(snapshot) }] };
@@ -105,7 +121,7 @@ export function dismissLegacyUpgradeNotice(state) {
   return { ...clone(state), legacyUpgradePending: false };
 }
 
-export function switchProfile(state, currentSnapshot, targetId) {
+export function switchProfile(state, currentSnapshot, targetId, options = {}) {
   currentSnapshot=withoutProgramDrafts(currentSnapshot);
   validateProfileState(state);
   if (!record(currentSnapshot) || Object.keys(currentSnapshot).some(key => !APP_KEYS.includes(key))) throw new Error('PROFILE_SNAPSHOT_INVALID');
@@ -117,6 +133,7 @@ export function switchProfile(state, currentSnapshot, targetId) {
   current.data = clone(currentSnapshot);
   const next = { ...clone(state), activeProfileId: targetId, profiles };
   const updates = Object.fromEntries(APP_KEYS.map(key => [key, Object.hasOwn(target.data, key) ? clone(target.data[key]) : null]));
+  if (updates.gymverse_body == null) updates.gymverse_body = initialBodyWeight(target, options.bodyMeasurementDate);
   updates[PROFILE_STATE_KEY] = next;
   return { state: next, updates };
 }
@@ -153,19 +170,4 @@ export function exportProfileSnapshot(state, currentSnapshot, profileId = state?
 
 export function importProfileSnapshot(state, payload, options = {}) {
   validateProfileState(state);
-  if (!record(payload) || payload.format !== 'gymverse-profile' || payload.schemaVersion !== 1 || !record(payload.profile) || !record(payload.data)) throw new Error('PROFILE_IMPORT_INVALID');
-  const name = typeof payload.profile.name === 'string' ? payload.profile.name.trim().slice(0, 60) : '';
-  if (!name) throw new Error('PROFILE_IMPORT_INVALID');
-  if (Object.keys(payload.data).some(key => !APP_KEYS.includes(key) || typeof payload.data[key] !== 'string')) throw new Error('PROFILE_IMPORT_INVALID');
-  try { Object.values(payload.data).forEach(value => JSON.parse(value)); } catch { throw new Error('PROFILE_IMPORT_INVALID'); }
-  const id = options.id || newProfileId();
-  if (!id || !PROFILE_ID.test(id) || state.profiles.some(profile => profile.id === id)) throw new Error('PROFILE_ID_INVALID');
-  if (Object.hasOwn(payload.profile, 'planPrograms')) validatePlanPrograms(payload.profile.planPrograms, JSON.parse(payload.data.gymverse_plans || '[]'));
-  const profile = { id, name, createdAt: options.createdAt || new Date().toISOString(), attributes: normalizeAttributes(payload.profile.attributes || {}), ...(Object.hasOwn(payload.profile, 'planPrograms') ? {planPrograms: clone(payload.profile.planPrograms)} : {}), data: clone(payload.data) };
-  if (state.profiles.length >= 20) throw new Error('PROFILE_LIMIT_REACHED');
-  const next = { ...clone(state), profiles: [...clone(state.profiles), profile] };
-  return { state: next, profile: clone(profile) };
-}
-
-export const PROFILE_STORAGE_KEY = PROFILE_STATE_KEY;
-export const PROFILE_DATA_KEYS = APP_KEYS;
+  if (!record(payload) || payload.format !== 'gymverse-profile' || pa

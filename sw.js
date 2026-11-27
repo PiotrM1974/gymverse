@@ -3,7 +3,7 @@ const PILOT_URL = new URL(self.location?.href || 'sw.js', self.registration.scop
 const LOOPBACK_HOSTS = new Set(['127.0.0.1', 'localhost', '[::1]']);
 const LOCAL_PRESENTATION_PILOT = LOOPBACK_HOSTS.has(PILOT_URL.hostname.toLowerCase()) &&
   PILOT_URL.searchParams.get('local-exercise-presentation-pilot') === '1';
-const CACHE = LOCAL_PRESENTATION_PILOT ? 'gymverse-v36-presentation-pilot' : 'gymverse-v63';
+const CACHE = LOCAL_PRESENTATION_PILOT ? 'gymverse-v36-presentation-pilot' : 'gymverse-v64';
 const RELEASE_REGISTRY = 'src/data/exercise-presentations/release-registry.json';
 const BASE_SHELL = ['./', 'index.html', 'src/ui/signal.css?v=62', 'src/ui/program-art.js', 'src/ui/program-art/bench.webp', 'src/ui/program-art/dumbbells.webp', 'src/ui/program-art/machine.webp', 'src/ui/program-art/kettlebells.webp', 'src/ui/program-art/leg-press.webp', 'src/ui/program-art/barbell.webp', 'src/ui/fonts/manrope-latin-variable.woff2', 'src/ui/fonts/manrope-latin-ext-variable.woff2', 'src/ui/fonts/OFL.txt', 'src/gv-base-b.js', 'src/gv-data.js', 'src/features/backup/import-plan.js', 'src/features/backup/import-preview.js', 'src/exercise/catalog.js', 'src/exercise/presentation-contract.js', 'src/vendor/zip.min.js', 'src/features/profiles/profile-model.js', 'src/features/plans/programs.js', 'src/features/plans/programs.js?v=63', 'src/features/plans/program-editor.js', 'src/features/plans/plan-merge.js', 'src/features/plans/generated-program.js', 'src/features/plans/program-drafts.js', 'src/features/plans/program-editor-ui.js', 'src/features/plans/synchronization.js', 'src/features/plans/generator.js', 'src/features/plans/progression.js', 'src/features/plans/history-context.js?v=62', 'src/features/anatomy/atlas.js', 'src/features/anatomy/atlas.css', 'src/features/anatomy/highlight-engine.js', 'src/data/anatomy/catalog-mapping.js', 'src/data/anatomy/musclemap-diagrams.js', 'src/data/anatomy/atlas-data.js', 'src/data/anatomy/male-front.js', 'src/data/anatomy/male-back.js', 'src/data/anatomy/female-front.js', 'src/data/anatomy/female-back.js', 'src/data/anatomy/bodies/male-front.webp', 'src/data/anatomy/bodies/male-back.webp', 'src/data/anatomy/bodies/female-front.webp', 'src/data/anatomy/bodies/female-back.webp', 'src/data/anatomy/THIRD-PARTY-NOTICES.md', 'img/p1_5.jpg', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png', 'apple-touch-icon.png'];
 const PRESENTATION_PILOT_SHELL = [
@@ -57,46 +57,4 @@ self.addEventListener('install', event => {
 self.addEventListener('activate', e => {
   e.waitUntil(
     caches.keys()
-      .then(keys => Promise.all(keys.filter(k => k.startsWith('gymverse-') && k !== CACHE).map(k => caches.delete(k))))
-  );
-});
-
-self.addEventListener('message', event => {
-  if (!event.data || event.data.type !== 'GYMVERSE_COUNT_APP_CLIENTS' || !event.ports || !event.ports[0]) return;
-  event.waitUntil(self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(clients => {
-    const scopePath = new URL(self.registration.scope).pathname;
-    const appClients = clients.filter(client => {
-      try { return new URL(client.url).pathname.startsWith(scopePath); } catch (_) { return false; }
-    });
-    event.ports[0].postMessage({ type: 'GYMVERSE_APP_CLIENT_COUNT', count: appClients.length });
-  }).catch(() => event.ports[0].postMessage({ type: 'GYMVERSE_APP_CLIENT_COUNT', error: true })));
-});
-
-self.addEventListener('fetch', e => {
-  const req = e.request;
-  if (req.method !== 'GET') return;
-  const url = new URL(req.url);
-  if (url.origin !== location.origin) return;
-
-  // Strona: sieć, a offline wyłącznie powłoka zapisana przez udaną instalację worker'a.
-  if (req.mode === 'navigate' || url.pathname.endsWith('/index.html')) {
-    e.respondWith(
-      fetch(req)
-        .catch(() => caches.open(CACHE).then(c => c.match(req).then(r => r || c.match('index.html').then(index => index || c.match('./')))))
-    );
-    return;
-  }
-
-  // Obrazki i reszta: z cache, a w tle odświeżenie.
-  e.respondWith(
-    caches.open(CACHE).then(cache => cache.match(req).then(cached => {
-      const net = fetch(req)
-        .then(res => {
-          if (res && res.ok) { const copy = res.clone(); cache.put(req, copy); }
-          return res;
-        })
-        .catch(() => cached);
-      return cached || net;
-    }))
-  );
-});
+      .then(keys => Promise.all(keys.filter(k => k.startsWith('gymverse-') &&
